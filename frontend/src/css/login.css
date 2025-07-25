@@ -1,0 +1,65 @@
+* {
+    margin: 0;
+    padding: 0;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #1C1E33;
+}
+
+.main .register #form {
+    text-align: center;
+    width: 400px;
+    display: flex;
+    flex-direction: column;
+    background-color: #25273E;
+    gap: 25px;
+    padding: 25px;
+    border-radius: 15px;
+}
+
+#form input {
+    padding: 15px;
+    border-radius: 10px;
+    border: 1px solid #EE3A57;
+    outline: none;
+    color: gray;
+    background-color: #1C1E33;
+    font-size: 15px;
+}
+
+#form input::placeholder {
+    color: gray;
+    font-size: 15px;
+}
+
+#form button {
+    margin-top: 10px;
+    cursor: pointer;
+    padding: 15px;
+    color: #EE3A57;
+    background-color: transparent;
+    border-radius: 10px;
+    border: 1px solid #EE3A57;
+}
+
+select {
+    padding: 15px;
+    border: 1px solid #EE3A57;
+    border-radius: 5px;
+    background-color: #1C1E33;
+    color: gray;
+}
+
+select option {
+    padding: 15px;
+    border: 1px solid #EE3A57;
+    border-radius: 5px;
+    background-color: #1C1E33;
+    color: gray;
+}

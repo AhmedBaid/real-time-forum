@@ -5,17 +5,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Real-Time-Forum</title>
-    <link rel="stylesheet" href="frontend/src/css/style.css">
+    <link rel="stylesheet" href="./frontend/src/css/login.css">
 </head>
 
 <body>
     <div class="main">
-        <form id="register-form">
-            <h2>Register</h2>
-            <input type="text" placeholder="Username" />
-            <input type="password" placeholder="Password" />
-            <button type="submit">Register</button>
-        </form>
+        <div class="register">
+            <form id="form">
+                <h2>Register</h2>
+                <input type="text" placeholder="Username" id="Username">
+                <input type="text" placeholder="Email" id="Email">
+                <input type="text" placeholder="FirstName" id="FirstName">
+                <input type="text" placeholder="LastName" id="LastName">
+                <input type="text" placeholder="Age" id="Age">
+                <select id="Gender">
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                </select>
+                <input type="text" placeholder="Password" id="Password">
+                <button type="submit">Register</button>
+            </form>
+        </div>
     </div>
     <script src="frontend/src/js/main.js"></script>
 </body>
