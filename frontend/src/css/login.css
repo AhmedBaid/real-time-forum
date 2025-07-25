@@ -9,7 +9,7 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background-color: #1C1E33;
+    background-color: #003044;
 }
 
 .main .register #form {
@@ -17,7 +17,7 @@ body {
     width: 400px;
     display: flex;
     flex-direction: column;
-    background-color: #25273E;
+    background-color: #214B5B;
     gap: 25px;
     padding: 25px;
     border-radius: 15px;
@@ -26,40 +26,48 @@ body {
 #form input {
     padding: 15px;
     border-radius: 10px;
-    border: 1px solid #EE3A57;
+    border: 1px solid #04E17A;
     outline: none;
-    color: gray;
-    background-color: #1C1E33;
+    color: whitesmoke;
+    background-color: #1D4658;
     font-size: 15px;
 }
 
 #form input::placeholder {
-    color: gray;
+    color: whitesmoke;
     font-size: 15px;
 }
 
 #form button {
     margin-top: 10px;
+    font-size: 20px;
     cursor: pointer;
-    padding: 15px;
-    color: #EE3A57;
-    background-color: transparent;
+    padding: 10px;
+    color: white;
+    background-color: #1ecc7b;
     border-radius: 10px;
-    border: 1px solid #EE3A57;
+    border: 1px solid #04E17A;
+    transition: 0.5s;
+}
+
+#form button:hover {
+    color: #04E17A;
+    background-color: transparent;
 }
 
 select {
     padding: 15px;
-    border: 1px solid #EE3A57;
+    border: 1px solid #04E17A;
     border-radius: 5px;
-    background-color: #1C1E33;
-    color: gray;
+    background-color: #1D4658;
+    color: whitesmoke;
 }
 
-select option {
-    padding: 15px;
-    border: 1px solid #EE3A57;
-    border-radius: 5px;
-    background-color: #1C1E33;
-    color: gray;
+
+#form h4{
+    color: white;
+}
+#form a{
+    color:#04E17A ;
+    text-decoration: none;
 }
