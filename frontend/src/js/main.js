@@ -1,18 +1,30 @@
-import { loadPage } from "./loadPage";
+import { loadPage } from "./loadPage.js";
+import { Navigate } from "./config.js";
 async function isloged() {
     try {
         const response = await fetch("/isloged");
-        if (!response.ok) {
-            Navigate("/login")
+        console.log(response);
+        
+        if (!response.ok) {            
+            Navigate("login")
+            loadPage("login")
+            return
         }
-        const json = await response.json();
-        loadPage(json)
+        const data = await response.json();
+        console.log(data);
+        
+        Navigate("/");
+        loadPage("/", data);
     } catch (error) {
-        console.error(error.message);
+        console.error("Error checking login:", error.message);
+        Navigate("login");
+        loadPage("login");
     }
 }
 
-function Navigate(url) {
-    history.pushState(null, null, url)
-}
+
 isloged()
+
+window.onpopstate = () => {
+    loadPage(location.pathname);
+};

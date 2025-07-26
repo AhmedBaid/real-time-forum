@@ -1,7 +1,6 @@
-#form {
+.main .register #form {
     text-align: center;
     width: 400px;
-    background-color: red;
     display: flex;
     flex-direction: column;
     background-color: #214B5B;
@@ -42,7 +41,14 @@
     background-color: transparent;
 }
 
-
+select {
+    outline: none;
+    border: none;
+    padding: 15px;
+    border-radius: 5px;
+    background-color: #193846d8;
+    color: whitesmoke;
+}
 
 
 #form h4{
