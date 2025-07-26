@@ -4,10 +4,7 @@ export async function login() {
     container.innerHTML = ""
     container.innerHTML = loginPage;
     let form = document.querySelector("form");
-    console.log(form);
-    
     form.addEventListener("submit", HandleLogin);
-
 }
 
 async function HandleLogin(e) {
