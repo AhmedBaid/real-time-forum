@@ -1,7 +1,9 @@
 export const container = document.querySelector(".main");
 
 export function Navigate(url) {
-    history.pushState(null, null, url)
+    console.log(3);
+    
+    history.pushState({}, "", url)
 }
 
 export const registerPage = `<div class="register">
@@ -28,8 +30,8 @@ export const loginPage = `<div class="login">
             <div class="error"></div>
             <form id="form" method="post">
                 <h2>Login</h2>
-                <input type="text" placeholder="Username" name="Username">
-                <input type="text" placeholder="Password" name="Password">
+                <input type="text" placeholder="Username" name="Username" class="username">
+                <input type="text" placeholder="Password" name="Password" class="password">
                 <button type="submit">Login</button>
                 <h4>Don't have an account <a href="/register">register</a></h4>
             </form>

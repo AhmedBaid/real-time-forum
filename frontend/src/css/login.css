@@ -40,6 +40,7 @@
 #form button:hover {
     color: #04E17A;
     background-color: transparent;
+    border: 1px solid #04E17A;
 }
 
 

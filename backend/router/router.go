@@ -10,7 +10,7 @@ import (
 func Router() {
 	http.HandleFunc("/", handler.HomeHandler)
 	http.HandleFunc("/register", handler.RegisterHandler)
-	http.HandleFunc("/login", handler.RegisterHandler)
+	http.HandleFunc("/login", handler.LoginHandler)
 	http.HandleFunc("/isloged", middleware.IsLogged)
 	http.HandleFunc("/frontend/src/", handler.StaticHandler)
 }

@@ -1,18 +1,21 @@
 import { loadPage } from "./loadPage.js";
 import { Navigate } from "./config.js";
+
 async function isloged() {
     try {
         const response = await fetch("/isloged");
-        console.log(response);
-        
-        if (!response.ok) {            
-            Navigate("login")
-            loadPage("login")
-            return
+
+        if (!response.ok) {
+            console.log(1);
+
+            Navigate("login");
+            loadPage("login");
+            return;
         }
+        console.log(2);
+
         const data = await response.json();
-        console.log(data);
-        
+
         Navigate("/");
         loadPage("/", data);
     } catch (error) {
@@ -21,7 +24,6 @@ async function isloged() {
         loadPage("login");
     }
 }
-
 
 isloged()
 
