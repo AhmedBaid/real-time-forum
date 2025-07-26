@@ -10,7 +10,11 @@ CREATE TABLE
     IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT NOT NULL UNIQUE,
+        firstname TEXT NOT NULL UNIQUE,
+        lastname TEXT NOT NULL UNIQUE,
         email TEXT NOT NULL UNIQUE,
+        gender TEXT NOT NULL UNIQUE,
+        age INTEGER NOT NULL UNIQUE,
         password TEXT NOT NULL,
         session TEXT DEFAULT NULL
     );

@@ -1,9 +1,18 @@
-// let container = document.querySelector(".main")
-// function loginpage() {
-//     let page = document.createElement("div")
-//     page.innerHTML = `
-// `
-//     container.appendChild(page)
-// }
-// loginpage()
+import { loadPage } from "./loadPage";
+async function isloged() {
+    try {
+        const response = await fetch("/isloged");
+        if (!response.ok) {
+            Navigate("/login")
+        }
+        const json = await response.json();
+        loadPage(json)
+    } catch (error) {
+        console.error(error.message);
+    }
+}
 
+function Navigate(url) {
+    history.pushState(null, null, url)
+}
+isloged()
