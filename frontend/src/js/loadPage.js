@@ -1,16 +1,21 @@
-import { container, registerPage, loginPage } from "./config.js";
-export function loadPage(path, data = null) {
-    console.log(path, "efef");
+import { container } from "./config.js";
+import { register } from "./register.js";
+import { login } from "./login.js";
 
+export function loadPage(path, data = null) {    
     if (path == "login") {
-        container.innerHTML = loginPage;
+        console.log("Loading login page");
+        
+        login()
         return
     } else if (path == "/") {
+        console.log(555);
+        
         const name = data?.message || "Guest";
         container.innerHTML = `<h2>Welcome ${name}!</h2>`;
         return
     } if (path == "register") {
-        container.innerHTML = registerPage;
+        register()
         return
     } else {
         container.innerHTML = `<h2>404 Not Found</h2>`;
