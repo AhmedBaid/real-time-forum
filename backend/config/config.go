@@ -8,9 +8,13 @@ import (
 var Db *sql.DB
 
 type Users struct {
-	Username string
-	Email    string
-	Password string
+	Username  string
+	FirstName string
+	LastName  string
+	Age       int
+	Gender    string
+	Email     string
+	Password  string
 }
 type Categories struct {
 	Name   string

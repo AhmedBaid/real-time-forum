@@ -26,10 +26,10 @@ body {
 #form input {
     padding: 15px;
     border-radius: 10px;
-    border: 1px solid #04E17A;
     outline: none;
+    border: none;
     color: whitesmoke;
-    background-color: #1D4658;
+    background-color: #193846d8;
     font-size: 15px;
 }
 
@@ -44,9 +44,9 @@ body {
     cursor: pointer;
     padding: 10px;
     color: white;
+    border: none;
     background-color: #1ecc7b;
     border-radius: 10px;
-    border: 1px solid #04E17A;
     transition: 0.5s;
 }
 
@@ -56,10 +56,11 @@ body {
 }
 
 select {
+    outline: none;
+    border: none;
     padding: 15px;
-    border: 1px solid #04E17A;
     border-radius: 5px;
-    background-color: #1D4658;
+    background-color: #193846d8;
     color: whitesmoke;
 }
 
@@ -70,4 +71,9 @@ select {
 #form a{
     color:#04E17A ;
     text-decoration: none;
+}
+
+
+#form input:focus,select:focus{
+    border:1px solid #04E17A;
 }

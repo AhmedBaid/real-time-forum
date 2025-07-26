@@ -7,7 +7,7 @@ import (
 	"real_time/backend/config"
 )
 
-func StaticController(w http.ResponseWriter, r *http.Request) {
+func StaticHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		config.ResponseJSON(w, http.StatusMethodNotAllowed, map[string]any{
 			"message": "Method not allowrd",
