@@ -14,6 +14,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 			"message": "Method not allowrd",
 			"status":  http.StatusMethodNotAllowed,
 		})
+		return
 	}
 	Username := r.FormValue("Username")
 	FirstName := r.FormValue("FirstName")
@@ -28,6 +29,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 			"message": errMsg,
 			"status":  http.StatusBadRequest,
 		})
+		return
 	}
 	
 
