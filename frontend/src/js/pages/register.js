@@ -1,5 +1,6 @@
 import { container, Navigate, registerPage } from "../config.js";
 import { loadPage } from "../loadPage.js";
+import { home } from "./home.js";
 
 export function register() {
     container.innerHTML = ""
@@ -40,6 +41,5 @@ async function HandleRegister(e) {
         return;
     }
     errMsg.innerHTML = "Registration successful!!";
-    Navigate("/")
-    loadPage(data)
+    home(data.data)
 }

@@ -1,5 +1,6 @@
     import { container, loginPage, Navigate } from "../config.js";
     import { loadPage } from "../loadPage.js";
+import { home } from "./home.js";
 
     export async function login() {
         container.innerHTML = ""
@@ -36,6 +37,5 @@
         }
 
         errMsg.innerHTML = "logged in successfully";
-        Navigate("/");
-        loadPage(data);
+        home(data.data);
     }
