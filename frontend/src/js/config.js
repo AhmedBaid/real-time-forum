@@ -28,8 +28,8 @@ export const loginPage = `<div class="login">
             <div class="error"></div>
             <form id="form" method="post">
                 <h2>Login</h2>
-                <input type="text" placeholder="Username" name="Username" class="username">
-                <input type="text" placeholder="Password" name="Password" class="password">
+                <input type="text" placeholder="Username"  id="username">
+                <input type="password" placeholder="Password"  id="password">
                 <button type="submit">Login</button>
                 <h4>Don't have an account <a class="lienRegister">register</a></h4>
             </form>
