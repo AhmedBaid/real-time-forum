@@ -5,18 +5,20 @@ async function isloged() {
     const response = await fetch("/isloged");
     const data = await response.json();
     if (response.ok) {
-        Navigate("/");
-        loadPage();
+        if (location.pathname === "/login" || location.pathname === "/register") {
+            Navigate("/");
+            return loadPage(data);
+        }
+        return loadPage(data);
     } else {
         if (location.pathname === "/login" || location.pathname === "/register") {
-            loadPage();
-        } else {
-            Navigate("/login");
-            loadPage();
+            return loadPage();
         }
+        Navigate("/login");
+        return loadPage();
     }
-}
 
+}
 isloged()
 
 window.onpopstate = () => {

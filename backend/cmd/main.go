@@ -19,17 +19,19 @@ func main() {
 		fmt.Println("kayn error", err)
 		return
 	}
-	defer config.Db.Close()
+	
 	query, err := os.ReadFile("./backend/database/query.sql")
 	if err != nil {
 		fmt.Println("error in readfile", err)
 		return
 	}
+
 	_, err = config.Db.Exec(string(query))
 	if err != nil {
 		fmt.Println("error execute", err)
 		return
 	}
+
 	fmt.Println("server listening on http://localhost:8080/")
 	router.Router()
 	err = http.ListenAndServe(":8080", nil)

@@ -1,6 +1,6 @@
-import { container, Navigate, registerPage } from "../config.js";
+import { container } from "../config.js";
 
-export function home() {
+export function home(data) {
     container.innerHTML = ""
-    container.innerHTML = "welcome to the home page";
+    container.innerHTML = `welcome ${data.username}!`;
 }

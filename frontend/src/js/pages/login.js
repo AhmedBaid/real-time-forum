@@ -20,20 +20,24 @@ async function HandleLogin(e) {
     errMsg.innerHTML = "";
     let username = document.getElementById("username").value;
     let password = document.getElementById("password").value;
-    try {
-        const response = await fetch("/login", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ username, password })
-        })
 
-        const data = await response.json();
-        Navigate("/");
-        loadPage();
-    } catch (err) {
-        errMsg.innerHTML = err.message;
+    const response = await fetch("/login", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ username, password })
+    })
+    console.log(response);
+    
+    const data = await response.json();
+    if (!response.ok) {
+        errMsg.innerHTML = data.message;
         return;
     }
+    console.log("logged in successfully");
+
+    errMsg.innerHTML = "logged in successfully";
+    Navigate("/");
+    loadPage(data);
 }

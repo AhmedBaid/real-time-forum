@@ -26,22 +26,20 @@ async function HandleRegister(e) {
         gender: document.getElementById("Gender").value,
         password: document.getElementById("Password").value,
     };
-        let response = await fetch("/register", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(fields)
-        });
-        const data = await response.json();
-        console.log(data);
-        
-        if (!response.ok) {
-            errMsg.innerHTML = data.message;
-            return;
-        }
-        errMsg.innerHTML = "Registration successful!!";
-        Navigate("/")
-        loadPage()
-    
+    let response = await fetch("/register", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(fields)
+    });
+    const data = await response.json();
+
+    if (!response.ok) {
+        errMsg.innerHTML = data.message;
+        return;
+    }
+    errMsg.innerHTML = "Registration successful!!";
+    Navigate("/")
+    loadPage()
 }
