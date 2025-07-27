@@ -33,6 +33,7 @@
     color: white;
     border: none;
     background-color: #1ecc7b;
+    border: 1px solid #04E17A;
     border-radius: 10px;
     transition: 0.5s;
 }
@@ -40,20 +41,14 @@
 #form button:hover {
     color: #04E17A;
     background-color: transparent;
-    border: 1px solid #04E17A;
 }
-
-
-
 
 #form h4{
     color: white;
 }
 #form a{
     color:#04E17A ;
-    text-decoration: none;
 }
-
 
 #form input:focus,select:focus{
     border:1px solid #04E17A;

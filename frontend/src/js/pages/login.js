@@ -1,8 +1,15 @@
-import { container, loginPage, Navigate } from "./config.js";
+import { container, loginPage, Navigate } from "../config.js";
+import { loadPage } from "../loadPage.js";
 
 export async function login() {
     container.innerHTML = ""
     container.innerHTML = loginPage;
+    let lien = document.querySelector(".lienRegister");
+    lien.addEventListener("click", (e) => {
+        e.preventDefault();
+        Navigate("/register");
+        loadPage();
+    });
     let form = document.querySelector("form");
     form.addEventListener("submit", HandleLogin);
 }

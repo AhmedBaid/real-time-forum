@@ -11,3 +11,7 @@ body {
     height: 100vh;
     background-color: #003044;
 }
+a{
+    text-decoration: none;
+    cursor: pointer;
+}

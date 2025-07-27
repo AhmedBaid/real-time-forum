@@ -19,7 +19,7 @@ export const registerPage = `<div class="register">
                 </select>
                 <input type="password" placeholder="Password" id="Password">
                 <button type="submit">Register</button>
-                <h4>Already have an account <a href="/login">login</a></h4>
+                <h4>Already have an account <a class="lienLogin">login</a></h4>
             </form>
         </div>`
 
@@ -31,6 +31,6 @@ export const loginPage = `<div class="login">
                 <input type="text" placeholder="Username" name="Username" class="username">
                 <input type="text" placeholder="Password" name="Password" class="password">
                 <button type="submit">Login</button>
-                <h4>Don't have an account <a href="/register">register</a></h4>
+                <h4>Don't have an account <a class="lienRegister">register</a></h4>
             </form>
         </div>`
