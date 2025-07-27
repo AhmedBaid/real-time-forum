@@ -17,7 +17,7 @@ async function HandleRegister(e) {
     e.preventDefault()
     let errMsg = document.querySelector(".error")
     errMsg.innerHTML = "";
-    const data = {
+    const fields = {
         username: document.getElementById("Username").value,
         email: document.getElementById("Email").value,
         firstName: document.getElementById("FirstName").value,
@@ -26,24 +26,22 @@ async function HandleRegister(e) {
         gender: document.getElementById("Gender").value,
         password: document.getElementById("Password").value,
     };
-
-    if (!data.username || !data.email || !data.firstName || !data.lastName || !data.age) {
-        errMsg.innerHTML = "All fields are required";
-        return;
-    }
-    let response = await fetch("/register", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(data)
-    });
-    const result = await response.json();
-    if (!response.ok) {
-        errMsg.innerHTML = result.message;
-        return;
-    }
-    errMsg.innerHTML = "Registration successful! You can now log in.";
-    Navigate("/")
-    loadPage()
+        let response = await fetch("/register", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(fields)
+        });
+        const data = await response.json();
+        console.log(data);
+        
+        if (!response.ok) {
+            errMsg.innerHTML = data.message;
+            return;
+        }
+        errMsg.innerHTML = "Registration successful!!";
+        Navigate("/")
+        loadPage()
+    
 }

@@ -18,8 +18,8 @@ async function HandleLogin(e) {
     e.preventDefault();
     let errMsg = document.querySelector(".error")
     errMsg.innerHTML = "";
-    let username = document.querySelector(".username").value;
-    let password = document.querySelector(".password").value;
+    let username = document.getElementById("username").value;
+    let password = document.getElementById("password").value;
     try {
         const response = await fetch("/login", {
             method: "POST",
@@ -28,20 +28,11 @@ async function HandleLogin(e) {
             },
             body: JSON.stringify({ username, password })
         })
-        
+
         const data = await response.json();
-        
-        if (!response.ok) {
-            errMsg.innerHTML = data.message;
-            return;
-        }
-        console.log(1);
-        
         Navigate("/");
-        loadPage("/", data);
+        loadPage();
     } catch (err) {
-        console.log(2);
-        
         errMsg.innerHTML = err.message;
         return;
     }
