@@ -8,9 +8,11 @@ import (
 )
 
 func Router() {
+	http.HandleFunc("/isloged", middleware.IsLogged)
 	http.HandleFunc("/", handler.HomeHandler)
 	http.HandleFunc("/register", handler.RegisterHandler)
 	http.HandleFunc("/login", handler.LoginHandler)
-	http.HandleFunc("/isloged", middleware.IsLogged)
+	http.HandleFunc("/logout", handler.LogoutHandler)
 	http.HandleFunc("/frontend/src/", handler.StaticHandler)
+	
 }
