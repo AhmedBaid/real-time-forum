@@ -1,9 +1,12 @@
-import { container, registerPage } from "./config.js";
+import { container, Navigate, registerPage } from "./config.js";
+import { loadPage } from "./loadPage.js";
 
 export function register() {
     container.innerHTML = ""
     container.innerHTML = registerPage;
     let form = document.querySelector("form");
+    console.log(form);
+
     form.addEventListener("submit", HandleRegister);
 }
 async function HandleRegister(e) {
@@ -19,30 +22,24 @@ async function HandleRegister(e) {
         gender: document.getElementById("Gender").value,
         password: document.getElementById("Password").value,
     };
+
     if (!data.username || !data.email || !data.firstName || !data.lastName || !data.age) {
         errMsg.innerHTML = "All fields are required";
         return;
     }
-    try {
-        let response = await fetch("/register", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(data)
-        });
-        if (!response.ok) {
-            errMsg.innerHTML = "Registration failed. Please try again.";
-            return;
-        }
-        const result = await response.json();
-        if (result.message) {
-            errMsg.innerHTML = result.message;
-            return;
-        }
-        errMsg.innerHTML = "Registration successful! You can now log in.";
-    } catch (error) {
-        errMsg.innerHTML = "An error occurred: " + error.message;
-        return
+    let response = await fetch("/register", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+    });
+    const result = await response.json();
+    if (!response.ok) {
+        errMsg.innerHTML = result.message;
+        return;
     }
+    errMsg.innerHTML = "Registration successful! You can now log in.";
+    Navigate("/")
+    loadPage()
 }

@@ -13,14 +13,6 @@ async function HandleLogin(e) {
     errMsg.innerHTML = "";
     let username = document.querySelector(".username").value;
     let password = document.querySelector(".password").value;
-    if (!username || !password) {
-        errMsg.innerHTML = "Username and Password are required";
-        return;
-    }
-    if (username.length < 3 || password.length < 3) {
-        errMsg.innerHTML = "Username and Password must be at least 3 characters long";
-        return;
-    }
     try {
         const response = await fetch("/login", {
             method: "POST",
@@ -29,18 +21,20 @@ async function HandleLogin(e) {
             },
             body: JSON.stringify({ username, password })
         })
-        if (!response.ok) {
-            errMsg.innerHTML = "Invalid Username or Password";
-            return;
-        }
+        
         const data = await response.json();
-        if (data.message) {
+        
+        if (!response.ok) {
             errMsg.innerHTML = data.message;
             return;
         }
+        console.log(1);
+        
         Navigate("/");
         loadPage("/", data);
     } catch (err) {
+        console.log(2);
+        
         errMsg.innerHTML = err.message;
         return;
     }
