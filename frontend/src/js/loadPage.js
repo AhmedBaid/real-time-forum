@@ -3,8 +3,7 @@ import { register } from "./pages/register.js";
 import { login } from "./pages/login.js";
 import { home } from "./pages/home.js";
 
-export function loadPage(data) {
-    console.log(data);
+export function loadPage(data=null) {
     if (location.pathname == "/login") {
         return login()
     } else if (location.pathname == "/") {
