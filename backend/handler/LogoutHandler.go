@@ -24,14 +24,14 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		http.SetCookie() http.Cookie{
+		http.SetCookie(w, &http.Cookie{
 			Name:     "session",
 			Value:    "",
 			Expires:  time.Now().Add(-1 * time.Hour),
 			HttpOnly: true,
 			Path:     "/",
-		}
-		http.SetCookie(w, &expiredCookie)
+		})
 	} else {
+		
 	}
 }
