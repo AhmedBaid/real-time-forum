@@ -3,7 +3,6 @@ package handler
 import (
 	"database/sql"
 	"encoding/json"
-	"html/template"
 	"net/http"
 
 	"real_time/backend/config"
@@ -14,11 +13,17 @@ import (
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
-		config.ResponseJSON(w, config.ErrorMethodnotAll.Code, config.ErrorMethodnotAll)
 		var user config.Users
 		err := json.NewDecoder(r.Body).Decode(&user)
 		if err != nil {
 			http.Error(w, "error in decoder", http.StatusInternalServerError)
+			return
+		}
+		if user.Username == "" || user.Password == "" {
+			config.ResponseJSON(w, http.StatusBadRequest, map[string]any{
+				"message": "Username and password are required",
+				"status":  http.StatusBadRequest,
+			})
 			return
 		}
 		query1 := `SELECT password FROM users WHERE username = ? or email=?`
@@ -62,12 +67,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 			"status":  http.StatusOK,
 			"data":    user,
 		})
-	} else {
-		template, err := template.ParseFiles("frontend/main.html")
-		if err != nil {
-			http.Error(w, "error in parsing template", http.StatusInternalServerError)
-			return
-		}
-		template.Execute(w, nil)
+	}else{
+		http.ServeFile(w, r, "frontend/main.html")
 	}
 }

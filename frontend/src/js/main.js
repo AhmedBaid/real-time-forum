@@ -2,26 +2,28 @@ import { loadPage } from "./loadPage.js";
 import { Navigate } from "./config.js";
 
 async function isloged() {
-    try {
-        const response = await fetch("/isloged");
-
-        if (!response.ok) {
+    const response = await fetch("/isloged");
+    const data = await response.json();
+    if (response.ok) {
+        if (location.pathname === "/login" || location.pathname === "/register") {
+            console.log(2222);
+            
+            Navigate("/");
+            loadPage(data);
+        } else {
+            loadPage(data);
             console.log(1);
-
-            Navigate("login");
-            loadPage("login");
-            return;
+            
         }
-        console.log(2);
-
-        const data = await response.json();
-
-        Navigate("/");
-        loadPage("/", data);
-    } catch (error) {
-        console.error("Error checking login:", error.message);
-        Navigate("login");
-        loadPage("login");
+    } else {
+        if (location.pathname === "/login" || location.pathname === "/register") {
+            console.log("Already logged in, redirecting to home page.");
+            
+            loadPage();
+        } else {
+            Navigate("/login");
+            loadPage();
+        }
     }
 }
 
