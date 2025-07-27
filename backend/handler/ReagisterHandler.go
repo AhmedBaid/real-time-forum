@@ -3,13 +3,13 @@ package handler
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"regexp"
 
 	"real_time/backend/config"
 
 	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
@@ -18,7 +18,6 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		var user config.Users
 		err := json.NewDecoder(r.Body).Decode(&user)
 		if err != nil {
-			fmt.Println("Error decoding JSON:", err)
 			http.Error(w, "error in decoder", http.StatusInternalServerError)
 			return
 		}
@@ -41,12 +40,17 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 			})
 			return
 		}
-
+		// create a new session
 		session := uuid.New().String()
+		// hash the password
+		hashPassword, Err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+		if Err != nil {
+			http.Error(w, "error in hashing password", http.StatusInternalServerError)
+			return
+		}
 		query2 := `INSERT INTO users (username, firstname, lastname,email, password,gender, age,session) VALUES (?, ?, ?, ?, ?, ?, ?,?)`
-		_, err = config.Db.Exec(query2, user.Username, user.FirstName, user.LastName, user.Email, user.Password, user.Gender, user.Age, session)
+		_, err = config.Db.Exec(query2, user.Username, user.FirstName, user.LastName, user.Email, hashPassword, user.Gender, user.Age, session)
 		if err != nil {
-			fmt.Println(err)
 			http.Error(w, "error in query", http.StatusInternalServerError)
 			return
 		}

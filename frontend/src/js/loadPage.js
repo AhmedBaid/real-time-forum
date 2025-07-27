@@ -3,14 +3,14 @@ import { register } from "./pages/register.js";
 import { login } from "./pages/login.js";
 import { home } from "./pages/home.js";
 
-export function loadPage() {    
+export function loadPage(data) {    
     if (location.pathname == "/login") {
         login()
         return
     } else if (location.pathname == "/") {
-        home()
+        home(data)
         return
-    }else if (location.pathname == "/register") {
+    } else if (location.pathname == "/register") {
         register()
         return
     } else {
