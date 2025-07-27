@@ -62,8 +62,9 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 			MaxAge:   3600,
 		})
 		config.ResponseJSON(w, http.StatusOK, map[string]any{
-			"message": "Registration successful",
-			"status":  http.StatusOK,
+			"message":  "Registration successful",
+			"status":   http.StatusOK,
+			"data": user,
 		})
 	} else {
 		http.ServeFile(w, r, "frontend/main.html")

@@ -3,18 +3,15 @@ import { register } from "./pages/register.js";
 import { login } from "./pages/login.js";
 import { home } from "./pages/home.js";
 
-export function loadPage(data) {    
+export function loadPage(data) {
+    console.log(data);
     if (location.pathname == "/login") {
-        login()
-        return
+        return login()
     } else if (location.pathname == "/") {
-        home(data)
-        return
+        return home(data)
     } else if (location.pathname == "/register") {
-        register()
-        return
+        return register()
     } else {
-        container.innerHTML = `<h2>404 Not Found</h2>`;
-        return
+        return container.innerHTML = `<h2>404 Not Found</h2>`;
     }
 }

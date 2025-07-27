@@ -41,5 +41,5 @@ async function HandleRegister(e) {
     }
     errMsg.innerHTML = "Registration successful!!";
     Navigate("/")
-    loadPage()
+    loadPage(data)
 }

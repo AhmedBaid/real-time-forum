@@ -49,7 +49,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		sessionID := uuid.New().String()
 		query2 := `UPDATE users SET session = ? WHERE username = ? or email = ?`
-		_, err = config.Db.Exec(query2, sessionID, user.Username,user.Username)
+		_, err = config.Db.Exec(query2, sessionID, user.Username, user.Username)
 		if err != nil {
 			http.Error(w, "error in updating session", http.StatusInternalServerError)
 			return

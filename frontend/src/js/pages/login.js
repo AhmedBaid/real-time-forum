@@ -28,14 +28,12 @@ async function HandleLogin(e) {
         },
         body: JSON.stringify({ username, password })
     })
-    console.log(response);
     
     const data = await response.json();
     if (!response.ok) {
         errMsg.innerHTML = data.message;
         return;
     }
-    console.log("logged in successfully");
 
     errMsg.innerHTML = "logged in successfully";
     Navigate("/");
