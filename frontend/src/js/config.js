@@ -1,6 +1,6 @@
 export const container = document.querySelector(".main");
 
-export function Navigate(url) {    
+export function Navigate(url) {
     history.pushState({}, "", url)
 }
 
@@ -34,3 +34,7 @@ export const loginPage = `<div class="login">
                 <h4>Don't have an account <a class="lienRegister">register</a></h4>
             </form>
         </div>`
+export async function isLogged() {
+    let response = await fetch("/isLogged");
+    return response.ok;
+}

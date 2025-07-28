@@ -2,13 +2,10 @@
     margin: 0;
     padding: 0;
     font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    box-sizing: border-box;
 }
 
 body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
     background-color: #003044;
 }
 a{

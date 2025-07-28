@@ -41,5 +41,6 @@ async function HandleRegister(e) {
         return;
     }
     errMsg.innerHTML = "Registration successful!!";
+    Navigate("/");
     home(data.data)
 }

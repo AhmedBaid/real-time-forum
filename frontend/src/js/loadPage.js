@@ -1,7 +1,7 @@
 import { container } from "./config.js";
-import { register } from "./pages/register.js";
-import { login } from "./pages/login.js";
-import { home } from "./pages/home.js";
+import { register } from "./views/register.js";
+import { login } from "./views/login.js";
+import { home } from "./views/home.js";
 
 export function loadPage(data) {
     if (location.pathname == "/login") {
