@@ -62,7 +62,6 @@ CREATE TABLE
 
 
 
-
 CREATE TRIGGER IF NOT EXISTS post_cleanup_trigger
 AFTER DELETE ON posts
 BEGIN

@@ -16,6 +16,7 @@ header h1 {
     font-size: 30px;
     cursor: pointer;
 }
+
 header h1 {
     font-size: 30px;
 }
@@ -23,12 +24,125 @@ header h1 {
 header span {
     color: #04E17A;
 }
-header button{
+
+header button {
     background-color: #04E17A;
-    color: white;
+    color: rgb(131, 129, 129);
+    font-weight: bold;
     font-size: 16px;
     border: none;
     padding: 10px 20px;
     border-radius: 5px;
     cursor: pointer;
+}
+
+.buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.Post-form {
+    animation: 0.5s postAn ease-in-out;
+    position: absolute;
+    width: 500px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    flex-direction: column;
+    background-color: #214B5B;
+    text-align: center;
+    border-radius: 15px;
+}
+
+
+
+.Post-form h2 {
+    margin-top: 15px;
+}
+
+.Post-form form input {
+    outline: none;
+    background-color: #193846d8;
+    color: white;
+    padding: 0 0 0 10px;
+    margin: 20px 0;
+    width: 90%;
+    height: 50px;
+    border: transparent;
+    border-radius: 10px;
+}
+
+.Post-form form input:focus {
+    border: 2px solid gray;
+}
+
+.Post-form form textarea {
+    outline: none;
+    color: white;
+    background-color: #193846d8;
+    resize: none;
+    padding: 25px 0 0 10px;
+    margin-bottom: 20px;
+    width: 90%;
+    height: 70px;
+    border-radius: 10px;
+    border: transparent;
+}
+
+.Post-form form textarea:focus {
+    border: 2px solid gray;
+}
+
+.Post-form form button {
+    margin-bottom: 15px;
+    font-size: 16px;
+    border: 1px solid;
+    font-weight: bold;
+    cursor: pointer;
+    width: 90%;
+    height: 40px;
+    color: white;
+    background-color: #04E17A;
+    outline: none;
+    border: none;
+    border-radius: 10px;
+}
+
+.Post-form form .categories  {
+    margin: auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    width: 90%;
+}
+
+.Post-form form .categories label {
+    padding: 10px;
+    width: 120px;
+    border-radius: 10px;
+    border: 1px solid #04E17A;
+    margin: 10px;
+    cursor: pointer;
+    color: black;
+    background-color: white;
+}
+
+.tag-checkk:checked+.tagCC {
+    background-color: #04E17A;
+    color: white;
+    font-weight: bold;
+}
+
+
+@keyframes postAn {
+    0% {
+        opacity: 0;
+        top: -100%;
+    }
+
+    100% {
+        opacity: 1;
+    }
 }
