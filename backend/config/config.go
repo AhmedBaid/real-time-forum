@@ -10,7 +10,7 @@ type Users struct {
 	Username  string `json:"username"`
 	FirstName string `json:"firstName"`
 	LastName  string `json:"lastName"`
-	Age       int `json:"age"`
+	Age       int    `json:"age"`
 	Gender    string `json:"gender"`
 	Email     string `json:"email"`
 	Password  string `json:"password"`
@@ -36,18 +36,18 @@ type Catgs struct {
 }
 
 type Posts struct {
-	Id                int          `json:"id"`
-	Username          string       `json:"username"`
-	Title             string       `json:"title"`
-	Description       string       `json:"description"`
-	Time              time.Time    `json:"time"`
-	TimeFormatted     string       `json:"time_formatted"`
-	TotalLikes        int          `json:"total_likes"`
-	TotalDislikes     int          `json:"total_dislikes"`
+	Id                int `json:"id"`
+	Username          string
+	Title             string `json:"title"`
+	Description       string `json:"description"`
+	Time              time.Time
+	TimeFormatted     string
+	TotalLikes        int
+	TotalDislikes     int
 	Comments          []Comments   `json:"comments"`
 	Categories        []Categories `json:"categories"`
-	TotalComments     int          `json:"total_comments"`
-	UserReactionPosts int          `json:"user_reaction_posts"`
+	TotalComments     int
+	UserReactionPosts int
 }
 
 type ErrorPage struct {
