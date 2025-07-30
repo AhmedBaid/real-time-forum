@@ -28,8 +28,12 @@ type Comments struct {
 	Username             string    `json:"username"`
 	Comment              string    `json:"comment"`
 	Time                 time.Time `json:"time"`
-	TimeFormattedComment string    `json:"time_formatted_comment"`
+	TimeFormattedComment string 
+	TotalLikes           int
+	TotalDislikes        int
+	UserReactionComment  int
 }
+
 
 type Catgs struct {
 	Catgs []string `json:"catgs"`
@@ -37,17 +41,16 @@ type Catgs struct {
 
 type Posts struct {
 	Id                int `json:"id"`
-	Username          string
+	Username          string `json:"username"`
 	Title             string `json:"title"`
 	Description       string `json:"description"`
-	Time              time.Time
-	TimeFormatted     string
-	TotalLikes        int
-	TotalDislikes     int
+	Time              time.Time    `json:"time"`
+	TotalLikes        int   `json:"TotalLikes"`
+	TotalDislikes     int   `json:"TotalDislikes"`
 	Comments          []Comments   `json:"comments"`
 	Categories        []Categories `json:"categories"`
-	TotalComments     int
-	UserReactionPosts int
+	TotalComments     int   `json:"TotalComments"`
+	UserReactionPosts int   `json:"UserReactionPosts"`
 }
 
 type ErrorPage struct {
