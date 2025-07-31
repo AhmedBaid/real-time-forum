@@ -1,6 +1,12 @@
 import { container, Header, Navigate, PostForm } from "../config.js";
 import { login } from "./login.js";
 import { timeFormat } from "../helpers/timeFormat.js";
+import { HandleComments } from "./createComments.js";
+
+
+
+
+
 async function fetchPosts() {
   try {
     let res = await fetch("/getPosts");
@@ -21,14 +27,69 @@ export async function home() {
   let allPost = document.createElement("div");
   allPost.className = "allPost";
   let obj = await fetchPosts();
-  console.log(obj.data.Posts[0].comments);
-
   for (const post of obj.data.Posts) {
-   if  ( post.comments === null)   post.comments =  []
     const postCombine = document.createElement("div");
     postCombine.className = "post-combine";
+
+    const postId = post.id;
+    const commentToggleId = `commentshow-${postId}`;
+    const commentsSectionId = `comments-section-${postId}`;
+
+    const commentsHTML =
+      post.comments  !== null
+        ? `
+      <div class="commentaires">
+        <h2 class="comment-title">Comments</h2>
+        ${post.comments
+          .map(
+            (comment) => `
+          <div class="comments">
+            <img src="https://robohash.org/${
+              comment.Username
+            }.png?size=50x50" />
+            <div class="comment-content">
+              <p class="user"><strong>${comment.Username}</strong></p>
+              <p class="comm">${comment.Comment}</p>
+              <div class="comment-actions">
+                <span class="time">${timeFormat(comment.time)}</span>
+                <div class="comment-reactions">
+                  <div class="reactionComment">
+                    <span class="span-like ${
+                      comment.UserReactionComment === 1 ? "active-like" : ""
+                    }">
+                      ${comment.TotalLikes}
+                    </span>
+                    <button class="comment-like-btn ${
+                      comment.UserReactionComment === 1 ? "active-like" : ""
+                    }" data-id="${comment.Id}" data-reaction="1" type="button">
+                      <i class="fa-solid fa-thumbs-up"></i>
+                    </button>
+                  </div>
+                  <div class="reactionComment">
+                    <span class="span-dislike ${
+                      comment.UserReactionComment === -1 ? "active-dislike" : ""
+                    }">
+                      ${comment.TotalDislikes}
+                    </span>
+                    <button class="comment-dislike-btn ${
+                      comment.UserReactionComment === -1 ? "active-dislike" : ""
+                    }" data-id="${comment.Id}" data-reaction="-1" type="button">
+                      <i class="fa-solid fa-thumbs-down"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `
+          )
+          .join("")}
+      </div>
+    `
+        : `<h1 class="messageErr">No Commentaires 🤷‍♂️</h1>`;
+
     postCombine.innerHTML = `
-    <div class="post-card" id="post-${post.id}">
+    <div class="post-card" id="post-${postId}">
       <div class="first-part">
         <div class="post-header">
           <div class="user-info">
@@ -41,14 +102,14 @@ export async function home() {
         </div>
 
         <h2 class="post-title">${post.title}</h2>
-
-
         <p class="post-description">${post.description}</p>
+
         <div class="post-tags">
           ${post.categories
             .map((cat) => `<span class="tag">${cat.name}</span>`)
             .join("")}
         </div>
+
         <div class="post-reactions">
           <form action="/reaction" method="post">
             <div class="reaction">
@@ -61,6 +122,7 @@ export async function home() {
                 <i class="fa-solid fa-thumbs-up"></i>
               </button>
             </div>
+
             <div class="reaction">
               <span class="span-dislike ${
                 post.userReactionPosts === -1 ? "active-dislike" : ""
@@ -71,89 +133,54 @@ export async function home() {
                 <i class="fa-solid fa-thumbs-down"></i>
               </button>
             </div>
+
             <div class="reaction">
               <span>${post.totalComments}</span>
-              <input type="checkbox" class="hidd" id="commentshow-${post.id}" />
-              <label for="commentshow-${
-                post.id
-              }" class="comment-icon"><i class="fa-solid fa-comment"></i></label>
-              <style>
-                #post-${post.id}:has(#commentshow-${
-      post.id
-    }:checked) .second-part {
-                  display: flex;
-                }
-              </style>
+              <input type="checkbox" class="hidd" id="${commentToggleId}" />
+              <label for="${commentToggleId}" class="comment-icon">
+                <i class="fa-solid fa-comment"></i>
+              </label>
             </div>
 
-            <input type="hidden" name="postID" value="${post.id}" />
+            <input type="hidden" name="postID" value="${postId}" />
           </form>
         </div>
       </div>
 
-      <div class="second-part" id="post-${post.id}">
-
-             <div class="comment">
-            <form action="/comment" method="post">
-              <input type="hidden" name="postID" value="{{.Id}}" />
-              <img src="https://robohash.org/{{$.UserActive}}.png?size=50x50" />
-              <input type="text" name="comment" placeholder="Add Comment" required /><br />
-              <button type="submit">Add</button>
-            </form>
-          </div>
-
-
-             <div class="commentaires">
-      <h2 class="comment-title">Comments</h2>
-      
-      ${post.comments.map(
-        (comment) => `
-        <div class="comments">
-          <img src="https://robohash.org/${comment.Username}.png?size=50x50" />
-          <div class="comment-content">
-            <p class="user"><strong>${comment.Username}</strong></p>
-            <p class="comm">${comment.Comment}</p>
-            <div class="comment-actions">
-              <span class="time">${timeFormat(comment.time)}</span>
-              <div class="comment-reactions">
-                <div class="reactionComment">
-                  <span class="span-like ${
-                    comment.UserReactionComment === 1 ? "active-like" : ""
-                  }">
-                    ${comment.TotalLikes}
-                  </span>
-                  <button class="comment-like-btn ${
-                    comment.UserReactionComment === 1 ? "active-like" : ""
-                  }" data-id="${comment.Id}" data-reaction="1" type="button">
-                    <i class="fa-solid fa-thumbs-up"></i>
-                  </button>
-                </div>
-                <div class="reactionComment">
-                  <span class="span-dislike ${
-                    comment.UserReactionComment === -1 ? "active-dislike" : ""
-                  }">
-                    ${comment.TotalDislikes}
-                  </span>
-                  <button class="comment-dislike-btn ${
-                    comment.UserReactionComment === -1 ? "active-dislike" : ""
-                  }" data-id="${comment.Id}" data-reaction="-1" type="button">
-                    <i class="fa-solid fa-thumbs-down"></i>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
+      <div class="second-part" id="${commentsSectionId}" style="display: none;">
+        <!-- Form Add Comment -->
+        <div class="comment">
+          <form  method="post" id="formComment">
+            <input type="hidden" name="postID" value="${postId}" />
+            <img src="https://robohash.org/${
+              obj.data.UserActive
+            }.png?size=50x50" />
+            <input type="text" name="comment" placeholder="Add Comment" required />
+            <button type="submit" >Add</button>
+          </form>
+          <span class="error"></span>
         </div>
-      `
-      ).join("")}
-    </div>
 
-          
+        ${commentsHTML}
       </div>
     </div>
-`;
+  `;
+
+    // 💡 Toggle logic (JS based)
+    setTimeout(() => {
+      const toggle = document.getElementById(commentToggleId);
+      const section = document.getElementById(commentsSectionId);
+
+      if (toggle && section) {
+        toggle.addEventListener("change", () => {
+          section.style.display = toggle.checked ? "flex" : "none";
+        });
+      }
+    }, 0);
+
     allPost.appendChild(postCombine);
   }
+
   // end post container
   container.innerHTML = "";
   header.innerHTML = Header;
@@ -164,6 +191,10 @@ export async function home() {
   container.append(allPost);
   const logoutButton = header.querySelector(".logout");
   let createButton = header.querySelector(".create");
+
+let formComment = document.getElementById("formComment")
+
+formComment.addEventListener("submit", HandleComments)
   logoutButton.addEventListener("click", Logout);
   createButton.addEventListener("click", () => {
     const postForm = document.querySelector(".Post-form");
@@ -183,7 +214,6 @@ async function Logout(e) {
     console.log("Logout failed");
   }
   const data = await response.json();
-
   Navigate("/login");
   login();
 }
