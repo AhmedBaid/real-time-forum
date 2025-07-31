@@ -24,33 +24,32 @@ type Categories struct {
 
 type Comments struct {
 	PostID               int       `json:"post_id"`
-	Id                   int       `json:"id"`
-	Username             string    `json:"username"`
-	Comment              string    `json:"comment"`
+	Id                   int       `json:"Id"`
+	Username             string    `json:"Username"`
+	Comment              string    `json:"Comment"`
 	Time                 time.Time `json:"time"`
-	TimeFormattedComment string 
-	TotalLikes           int
-	TotalDislikes        int
-	UserReactionComment  int
+	TimeFormattedComment string
+	TotalLikes           int `json:"TotalLikes"`
+	TotalDislikes        int `json:"TotalDislikes"`
+	UserReactionComment  int `json:"UserReactionComment"`
 }
-
 
 type Catgs struct {
 	Catgs []string `json:"catgs"`
 }
 
 type Posts struct {
-	Id                int `json:"id"`
-	Username          string `json:"username"`
-	Title             string `json:"title"`
-	Description       string `json:"description"`
+	Id                int          `json:"id"`
+	Username          string       `json:"username"`
+	Title             string       `json:"title"`
+	Description       string       `json:"description"`
 	Time              time.Time    `json:"time"`
-	TotalLikes        int   `json:"TotalLikes"`
-	TotalDislikes     int   `json:"TotalDislikes"`
+	TotalLikes        int          `json:"totalLikes"`
+	TotalDislikes     int          `json:"totalDislikes"`
 	Comments          []Comments   `json:"comments"`
 	Categories        []Categories `json:"categories"`
-	TotalComments     int   `json:"TotalComments"`
-	UserReactionPosts int   `json:"UserReactionPosts"`
+	TotalComments     int          `json:"totalComments"`
+	UserReactionPosts int          `json:"userReactionPosts"`
 }
 
 type ErrorPage struct {
