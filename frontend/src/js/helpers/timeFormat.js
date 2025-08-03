@@ -2,7 +2,7 @@ export function timeFormat(time) {
     let timef = ""
     let postDate = new Date(time).getTime()
     let now = new Date()
-    now.setHours(now.getHours() + 1)
+    now.setHours(now.getHours() )
     let def = (now - postDate) / 1000
     if (def < 60) {
         timef = "just now"
