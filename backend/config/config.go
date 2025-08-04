@@ -7,11 +7,11 @@ import (
 )
 
 type Reactions struct {
-	Like    string `json:"like"`
-	PostID  int    `json:"postId"`
-	TotalLike  int    `json:"TotalLike"`
-	TotalDislikes  int    `json:"TotalDislikes"`
-
+	Like              string `json:"like"`
+	PostID            int    `json:"postId"`
+	TotalLike         int    `json:"TotalLike"`
+	TotalDislikes     int    `json:"TotalDislikes"`
+	UserReactionPosts int    `json:"userReactionPosts"`
 }
 type Users struct {
 	Username  string `json:"username"`

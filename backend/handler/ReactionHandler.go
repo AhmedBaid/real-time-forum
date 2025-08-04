@@ -92,7 +92,13 @@ func ReactionHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	stmtLikes := `SELECT COUNT(*) FROM likes WHERE postID = ? AND value = '1'`
+	stmtUserReaction := `COALESCE((
+					SELECT value FROM likes WHERE postID = ? AND userID = ?
+				), 0) AS user_reaction_pub`
+
+	config.Db.QueryRow(stmtUserReaction, reaction.PostID, userid).Scan(&reaction.UserReactionPosts)
+
+	stmtLikes := `SELECT COUNT(*)  FROM likes WHERE postID = ? AND value = '1'`
 	config.Db.QueryRow(stmtLikes, reaction.PostID).Scan(&reaction.TotalLike)
 
 	stmtDislikes := `SELECT COUNT(*) FROM likes WHERE postID = ? AND value = '-1'`

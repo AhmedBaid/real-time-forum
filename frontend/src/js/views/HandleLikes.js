@@ -30,12 +30,8 @@ export async function HandleLikes(e) {
     let spanlike = form.querySelector(".span-like");
     let spandislike = form.querySelector(".span-dislike");
 
-    console.log("spanlike", spanlike);
-    console.log("spandislike", spandislike);
-console.log(data);
-
-    spanlike.textContent = data.TotalLike;
-    spandislike.textContent = data.TotalDislikes;
+    spanlike.textContent = data.data.TotalLike;
+    spandislike.textContent = data.data.TotalDislikes;
   } catch (error) {
     console.log(error);
     errorMessage.textContent = error.message;
