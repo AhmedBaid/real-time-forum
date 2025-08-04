@@ -1,3 +1,13 @@
+:root {
+  --wahd: #04aa6d;
+  --joj: #090114;
+  --tlata: #6a2fc7;
+  --bg: #0a0a0a;
+  --bg2: #4285f4;
+  --akhdar: #0afb26;
+}
+
+
 header {
   position: fixed;
   top: 0;
@@ -11,6 +21,12 @@ header {
   box-shadow: 0px 1px 2px #00ff26;
   z-index: 10;
 }
+body::-webkit-scrollbar,
+.commentaires::-webkit-scrollbar,
+.comm::-webkit-scrollbar {
+  display: none;
+}
+
 
 header h1 {
   color: white;
@@ -147,7 +163,6 @@ header button {
 }
 /*   posts*/
 
-
 .allPost {
   display: flex;
   flex-direction: column;
@@ -158,7 +173,6 @@ header button {
 .post-combine {
   display: flex;
   width: 70%;
-  
 }
 
 .post-card {
@@ -280,7 +294,8 @@ header button {
 .comment-content {
   width: 100%;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  justify-content: space-between;
 }
 
 .avatar,
@@ -423,4 +438,44 @@ body:has(#commentshow:checked) .second-part {
   height: 0;
   visibility: hidden;
 }
-/* end posts */ 
+/* end posts */
+
+
+.error {
+    white-space: nowrap;
+    animation: err 0.8s ease-in-out;
+    padding: 0 10px;
+    height: 50px;
+    position: fixed;
+    top: 50px;
+    right: 10px;
+    border: 2px solid #de747f;
+    display: flex ; 
+    align-items: center;
+    font-weight: bold;
+    background-color: #f4838d;
+    color: #000000;
+    border-radius: 5px;
+    margin: 20px auto;
+    font-family: sans-serif;
+}
+
+.error .icon {
+    margin-right: 10px;
+    font-size: 20px;
+}
+
+.error .message {
+    font-size: 14px;
+}
+
+
+.error .close-btn {
+    position: absolute;
+    right: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 20px;
+    margin-left: 50px;
+    color: #721c24;
+}

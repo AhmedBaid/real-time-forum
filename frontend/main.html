@@ -1,24 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Real-Time-Forum</title>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Real-Time-Forum</title>
+    <link rel="stylesheet" href="frontend/src/css/login.css" />
+    <link rel="stylesheet" href="frontend/src/css/register.css" />
+    <link rel="stylesheet" href="frontend/src/css/global.css" />
+    <link rel="stylesheet" href="frontend/src/css/home.css" />
+    <link
+      rel="shortcut icon"
+      href="frontend/src/assets/icon.png"
+      type="image/x-icon"
+    />
 
-  <link rel="stylesheet" href="frontend/src/css/login.css" />
-  <link rel="stylesheet" href="frontend/src/css/register.css" />
-  <link rel="stylesheet" href="frontend/src/css/global.css" />
-  <link rel="stylesheet" href="frontend/src/css/home.css" />
-  <link rel="shortcut icon" href="frontend/src/assets/icon.png" type="image/x-icon" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+    />
+  </head>
 
-  <!-- نسخة واحدة فقط من Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
-</head>
+  <body>
+    <div class="main"></div>
+    <div class="error" style="display: none">
+      <span id="message"></span>
+      <span
+        class="close-btn"
+        onclick="this.parentElement.style.display='none';"
+      style="margin-left: 50px;">🚫</span>
+    </div>
 
-<body>
-  <div class="main"></div>
-  <script type="module" src="frontend/src/js/main.js"></script>
-</body>
-
+    <script type="module" src="frontend/src/js/main.js"></script>
+  </body>
 </html>

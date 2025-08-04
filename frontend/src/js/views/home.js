@@ -2,9 +2,7 @@ import { container, Header, Navigate, PostForm } from "../config.js";
 import { login } from "./login.js";
 import { timeFormat } from "../helpers/timeFormat.js";
 import { HandleComments } from "./createComments.js";
-
-
-
+import { HandleLikes } from "./HandleLikes.js";
 
 
 async function fetchPosts() {
@@ -16,7 +14,9 @@ async function fetchPosts() {
     }
     return await res.json();
   } catch (error) {
-    console.log(error);
+    let spanError = document.querySelector(".error");
+    spanError.textContent = error;
+    spanError.style.display = "block ";
   }
 }
 
@@ -27,6 +27,9 @@ export async function home() {
   let allPost = document.createElement("div");
   allPost.className = "allPost";
   let obj = await fetchPosts();
+
+  console.log(obj.data.Posts);
+
   for (const post of obj.data.Posts) {
     const postCombine = document.createElement("div");
     postCombine.className = "post-combine";
@@ -36,10 +39,10 @@ export async function home() {
     const commentsSectionId = `comments-section-${postId}`;
 
     const commentsHTML =
-      post.comments  !== null
+      post.comments !== null
         ? `
-      <div class="commentaires">
         <h2 class="comment-title">Comments</h2>
+      <div class="commentaires">
         ${post.comments
           .map(
             (comment) => `
@@ -48,36 +51,12 @@ export async function home() {
               comment.Username
             }.png?size=50x50" />
             <div class="comment-content">
+            <div>
               <p class="user"><strong>${comment.Username}</strong></p>
-              <p class="comm">${comment.Comment}</p>
+              <p class="comm">${comment.Comment}</p></div>
+            
               <div class="comment-actions">
-                <span class="time">${timeFormat(comment.time)}</span>
-                <div class="comment-reactions">
-                  <div class="reactionComment">
-                    <span class="span-like ${
-                      comment.UserReactionComment === 1 ? "active-like" : ""
-                    }">
-                      ${comment.TotalLikes}
-                    </span>
-                    <button class="comment-like-btn ${
-                      comment.UserReactionComment === 1 ? "active-like" : ""
-                    }" data-id="${comment.Id}" data-reaction="1" type="button">
-                      <i class="fa-solid fa-thumbs-up"></i>
-                    </button>
-                  </div>
-                  <div class="reactionComment">
-                    <span class="span-dislike ${
-                      comment.UserReactionComment === -1 ? "active-dislike" : ""
-                    }">
-                      ${comment.TotalDislikes}
-                    </span>
-                    <button class="comment-dislike-btn ${
-                      comment.UserReactionComment === -1 ? "active-dislike" : ""
-                    }" data-id="${comment.Id}" data-reaction="-1" type="button">
-                      <i class="fa-solid fa-thumbs-down"></i>
-                    </button>
-                  </div>
-                </div>
+                <span class="time">${timeFormat(comment.time)}</span>  
               </div>
             </div>
           </div>
@@ -86,7 +65,7 @@ export async function home() {
           .join("")}
       </div>
     `
-        : `<h1 class="messageErr">No Commentaires 🤷‍♂️</h1>`;
+        : ` <div class="commentaires"><h1 class="messageErr">No Commentaires 🤷‍♂️</h1></div>`;
 
     postCombine.innerHTML = `
     <div class="post-card" id="post-${postId}">
@@ -111,12 +90,12 @@ export async function home() {
         </div>
 
         <div class="post-reactions">
-          <form action="/reaction" method="post">
+          <form  method="post"  class="likesForm" >
             <div class="reaction">
               <span class="span-like ${
                 post.userReactionPosts === 1 ? "active-like" : ""
               }">${post.totalLikes}</span>
-              <button name="reaction" value="1" class="like-btn ${
+              <button name="reaction1" value="1" class="like-btn ${
                 post.userReactionPosts === 1 ? "active-like" : ""
               }" type="submit">
                 <i class="fa-solid fa-thumbs-up"></i>
@@ -127,7 +106,7 @@ export async function home() {
               <span class="span-dislike ${
                 post.userReactionPosts === -1 ? "active-dislike" : ""
               }">${post.totalDislikes}</span>
-              <button name="reaction" value="-1" class="dislike-btn ${
+              <button name="reaction2" value="-1" class="dislike-btn ${
                 post.userReactionPosts === -1 ? "active-dislike" : ""
               }" type="submit">
                 <i class="fa-solid fa-thumbs-down"></i>
@@ -143,22 +122,22 @@ export async function home() {
             </div>
 
             <input type="hidden" name="postID" value="${postId}" />
-          </form>
+            </form>
         </div>
       </div>
 
       <div class="second-part" id="${commentsSectionId}" style="display: none;">
         <!-- Form Add Comment -->
         <div class="comment">
-          <form  method="post" id="formComment">
+          <form  method="post" id="${postId}"  class="formComment">
             <input type="hidden" name="postID" value="${postId}" />
             <img src="https://robohash.org/${
               obj.data.UserActive
             }.png?size=50x50" />
-            <input type="text" name="comment" placeholder="Add Comment" required />
+            <input type="text" name="comment" preactionlaceholder="Add Comment" required />
             <button type="submit" >Add</button>
           </form>
-          <span class="error"></span>
+         
         </div>
 
         ${commentsHTML}
@@ -192,9 +171,15 @@ export async function home() {
   const logoutButton = header.querySelector(".logout");
   let createButton = header.querySelector(".create");
 
-let formComment = document.getElementById("formComment")
+  document.querySelectorAll(".formComment").forEach((form) => {
+    form.addEventListener("submit", HandleComments);
+  });
 
-formComment.addEventListener("submit", HandleComments)
+
+  document.querySelectorAll(".likesForm").forEach((form)=>{
+    
+        form.addEventListener("submit", HandleLikes);
+  })
   logoutButton.addEventListener("click", Logout);
   createButton.addEventListener("click", () => {
     const postForm = document.querySelector(".Post-form");

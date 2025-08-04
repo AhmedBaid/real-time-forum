@@ -2,41 +2,64 @@ import { timeFormat } from "../helpers/timeFormat.js";
 
 export async function HandleComments(e) {
   e.preventDefault();
-  let errMsg = document.querySelector(".error");
-  errMsg.innerHTML = "";
-  let post_id = Number(document.getElementsByName("postID")[0].value);
-  let Comment = document.getElementsByName("comment")[0].value;
+  let form = e.target;
 
-  const response = await fetch("/createComment", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ post_id, Comment }),
-  });
+  const errorDiv = document.querySelector(".error");
+  const errorMessage = document.getElementById("message");
 
-  const data = await response.json();
-  if (!response.ok) {
-    errMsg.innerHTML = data.message;
-    console.log(data.message, 3);
+  errorDiv.style.display = "none";
+  errorMessage.textContent = "";
 
-    return;
+  let post_id = Number(form.querySelector("[name='postID']").value);
+  let Comment = form.querySelector("[name='comment']").value;
+
+  
+  if (post_id === 0 || Comment.trim() === "" || Comment.length < 3) {
+     errorMessage.textContent = "Comment must be at least 3 characters." ;
+    errorDiv.style.display = "flex";
+    return
   }
+  try {
+    const response = await fetch("/createComment", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ post_id, Comment }),
+    });
 
-  let commentaires = document.querySelector(".commentaires");
+    if (!response.ok) {
+      let err = await response.text();
+      throw new Error(err);
+    }
 
-  let div = document.createElement("div");
-  div.className = "comments";
+    const data = await response.json();
 
-  div.innerHTML = `
- <img src="https://robohash.org/redaanniz.png?size=50x50" />
-            <div class="comment-content">
-              <p class="user"><strong>redaanniz</strong></p>
-              <p class="comm">${Comment}</p>
-              <div class="comment-actions">
-                <span class="time">${timeFormat(new Date())}</span>
-              </div>
- </div>
-`;
-  commentaires.prepend(div);
+    const commentaires = form
+      .closest(".second-part")
+      .querySelector(".commentaires");
+
+    let div = document.createElement("div");
+    div.className = "comments";
+
+    div.innerHTML = `
+      <img src="https://robohash.org/${data.data.Username}.png?size=50x50" />
+      <div class="comment-content">
+        <div>
+          <p class="user"><strong>${data.data.Username}</strong></p>
+          <p class="comm">${data.data.Comment}</p>
+        </div>
+        <div class="comment-actions">
+          <span class="time">${timeFormat(data.data.time)}</span>
+        </div>
+      </div>
+    `;
+
+    form.reset();
+    commentaires.prepend(div);
+  } catch (error) {
+
+    
+    let err = JSON.parse(error.message);
+    errorMessage.textContent = err.message ;
+    errorDiv.style.display = "flex";
+  }
 }

@@ -4,6 +4,8 @@ export function Navigate(url) {
   history.pushState({}, "", url);
 }
 
+export const spanError = document.querySelector(".error");
+export const spanMessage = document.getElementById("message");
 export const registerPage = `<div class="register">
             <div class="error"></div>
             <form id="form" method="post">

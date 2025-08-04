@@ -27,16 +27,8 @@ func FetchComments(r *http.Request) (map[int][]config.Comments, error) {
     COALESCE(c.comment, '') AS comment,
     c.time AS time,
     COALESCE(c.username, '') AS username,
-    c.postID,
-    COUNT(CASE WHEN cl.value = '1' THEN 1 END) AS total_likes, 
-    COUNT(CASE WHEN cl.value = '-1' THEN 1 END) AS total_dislikes,
-    COALESCE((
-        SELECT value 
-        FROM commentsLikes 
-        WHERE commentID = c.id AND userID = ?
-    ), 0) AS user_reaction_comment
+    c.postID
 	FROM comments c
-	LEFT JOIN commentsLikes cl ON c.id = cl.commentID
 	GROUP BY c.id
 	ORDER BY c.time DESC;
 
@@ -51,11 +43,10 @@ func FetchComments(r *http.Request) (map[int][]config.Comments, error) {
 
 	for rows2.Next() {
 		var comment config.Comments
-		err2 = rows2.Scan(&comment.Id, &comment.Comment, &comment.Time, &comment.Username, &comment.PostID, &comment.TotalLikes, &comment.TotalDislikes, &comment.UserReactionComment)
+		err2 = rows2.Scan(&comment.Id, &comment.Comment, &comment.Time, &comment.Username, &comment.PostID)
 		if err2 != nil {
 			return nil, err2
 		}
-
 		comments = append(comments, comment)
 	}
 	//  !  end get comments

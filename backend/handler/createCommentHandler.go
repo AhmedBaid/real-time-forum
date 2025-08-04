@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
+
 	"real_time/backend/config"
 	"real_time/backend/helpers"
 )
@@ -61,7 +63,7 @@ func CommentHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	stmt := `insert into comments (postID, comment, username ) values(?, ? ,?)`
-	_, errrrr := config.Db.Exec(stmt, postID2, comment.Comment, username)
+	res, errrrr := config.Db.Exec(stmt, postID2, comment.Comment, username)
 	if errrrr != nil {
 		config.ResponseJSON(w, http.StatusInternalServerError, map[string]any{
 			"message": "Erron in database 3",
@@ -69,6 +71,15 @@ func CommentHandler(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
+	commentID, _ := res.LastInsertId()
+
+
+
+	comment.Username = username
+	comment.Id = int(commentID)
+comment.Time  =  time.Now()
+
+
 	config.ResponseJSON(w, http.StatusOK, map[string]any{
 		"message": "comments created  successful",
 		"status":  http.StatusOK,
