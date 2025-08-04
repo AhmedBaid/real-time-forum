@@ -38,11 +38,11 @@ func ReactionHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	stmt2 := "SELECT id  FROM users WHERE session = ?"
+	// get user ID
+	stmt2 := "SELECT id FROM users WHERE session = ?"
 	var userid int
-	errr := config.Db.QueryRow(stmt2, session).Scan(&userid)
-
-	if errr != nil {
+	err = config.Db.QueryRow(stmt2, session).Scan(&userid)
+	if err != nil {
 		config.ResponseJSON(w, config.ErrorInternalServerErr.Code, map[string]any{
 			"message": "error in database",
 			"status":  config.ErrorInternalServerErr.Code,
@@ -50,70 +50,57 @@ func ReactionHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	stmt := `select value from likes where postID = ? and  userID = ?`
+	// get user reaction (if exists)
+	stmt := `SELECT value FROM likes WHERE postID = ? AND userID = ?`
 	row := config.Db.QueryRow(stmt, reaction.PostID, userid)
+
 	var reactionValue string
-	errrr := row.Scan(&reactionValue)
-	if errrr == sql.ErrNoRows {
-		// make the like
-		stmt := `insert into likes (postID, userID, value) values(?, ?, ?)`
+	err = row.Scan(&reactionValue)
+
+	if err == sql.ErrNoRows {
+		// insert
+		stmt := `INSERT INTO likes (postID, userID, value) VALUES (?, ?, ?)`
 		_, err := config.Db.Exec(stmt, reaction.PostID, userid, reaction.Like)
 		if err != nil {
-			fmt.Println(err)
 			config.ResponseJSON(w, config.ErrorInternalServerErr.Code, map[string]any{
-				"message": "error in database 1 ",
+				"message": "error in database 1",
 				"status":  config.ErrorInternalServerErr.Code,
 			})
 			return
 		}
-		fmt.Println(reaction, "1")
-		config.ResponseJSON(w, http.StatusOK, map[string]any{
-			"message": "liked   successful",
-			"status":  http.StatusOK,
-			"data":    reaction,
-		})
-
-	} else {
-		if reactionValue == reaction.Like {
-			// delete the like
-			stmt := `delete from likes where postID = ? and userID = ?`
-			_, err := config.Db.Exec(stmt, reaction.PostID, userid)
-			if err != nil {
-				fmt.Println(err)
-				config.ResponseJSON(w, config.ErrorInternalServerErr.Code, map[string]any{
-					"message": "error in database 2",
-					"status":  config.ErrorInternalServerErr.Code,
-				})
-				return
-			}
-			fmt.Println(reaction, "2")
-
-			config.ResponseJSON(w, http.StatusOK, map[string]any{
-				"message": "liked   successful",
-				"status":  http.StatusOK,
-				"data":    reaction,
+	} else if reactionValue == reaction.Like {
+		// delete
+		stmt := `DELETE FROM likes WHERE postID = ? AND userID = ?`
+		_, err := config.Db.Exec(stmt, reaction.PostID, userid)
+		if err != nil {
+			config.ResponseJSON(w, config.ErrorInternalServerErr.Code, map[string]any{
+				"message": "error in database 2",
+				"status":  config.ErrorInternalServerErr.Code,
 			})
-
 			return
-		} else {
-			// update the like
-			stmt := `update likes set value = ? where postID = ? and userID = ?`
-			_, err := config.Db.Exec(stmt, reaction.Like, reaction.PostID, userid)
-			if err != nil {
-				config.ResponseJSON(w, config.ErrorInternalServerErr.Code, map[string]any{
-					"message": "error in database 3",
-					"status":  config.ErrorInternalServerErr.Code,
-				})
-				return
-			}
-			fmt.Println(reaction, "3")
-
-			config.ResponseJSON(w, http.StatusOK, map[string]any{
-				"message": "liked   successful",
-				"status":  http.StatusOK,
-				"data":    reaction,
+		}
+	} else {
+		// update
+		stmt := `UPDATE likes SET value = ? WHERE postID = ? AND userID = ?`
+		_, err := config.Db.Exec(stmt, reaction.Like, reaction.PostID, userid)
+		if err != nil {
+			config.ResponseJSON(w, config.ErrorInternalServerErr.Code, map[string]any{
+				"message": "error in database 3",
+				"status":  config.ErrorInternalServerErr.Code,
 			})
 			return
 		}
 	}
+
+	stmtLikes := `SELECT COUNT(*) FROM likes WHERE postID = ? AND value = '1'`
+	config.Db.QueryRow(stmtLikes, reaction.PostID).Scan(&reaction.TotalLike)
+
+	stmtDislikes := `SELECT COUNT(*) FROM likes WHERE postID = ? AND value = '-1'`
+	config.Db.QueryRow(stmtDislikes, reaction.PostID).Scan(&reaction.TotalDislikes)
+	fmt.Println(reaction)
+	config.ResponseJSON(w, http.StatusOK, map[string]any{
+		"message": "reaction updated successfully",
+		"status":  http.StatusOK,
+		"data":    reaction,
+	})
 }
