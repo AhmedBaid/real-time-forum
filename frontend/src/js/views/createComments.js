@@ -1,5 +1,4 @@
 import { timeFormat } from "../helpers/timeFormat.js";
-import { login } from "./login.js";
 
 export async function HandleComments(e) {
   e.preventDefault();
