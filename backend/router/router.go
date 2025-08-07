@@ -8,6 +8,11 @@ import (
 )
 
 func Router() {
+	http.HandleFunc("/ReactionHandler", handler.ReactionHandler)
+	http.HandleFunc("/getComments", handler.GetComments)
+
+	http.HandleFunc("/createComment", handler.CommentHandler)
+	http.HandleFunc("/getPosts", handler.GetPosts)
 	http.HandleFunc("/isloged", middleware.IsLogged)
 	http.HandleFunc("/", handler.HomeHandler)
 	http.HandleFunc("/register", handler.RegisterHandler)

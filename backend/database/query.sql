@@ -18,7 +18,6 @@ CREATE TABLE
         password TEXT NOT NULL,
         session TEXT DEFAULT NULL
     );
-
 CREATE TABLE
     IF NOT EXISTS posts (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -27,7 +26,6 @@ CREATE TABLE
         description TEXT,
         time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         userID INTEGER  NOT NULL,
-        image_path TEXT,
         FOREIGN KEY (userID) REFERENCES users (id) ON DELETE CASCADE
     );
 
@@ -60,7 +58,14 @@ CREATE TABLE
         FOREIGN KEY (postID) REFERENCES posts (id) ON DELETE CASCADE
     );
 
-
+CREATE TABLE IF NOT EXISTS commentsLikes (
+    userID INTEGER,
+    commentID INTEGER,
+    value VARCHAR(2),
+    PRIMARY KEY (userID, commentID),
+    FOREIGN KEY (userID) REFERENCES users (id) ON DELETE CASCADE,
+    FOREIGN KEY (commentID) REFERENCES comments (id) ON DELETE CASCADE
+);
 
 CREATE TRIGGER IF NOT EXISTS post_cleanup_trigger
 AFTER DELETE ON posts

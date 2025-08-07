@@ -6,6 +6,13 @@ import (
 	"time"
 )
 
+type Reactions struct {
+	Like              string `json:"like"`
+	PostID            int    `json:"postId"`
+	TotalLike         int    `json:"TotalLike"`
+	TotalDislikes     int    `json:"TotalDislikes"`
+	UserReactionPosts int    `json:"userReactionPosts"`
+}
 type Users struct {
 	Username  string `json:"username"`
 	FirstName string `json:"firstName"`
@@ -23,12 +30,12 @@ type Categories struct {
 }
 
 type Comments struct {
-	PostID               int       `json:"post_id"`
-	Id                   int       `json:"id"`
-	Username             string    `json:"username"`
-	Comment              string    `json:"comment"`
-	Time                 time.Time `json:"time"`
-	TimeFormattedComment string    `json:"time_formatted_comment"`
+	PostID   int       `json:"post_id"`
+	Id       int       `json:"Id"`
+	Username string    `json:"Username"`
+	Comment  string    `json:"Comment"`
+	Time     time.Time `json:"time"`
+	TotalComments  int `json:"totalComments"`
 }
 
 type Catgs struct {
@@ -36,18 +43,16 @@ type Catgs struct {
 }
 
 type Posts struct {
-	Id                int `json:"id"`
-	Username          string
-	Title             string `json:"title"`
-	Description       string `json:"description"`
-	Time              time.Time
-	TimeFormatted     string
-	TotalLikes        int
-	TotalDislikes     int
-	Comments          []Comments   `json:"comments"`
+	Id                int          `json:"id"`
+	Username          string       `json:"username"`
+	Title             string       `json:"title"`
+	Description       string       `json:"description"`
+	Time              time.Time    `json:"time"`
+	TotalLikes        int          `json:"totalLikes"`
+	TotalDislikes     int          `json:"totalDislikes"`
 	Categories        []Categories `json:"categories"`
-	TotalComments     int
-	UserReactionPosts int
+	TotalComments     int          `json:"totalComments"`
+	UserReactionPosts int          `json:"userReactionPosts"`
 }
 
 type ErrorPage struct {
