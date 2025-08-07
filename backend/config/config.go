@@ -35,6 +35,7 @@ type Comments struct {
 	Username string    `json:"Username"`
 	Comment  string    `json:"Comment"`
 	Time     time.Time `json:"time"`
+	TotalComments  int `json:"totalComments"`
 }
 
 type Catgs struct {
@@ -49,7 +50,6 @@ type Posts struct {
 	Time              time.Time    `json:"time"`
 	TotalLikes        int          `json:"totalLikes"`
 	TotalDislikes     int          `json:"totalDislikes"`
-	Comments          []Comments   `json:"comments"`
 	Categories        []Categories `json:"categories"`
 	TotalComments     int          `json:"totalComments"`
 	UserReactionPosts int          `json:"userReactionPosts"`

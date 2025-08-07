@@ -1,4 +1,5 @@
 import { timeFormat } from "../helpers/timeFormat.js";
+import { login } from "./login.js";
 
 export async function HandleComments(e) {
   e.preventDefault();
@@ -13,11 +14,10 @@ export async function HandleComments(e) {
   let post_id = Number(form.querySelector("[name='postID']").value);
   let Comment = form.querySelector("[name='comment']").value;
 
-  
   if (post_id === 0 || Comment.trim() === "" || Comment.length < 3) {
-     errorMessage.textContent = "Comment must be at least 3 characters." ;
+    errorMessage.textContent = "Comment must be at least 3 characters.";
     errorDiv.style.display = "flex";
-    return
+    return;
   }
   try {
     const response = await fetch("/createComment", {
@@ -54,12 +54,15 @@ export async function HandleComments(e) {
     `;
 
     form.reset();
-    commentaires.prepend(div);
-  } catch (error) {
 
-    
-    let err = JSON.parse(error.message);
-    errorMessage.textContent = err.message ;
+    commentaires.prepend(div);
+    const totalSpan = form.closest(".post-card").querySelector(".totalComnts");
+    if (totalSpan) {
+      let current = Number(totalSpan.textContent);
+      totalSpan.textContent = current + 1;
+    }
+  } catch (error) {
+    errorMessage.textContent = error.message;
     errorDiv.style.display = "flex";
   }
 }

@@ -4,6 +4,11 @@ import { timeFormat } from "../helpers/timeFormat.js";
 import { HandleComments } from "./createComments.js";
 import { HandleLikes } from "./HandleLikes.js";
 
+const errorDiv = document.querySelector(".error");
+const errorMessage = document.getElementById("message");
+
+errorDiv.style.display = "none";
+errorMessage.textContent = "";
 
 async function fetchPosts() {
   try {
@@ -14,36 +19,20 @@ async function fetchPosts() {
     }
     return await res.json();
   } catch (error) {
-    let spanError = document.querySelector(".error");
-    spanError.textContent = error;
-    spanError.style.display = "block ";
+    errorMessage.textContent = error;
+    errorDiv.style.display = "flex";
   }
 }
 
-export async function home() {
-  let header = document.createElement("header");
-  let Postform = document.createElement("div");
-  // posts
-  let allPost = document.createElement("div");
-  allPost.className = "allPost";
-  let obj = await fetchPosts();
+function renderCommentsStyled(section, comments) {
+  const commentsContainer = section.querySelector(".comments-list");
 
-  console.log(obj.data.Posts);
-
-  for (const post of obj.data.Posts) {
-    const postCombine = document.createElement("div");
-    postCombine.className = "post-combine";
-
-    const postId = post.id;
-    const commentToggleId = `commentshow-${postId}`;
-    const commentsSectionId = `comments-section-${postId}`;
-
-    const commentsHTML =
-      post.comments !== null
-        ? `
-        <h2 class="comment-title">Comments</h2>
+  const commentsHTML =
+    comments && comments.length > 0
+      ? `
+      <h2 class="comment-title">Comments</h2>
       <div class="commentaires">
-        ${post.comments
+        ${comments
           .map(
             (comment) => `
           <div class="comments">
@@ -51,12 +40,12 @@ export async function home() {
               comment.Username
             }.png?size=50x50" />
             <div class="comment-content">
-            <div>
-              <p class="user"><strong>${comment.Username}</strong></p>
-              <p class="comm">${comment.Comment}</p></div>
-            
+              <div>
+                <p class="user"><strong>${comment.Username}</strong></p>
+                <p class="comm">${comment.Comment}</p>
+              </div>
               <div class="comment-actions">
-                <span class="time">${timeFormat(comment.time)}</span>  
+                <span class="time">${timeFormat(comment.time)}</span>
               </div>
             </div>
           </div>
@@ -65,7 +54,40 @@ export async function home() {
           .join("")}
       </div>
     `
-        : ` <div class="commentaires"><h1 class="messageErr">No Commentaires 🤷‍♂️</h1></div>`;
+      : `<div class="commentaires"><h1 class="messageErr">No Commentaires 🤷‍♂️</h1></div>`;
+
+  commentsContainer.innerHTML = commentsHTML;
+}
+
+async function fetchComments(postID) {
+  try {
+    const res = await fetch(`/getComments?id=${postID}`);
+    if (!res.ok) {
+      const errormsg = await res.text();
+      throw new Error(errormsg);
+    }
+
+    return await res.json();
+  } catch (error) {
+    console.error("Error fetching comments:", error.message);
+    return null;
+  }
+}
+
+export async function home() {
+  let header = document.createElement("header");
+  let Postform = document.createElement("div");
+  let allPost = document.createElement("div");
+  allPost.className = "allPost";
+  let obj = await fetchPosts();
+
+  for (const post of obj.data.Posts) {
+    const postCombine = document.createElement("div");
+    postCombine.className = "post-combine";
+
+    const postId = post.id;
+    const commentToggleId = `commentshow-${postId}`;
+    const commentsSectionId = `comments-section-${postId}`;
 
     postCombine.innerHTML = `
     <div class="post-card" id="post-${postId}">
@@ -90,7 +112,7 @@ export async function home() {
         </div>
 
         <div class="post-reactions">
-          <form  method="post"  class="likesForm" >
+          <form method="post" class="likesForm">
             <div class="reaction">
               <span class="span-like ${
                 post.userReactionPosts === 1 ? "active-like" : ""
@@ -114,45 +136,55 @@ export async function home() {
             </div>
 
             <div class="reaction">
-              <span>${post.totalComments}</span>
-              <input type="checkbox" class="hidd" id="${commentToggleId}" />
+              <span class="totalComnts">${post.totalComments}</span>
+              <input type="checkbox" class="hidd" value="${
+                post.id
+              }" id="${commentToggleId}" />
               <label for="${commentToggleId}" class="comment-icon">
                 <i class="fa-solid fa-comment"></i>
               </label>
             </div>
 
             <input type="hidden" name="postID" value="${postId}" />
-            </form>
+          </form>
         </div>
       </div>
 
       <div class="second-part" id="${commentsSectionId}" style="display: none;">
-        <!-- Form Add Comment -->
         <div class="comment">
-          <form  method="post" id="${postId}"  class="formComment">
+          <form method="post" id="${postId}" class="formComment">
             <input type="hidden" name="postID" value="${postId}" />
             <img src="https://robohash.org/${
               obj.data.UserActive
             }.png?size=50x50" />
-            <input type="text" name="comment" preactionlaceholder="Add Comment" required />
-            <button type="submit" >Add</button>
+            <input type="text" name="comment" placeholder="Add Comment" required />
+            <button type="submit">Add</button>
           </form>
-         
         </div>
-
-        ${commentsHTML}
+        <div class="comments-list"></div>
       </div>
     </div>
   `;
 
-    // 💡 Toggle logic (JS based)
     setTimeout(() => {
       const toggle = document.getElementById(commentToggleId);
       const section = document.getElementById(commentsSectionId);
 
       if (toggle && section) {
-        toggle.addEventListener("change", () => {
+        toggle.addEventListener("change", async () => {
           section.style.display = toggle.checked ? "flex" : "none";
+
+          if (toggle.checked) {
+            const data = await fetchComments(toggle.value);
+
+            if (!data) return;
+
+            renderCommentsStyled(section, data.data);
+            const countSpan = section.closest(".post-card").querySelector(".totalComnts");
+            if (countSpan) {
+             countSpan.innerHTML=   data.data.length
+            }
+          }
         });
       }
     }, 0);
@@ -160,7 +192,6 @@ export async function home() {
     allPost.appendChild(postCombine);
   }
 
-  // end post container
   container.innerHTML = "";
   header.innerHTML = Header;
   Postform.innerHTML = PostForm;
@@ -168,6 +199,7 @@ export async function home() {
   container.appendChild(header);
   container.appendChild(Postform);
   container.append(allPost);
+
   const logoutButton = header.querySelector(".logout");
   let createButton = header.querySelector(".create");
 
@@ -175,21 +207,21 @@ export async function home() {
     form.addEventListener("submit", HandleComments);
   });
 
+  document.querySelectorAll(".likesForm").forEach((form) => {
+    form.addEventListener("submit", HandleLikes);
+  });
 
-  document.querySelectorAll(".likesForm").forEach((form)=>{
-    
-        form.addEventListener("submit", HandleLikes);
-  })
   logoutButton.addEventListener("click", Logout);
+
   createButton.addEventListener("click", () => {
     const postForm = document.querySelector(".Post-form");
-    if (postForm.style.display === "none" || postForm.style.display === "") {
-      postForm.style.display = "block";
-    } else {
-      postForm.style.display = "none";
-    }
+    postForm.style.display =
+      postForm.style.display === "none" || postForm.style.display === ""
+        ? "block"
+        : "none";
   });
 }
+
 async function Logout(e) {
   e.preventDefault();
   const response = await fetch("/logout", {

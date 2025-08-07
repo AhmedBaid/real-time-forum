@@ -3,7 +3,6 @@ package handler
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"real_time/backend/config"
@@ -92,9 +91,9 @@ func ReactionHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	stmtUserReaction := `COALESCE((
+	stmtUserReaction := `
 					SELECT value FROM likes WHERE postID = ? AND userID = ?
-				), 0) AS user_reaction_pub`
+				`
 
 	config.Db.QueryRow(stmtUserReaction, reaction.PostID, userid).Scan(&reaction.UserReactionPosts)
 
@@ -103,7 +102,6 @@ func ReactionHandler(w http.ResponseWriter, r *http.Request) {
 
 	stmtDislikes := `SELECT COUNT(*) FROM likes WHERE postID = ? AND value = '-1'`
 	config.Db.QueryRow(stmtDislikes, reaction.PostID).Scan(&reaction.TotalDislikes)
-	fmt.Println(reaction)
 	config.ResponseJSON(w, http.StatusOK, map[string]any{
 		"message": "reaction updated successfully",
 		"status":  http.StatusOK,

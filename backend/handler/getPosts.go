@@ -24,10 +24,9 @@ func GetPosts(w http.ResponseWriter, r *http.Request) {
 
 	sessValue = sess
 	// get comments
-	commentMap, err := helpers.FetchComments(r)
 	categorMap, errcat := helpers.FetchCategories()
 
-	if err != nil || errcat != nil {
+	if  errcat != nil {
 		fmt.Println("err1efez", err)
 		fmt.Println("err2fefe", errcat)
 
@@ -56,6 +55,8 @@ func GetPosts(w http.ResponseWriter, r *http.Request) {
 				ORDER BY p.time DESC;	
 	`
 
+
+
 	rows, err := config.Db.Query(stmt, userId)
 	if err != nil {
 		config.ResponseJSON(w, config.ErrorInternalServerErr.Code, map[string]any{
@@ -66,22 +67,28 @@ func GetPosts(w http.ResponseWriter, r *http.Request) {
 	}
 	var posts []config.Posts
 	var post config.Posts
+
+	 var totalcmnts = `SELECT  count(*) as totalcomments FROM comments c 
+	 INNER JOIN posts p  on p.id = c.postID
+	 WHERE c.postID = ?
+	`
 	var totalLikes, totalDislikes, user_reaction_pub int
+	defer rows.Close()
 	for rows.Next() {
 		err = rows.Scan(&post.Id, &post.Username, &post.Title, &post.Description, &post.Time, &totalLikes, &totalDislikes, &user_reaction_pub)
 		if err != nil {
-			fmt.Println(err)
 			config.ResponseJSON(w, config.ErrorInternalServerErr.Code, map[string]any{
 				"message": "server Error 3",
 				"status":  config.ErrorInternalServerErr.Code,
 			})
 			return
 		}
+		var Total int 
+		config.Db.QueryRow(totalcmnts, post.Id).Scan(&Total)
 		post.Categories = categorMap[post.Id]
-		post.Comments = commentMap[post.Id]
 		post.TotalLikes = totalLikes
 		post.TotalDislikes = totalDislikes
-		post.TotalComments = len(commentMap[post.Id])
+		post.TotalComments = Total
 		post.UserReactionPosts = user_reaction_pub
 		posts = append(posts, post)
 
