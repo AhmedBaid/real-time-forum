@@ -3,76 +3,14 @@ import { login } from "./login.js";
 import { timeFormat } from "../helpers/timeFormat.js";
 import { HandleComments } from "./createComments.js";
 import { HandleLikes } from "./HandleLikes.js";
+import { fetchComments , fetchPosts } from "../helpers/api.js";
+import {renderCommentsStyled} from "../helpers/randerComments.js"
 
-const errorDiv = document.querySelector(".error");
-const errorMessage = document.getElementById("message");
 
-errorDiv.style.display = "none";
-errorMessage.textContent = "";
 
-async function fetchPosts() {
-  try {
-    let res = await fetch("/getPosts");
-    if (!res.ok) {
-      let errormsg = await res.text();
-      throw new Error(errormsg);
-    }
-    return await res.json();
-  } catch (error) {
-    errorMessage.textContent = error;
-    errorDiv.style.display = "flex";
-  }
-}
 
-function renderCommentsStyled(section, comments) {
-  const commentsContainer = section.querySelector(".comments-list");
 
-  const commentsHTML =
-    comments && comments.length > 0
-      ? `
-      <h2 class="comment-title">Comments</h2>
-      <div class="commentaires">
-        ${comments
-          .map(
-            (comment) => `
-          <div class="comments">
-            <img src="https://robohash.org/${
-              comment.Username
-            }.png?size=50x50" />
-            <div class="comment-content">
-              <div>
-                <p class="user"><strong>${comment.Username}</strong></p>
-                <p class="comm">${comment.Comment}</p>
-              </div>
-              <div class="comment-actions">
-                <span class="time">${timeFormat(comment.time)}</span>
-              </div>
-            </div>
-          </div>
-        `
-          )
-          .join("")}
-      </div>
-    `
-      : `<div class="commentaires"><h1 class="messageErr">No Commentaires 🤷‍♂️</h1></div>`;
 
-  commentsContainer.innerHTML = commentsHTML;
-}
-
-async function fetchComments(postID) {
-  try {
-    const res = await fetch(`/getComments?id=${postID}`);
-    if (!res.ok) {
-      const errormsg = await res.text();
-      throw new Error(errormsg);
-    }
-
-    return await res.json();
-  } catch (error) {
-    console.error("Error fetching comments:", error.message);
-    return null;
-  }
-}
 
 export async function home() {
   let header = document.createElement("header");

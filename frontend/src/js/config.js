@@ -4,6 +4,12 @@ export function Navigate(url) {
   history.pushState({}, "", url);
 }
 
+export const errorDiv = document.querySelector(".error");
+export const errorMessage = document.getElementById("message");
+
+errorDiv.style.display = "none";
+errorMessage.textContent = "";
+
 export const spanError = document.querySelector(".error");
 export const spanMessage = document.getElementById("message");
 export const registerPage = `<div class="register">
