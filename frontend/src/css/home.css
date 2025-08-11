@@ -479,3 +479,18 @@ body:has(#commentshow:checked) .second-part {
     margin-left: 50px;
     color: #721c24;
 }
+
+.aside2 {
+  position: fixed;
+  width: 300px;
+  height: 500px;
+  height: fit-content;
+  background: #222831;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  color: white;
+  border-radius: 12px;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+}
