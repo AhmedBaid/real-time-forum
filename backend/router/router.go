@@ -10,6 +10,8 @@ import (
 func Router() {
 	http.HandleFunc("/ReactionHandler", handler.ReactionHandler)
 	http.HandleFunc("/getComments", handler.GetComments)
+	http.HandleFunc("/getUsers", handler.GetUsers)
+
 
 	http.HandleFunc("/createComment", handler.CommentHandler)
 	http.HandleFunc("/getPosts", handler.GetPosts)
