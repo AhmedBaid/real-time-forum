@@ -49,15 +49,16 @@ export const Header = `<h1>RT-<span>FO</span>RUM</h1>
     </div>`;
 
 const categories = [
-  { id: 1, name: "General" },
+  { id: 1, name: "Sport" },
+  { id: 6, name: "Music" },
+  { id: 3, name: "Movies" },
+  { id: 5, name: "Gym" },
   { id: 2, name: "Technology" },
-  { id: 3, name: "Health" },
-  { id: 4, name: "Sports" },
-  { id: 5, name: "Entertainment" },
-  { id: 6, name: "Education" },
+  { id: 7, name: "Science" },
+  { id: 4, name: "Culture" },
+  { id: 8, name: "Politics" },
 ];
 export const PostForm = `
-  <div class="Post-form">
     <form method="post">
       <h2>Create Post</h2>
       <input type="text" id="title" name="title" placeholder="Title" />
@@ -73,8 +74,7 @@ export const PostForm = `
           .join("")}
       </div>
       <button type="submit">Create Post</button>
-    </form>
-  </div>`;
+    </form>`;
 
 export async function isLogged() {
   let response = await fetch("/isLogged");

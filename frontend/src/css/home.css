@@ -17,13 +17,12 @@ header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: #193846d8;
+  background-color:  #263751;
   box-shadow: 0px 1px 2px #00ff26;
-  z-index: 10;
+  z-index: 1000;
 }
-body::-webkit-scrollbar,
-.commentaires::-webkit-scrollbar,
-.comm::-webkit-scrollbar {
+
+*::-webkit-scrollbar {
   display: none !important;
 }
 
@@ -61,7 +60,8 @@ header button {
 .Post-form {
   animation: 0.5s postAn ease-in-out;
   position: absolute;
-  width: 500px;
+  position: fixed;
+  width: 550px;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -71,6 +71,7 @@ header button {
   text-align: center;
   border-radius: 15px;
   display: none;
+  z-index: 1000;
 }
 
 .Post-form h2 {
@@ -112,7 +113,7 @@ header button {
 
 .Post-form form button {
   margin-bottom: 15px;
-  font-size: 16px;
+  font-size: 18px;
   border: 1px solid;
   font-weight: bold;
   cursor: pointer;
@@ -131,23 +132,24 @@ header button {
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  width: 90%;
+  width: 100%;
+  margin-bottom: 20px;
 }
 
 .Post-form form .categories label {
   padding: 10px;
-  width: 120px;
+  width: 105px;
   border-radius: 10px;
   border: 1px solid #04e17a;
   margin: 10px;
   cursor: pointer;
-  color: black;
-  background-color: white;
+  color: white;
+  background-color: transparent;
 }
 
-.tag-checkk:checked + .tagCC {
+.tag-checkk:checked+.tagCC {
   background-color: #04e17a;
-  color: white;
+  color: blackx1;
   font-weight: bold;
 }
 
@@ -161,6 +163,7 @@ header button {
     opacity: 1;
   }
 }
+
 /*   posts*/
 
 .allPost {
@@ -168,27 +171,10 @@ header button {
   flex-direction: column;
   width: 80%;
   margin: 100px auto 0 auto;
-  padding: 0 0 0 auto;
-}
-.post-combine {
-  display: flex;
-  width: 70%;
 }
 
-.post-card {
-  display: flex;
-  flex-direction: column;
-  color: #fff;
-  padding: 24px;
-  border-radius: 10px;
-  width: 800px;
-  background: #222831;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-  margin: 0 auto 20px auto;
-}
+
+
 .post-card .image {
   margin-bottom: 5px;
   border-radius: 10px;
@@ -212,11 +198,13 @@ header button {
   margin: 10px 0px;
   background-color: #2e313ac9;
 }
+
 .comment-title {
   text-align: center;
   font-size: 16px;
   color: var(--wahd);
 }
+
 .comment {
   display: flex;
   width: 100%;
@@ -370,6 +358,7 @@ body:has(#commentshow:checked) .second-part {
   gap: 30px;
   align-items: center;
 }
+
 .reactionComment {
   border-radius: 20px;
   display: flex;
@@ -418,6 +407,7 @@ body:has(#commentshow:checked) .second-part {
 .dislike-btn.active-dislike {
   color: #ed2939;
 }
+
 .comment-like-btn.active-like {
   color: #43abb4;
 }
@@ -425,6 +415,7 @@ body:has(#commentshow:checked) .second-part {
 .comment-dislike-btn.active-dislike {
   color: #ed2939;
 }
+
 .span-like.active-like {
   color: white;
 }
@@ -438,46 +429,47 @@ body:has(#commentshow:checked) .second-part {
   height: 0;
   visibility: hidden;
 }
+
 /* end posts */
 
 
 .error {
-    white-space: nowrap;
-    animation: err 0.8s ease-in-out;
-    padding: 0 10px;
-    height: 50px;
-    position: fixed;
-    top: 50px;
-    right: 10px;
-    border: 2px solid #de747f;
-    display: flex ; 
-    align-items: center;
-    font-weight: bold;
-    background-color: #f4838d;
-    color: #000000;
-    border-radius: 5px;
-    margin: 20px auto;
-    font-family: sans-serif;
+  white-space: nowrap;
+  animation: err 0.8s ease-in-out;
+  padding: 0 10px;
+  height: 50px;
+  position: fixed;
+  top: 50px;
+  right: 10px;
+  border: 2px solid #de747f;
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+  background-color: #f4838d;
+  color: #000000;
+  border-radius: 5px;
+  margin: 20px auto;
+  font-family: sans-serif;
 }
 
 .error .icon {
-    margin-right: 10px;
-    font-size: 20px;
+  margin-right: 10px;
+  font-size: 20px;
 }
 
 .error .message {
-    font-size: 14px;
+  font-size: 14px;
 }
 
 
 .error .close-btn {
-    position: absolute;
-    right: 10px;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 20px;
-    margin-left: 50px;
-    color: #721c24;
+  position: absolute;
+  right: 10px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 20px;
+  margin-left: 50px;
+  color: #721c24;
 }
 
 
@@ -486,38 +478,24 @@ body:has(#commentshow:checked) .second-part {
   display: flex;
   flex-direction: row;
   gap: 20px;
-  margin: 80px auto 0 auto;
+  margin: auto;
   padding: 20px;
   max-width: 1400px;
   align-items: flex-start;
 }
 
-/* Update the posts container */
-.allPost {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  margin: 0;
-  padding: 0;
-  min-width: 0; /* Allows flex item to shrink */
-}
 
-.post-combine {
-  display: flex;
-  width: 100%;
-}
 
 .post-card {
   display: flex;
   flex-direction: column;
   color: #fff;
   padding: 24px;
-  border-radius: 15px; /* Match the users border-radius */
+  border-radius: 15px;
+  /* Match the users border-radius */
   width: 100%;
   max-width: 800px;
   background: #222831;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.18);
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
   margin: 0 0 20px 0;
@@ -534,7 +512,7 @@ body:has(#commentshow:checked) .second-part {
   overflow-y: auto;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   position: sticky;
-  top: 100px;
+  top: 120px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
 }
@@ -605,12 +583,12 @@ body:has(#commentshow:checked) .second-part {
     transform: scale(0.95);
     box-shadow: 0 0 0 0 rgba(10, 251, 38, 0.7);
   }
-  
+
   70% {
     transform: scale(1);
     box-shadow: 0 0 0 10px rgba(10, 251, 38, 0);
   }
-  
+
   100% {
     transform: scale(0.95);
     box-shadow: 0 0 0 0 rgba(10, 251, 38, 0);
@@ -652,7 +630,7 @@ body:has(#commentshow:checked) .second-part {
     flex-direction: column;
     max-width: 90%;
   }
-  
+
   .aside2 {
     width: 100%;
     min-width: auto;
@@ -660,14 +638,14 @@ body:has(#commentshow:checked) .second-part {
     position: static;
     order: -1;
   }
-  
+
   .users {
     display: inline-flex;
     width: auto;
     min-width: 280px;
     margin-right: 10px;
   }
-  
+
   .aside2 {
     display: flex;
     flex-direction: row;
@@ -682,15 +660,15 @@ body:has(#commentshow:checked) .second-part {
     padding: 10px;
     margin-top: 70px;
   }
-  
+
   .post-card {
     padding: 16px;
   }
-  
+
   .aside2 {
     padding: 10px;
   }
-  
+
   .users {
     min-width: 250px;
     margin-right: 8px;

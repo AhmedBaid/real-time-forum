@@ -6,15 +6,10 @@ import { HandleLikes } from "./HandleLikes.js";
 import { fetchComments, fetchPosts, fetchUsers } from "../helpers/api.js";
 import { renderCommentsStyled } from "../helpers/randerComments.js"
 
-
-
-
-
-
-
 export async function home() {
   let header = document.createElement("header");
   let Postform = document.createElement("div");
+  Postform.className = "Post-form";
   let parentContainer  =  document.createElement("div")
   parentContainer.className="parentContainer"
   let allPost = document.createElement("div");
@@ -43,14 +38,11 @@ aside.appendChild(div)
   let obj = await fetchPosts();
 
   for (const post of obj.data.Posts) {
-    const postCombine = document.createElement("div");
-    postCombine.className = "post-combine";
-
     const postId = post.id;
     const commentToggleId = `commentshow-${postId}`;
     const commentsSectionId = `comments-section-${postId}`;
 
-    postCombine.innerHTML = `
+    allPost.innerHTML += `
     <div class="post-card" id="post-${postId}">
       <div class="first-part">
         <div class="post-header">
@@ -143,19 +135,20 @@ aside.appendChild(div)
       }
     }, 0);
 
-    allPost.appendChild(postCombine);
   }
 
   container.innerHTML = "";
   header.innerHTML = Header;
   Postform.innerHTML = PostForm;
+  console.log(Postform);
+  
   //end  fetch posts 
 
   parentContainer.appendChild(allPost)
   parentContainer.appendChild(aside)
 
   container.appendChild(header);
-  container.appendChild(Postform);
+  document.body.appendChild(Postform);
   container.append(parentContainer);
 
 
@@ -178,6 +171,7 @@ aside.appendChild(div)
       postForm.style.display === "none" || postForm.style.display === ""
         ? "block"
         : "none";
+    container.style.opacity = postForm.style.display === "block" ? "0.2" : "1";
   });
 }
 
