@@ -1,3 +1,6 @@
+import { container, Navigate, PostForm } from "../config.js";
+import { home } from "./home.js";
+
 export async function createPost(e) {
     e.preventDefault();
     console.log("createPost function called");
@@ -28,7 +31,12 @@ export async function createPost(e) {
         errorMessage.textContent =data.message;
         return;
     }
+    const postForm = document.querySelector(".Post-form");    
+    postForm.style.display = "none";
+    container.style.opacity = "1";
     errorDiv.style.display = "flex";
     errorDiv.style.backgroundColor = "#04e17a";
     errorMessage.textContent = "Post created successfully";
+    Navigate("/");
+    home();
 }

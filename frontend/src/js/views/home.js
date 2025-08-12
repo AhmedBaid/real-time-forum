@@ -165,6 +165,7 @@ export async function home() {
   logoutButton.addEventListener("click", Logout);
 
   createButton.addEventListener("click", () => {
+    Navigate("/createpost");
     const postForm = document.querySelector(".Post-form");    
     postForm.style.display =
       postForm.style.display === "none" || postForm.style.display === ""
