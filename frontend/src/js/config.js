@@ -13,7 +13,6 @@ errorMessage.textContent = "";
 export const spanError = document.querySelector(".error");
 export const spanMessage = document.getElementById("message");
 export const registerPage = `<div class="register">
-            <div class="error"></div>
             <form id="form" method="post">
                 <h2>Register</h2>
                 <input type="text" placeholder="Username" id="Username">
@@ -32,7 +31,6 @@ export const registerPage = `<div class="register">
         </div>`;
 
 export const loginPage = `<div class="login">
-            <div class="error"></div>
             <form id="form" method="post">
                 <h2>Login</h2>
                 <input type="text" placeholder="Username"  id="username">

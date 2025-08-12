@@ -1,4 +1,4 @@
-import { container, Header, Navigate, PostForm } from "../config.js";
+import { container, errorDiv, errorMessage, Header, Navigate, PostForm } from "../config.js";
 import { login } from "./login.js";
 import { timeFormat } from "../helpers/timeFormat.js";
 import { HandleComments } from "./createComments.js";
@@ -181,9 +181,13 @@ async function Logout(e) {
     method: "POST",
   });
   if (!response.ok) {
-    console.log("Logout failed");
+    errorDiv.style.display = "flex";
+    errorMessage.textContent = "logout failed";
+    return;
   }
-  const data = await response.json();
+  errorDiv.style.display = "flex";
+  errorDiv.style.backgroundColor = "#04e17a";
+  errorMessage.textContent = "logout successfully";
   Navigate("/login");
   login();
 }
