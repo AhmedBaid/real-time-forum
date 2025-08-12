@@ -452,8 +452,6 @@ body:has(#commentshow:checked) .second-part {
   outline: none;
 }
 
-
-
 .error .message {
   font-size: 18px;
 }

@@ -33,24 +33,22 @@ export async function HandleLikes(e) {
     let deslikebtn = form.querySelector("[name='reaction2']");
 
 
-   if (data.data.userReactionPosts === 1) {
-  likebtn.classList.add("active-like");
-  deslikebtn.classList.remove("active-dislike");
-} else {
-  likebtn.classList.remove("active-like");
-}
-console.log(data.data.userReactionPosts);
+    if (data.data.userReactionPosts === 1) {
+      likebtn.classList.add("active-like");
+      deslikebtn.classList.remove("active-dislike");
+    } else {
+      likebtn.classList.remove("active-like");
+    }
 
-if (data.data.userReactionPosts === -1) {
-  
-  deslikebtn.classList.add("active-dislike");
-  likebtn.classList.remove("active-like");
-} else {
-  deslikebtn.classList.remove("active-dislike");
-}
+    if (data.data.userReactionPosts === -1) {
+
+      deslikebtn.classList.add("active-dislike");
+      likebtn.classList.remove("active-like");
+    } else {
+      deslikebtn.classList.remove("active-dislike");
+    }
 
   } catch (error) {
-    console.log(error);
     errorMessage.textContent = error.message;
     errorDiv.style.display = "flex";
   }

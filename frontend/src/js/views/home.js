@@ -5,31 +5,31 @@ import { HandleComments } from "./createComments.js";
 import { HandleLikes } from "./HandleLikes.js";
 import { fetchComments, fetchPosts, fetchUsers } from "../helpers/api.js";
 import { renderCommentsStyled } from "../helpers/randerComments.js"
+import { createPost } from "./createPost.js";
 
 export async function home() {
   let header = document.createElement("header");
   let Postform = document.createElement("div");
   Postform.className = "Post-form";
-  let parentContainer  =  document.createElement("div")
-  parentContainer.className="parentContainer"
+  let parentContainer = document.createElement("div")
+  parentContainer.className = "parentContainer"
   let allPost = document.createElement("div");
   allPost.className = "allPost";
-  let aside =  document.createElement("div")
-  aside.className="aside2"
+  let aside = document.createElement("div")
+  aside.className = "aside2"
   //fetch users 
   let users = await fetchUsers()
-  console.log(users);
-  
+
   for (const user of users.data) {
-const div  =  document.createElement("div")
-div.className= "users"
-div.innerHTML =  `
+    const div = document.createElement("div")
+    div.className = "users"
+    div.innerHTML = `
  <img src="https://robohash.org/${user
       }.png?size=50x50" class="avatar" />
 <span class="username">${user}</span>
 <span class="online">.</span>
 `
-aside.appendChild(div)
+    aside.appendChild(div)
   }
 
   //end fetch users 
@@ -140,8 +140,7 @@ aside.appendChild(div)
   container.innerHTML = "";
   header.innerHTML = Header;
   Postform.innerHTML = PostForm;
-  console.log(Postform);
-  
+
   //end  fetch posts 
 
   parentContainer.appendChild(allPost)
@@ -162,17 +161,19 @@ aside.appendChild(div)
   document.querySelectorAll(".likesForm").forEach((form) => {
     form.addEventListener("submit", HandleLikes);
   });
-
+ 
   logoutButton.addEventListener("click", Logout);
 
   createButton.addEventListener("click", () => {
-    const postForm = document.querySelector(".Post-form");
+    const postForm = document.querySelector(".Post-form");    
     postForm.style.display =
       postForm.style.display === "none" || postForm.style.display === ""
         ? "block"
         : "none";
     container.style.opacity = postForm.style.display === "block" ? "0.2" : "1";
   });
+  let form = document.querySelector(".post-form");  
+  form.addEventListener("submit", createPost);
 }
 
 async function Logout(e) {

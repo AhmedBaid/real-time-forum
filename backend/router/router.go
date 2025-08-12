@@ -21,5 +21,5 @@ func Router() {
 	http.HandleFunc("/login", handler.LoginHandler)
 	http.HandleFunc("/logout", handler.LogoutHandler)
 	http.HandleFunc("/frontend/src/", handler.StaticHandler)
-	http.HandleFunc("/createpost", middleware.Authorisation(handler.CreatePostHandler))
+	http.HandleFunc("/createpost", middleware.Authorisation(handler.CreatePost))
 }
