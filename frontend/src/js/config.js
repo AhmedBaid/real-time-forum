@@ -10,8 +10,6 @@ export const errorMessage = document.getElementById("message");
 errorDiv.style.display = "none";
 errorMessage.textContent = "";
 
-export const spanError = document.querySelector(".error");
-export const spanMessage = document.getElementById("message");
 export const registerPage = `<div class="register">
             <form id="form" method="post" class="register-form">
                 <h2>Register</h2>
