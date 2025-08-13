@@ -525,7 +525,7 @@ body:has(#commentshow:checked) .second-part {
 
 /* Update the users sidebar */
 .aside2 {
-  background-color: var(--bg);
+  background-color: #222831;
   border-radius: 15px;
   padding: 15px;
   width: 320px;
