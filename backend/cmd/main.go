@@ -9,12 +9,12 @@ import (
 	"real_time/backend/config"
 	"real_time/backend/router"
 
-	_ "github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite"
 )
 
 func main() {
 	var err error
-	config.Db, err = sql.Open("sqlite3", "./backend/database/db.db")
+	config.Db, err = sql.Open("sqlite", "./backend/database/db.db")
 	if err != nil {
 		fmt.Println("kayn error", err)
 		return

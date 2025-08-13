@@ -10,6 +10,8 @@ import (
 func Router() {
 	http.HandleFunc("/ReactionHandler", handler.ReactionHandler)
 	http.HandleFunc("/getComments", handler.GetComments)
+	http.HandleFunc("/getUsers", handler.GetUsers)
+
 
 	http.HandleFunc("/createComment", handler.CommentHandler)
 	http.HandleFunc("/getPosts", handler.GetPosts)
@@ -19,5 +21,5 @@ func Router() {
 	http.HandleFunc("/login", handler.LoginHandler)
 	http.HandleFunc("/logout", handler.LogoutHandler)
 	http.HandleFunc("/frontend/src/", handler.StaticHandler)
-	http.HandleFunc("/createpost", middleware.Authorisation(handler.CreatePostHandler))
+	http.HandleFunc("/createpost", middleware.Authorisation(handler.CreatePost))
 }

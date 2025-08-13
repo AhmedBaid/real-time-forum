@@ -7,7 +7,8 @@ export  function renderCommentsStyled(section, comments) {
   const commentsHTML =
     comments && comments.length > 0
       ? `
-      <h2 class="comment-title">Comments</h2>
+      <h1 class="comment-title">Comments</h1>
+      <hr/>
       <div class="commentaires">
         ${comments
           .map(

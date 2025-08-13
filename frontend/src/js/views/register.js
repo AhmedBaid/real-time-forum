@@ -1,4 +1,4 @@
-import { container, Navigate, registerPage } from "../config.js";
+import { container, errorDiv, errorMessage, Navigate, registerPage } from "../config.js";
 import { loadPage } from "../loadPage.js";
 import { home } from "./home.js";
 
@@ -16,8 +16,6 @@ export function register() {
 }
 async function HandleRegister(e) {
     e.preventDefault()
-    let errMsg = document.querySelector(".error")
-    errMsg.innerHTML = "";
     const fields = {
         username: document.getElementById("Username").value,
         email: document.getElementById("Email").value,
@@ -37,10 +35,13 @@ async function HandleRegister(e) {
     const data = await response.json();
 
     if (!response.ok) {
-        errMsg.innerHTML = data.message;
+        errorDiv.style.display = "flex";
+        errorMessage.textContent = data.message;
         return;
     }
-    errMsg.innerHTML = "Registration successful!!";
+    errorDiv.style.display = "flex";
+    errorDiv.style.backgroundColor = "#04e17a";
+    errorMessage.textContent = "User registered successfully";
     Navigate("/");
     home(data.data)
 }

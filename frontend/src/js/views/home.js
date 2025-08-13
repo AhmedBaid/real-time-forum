@@ -1,35 +1,48 @@
-import { container, Header, Navigate, PostForm } from "../config.js";
+import { container, errorDiv, errorMessage, Header, Navigate, PostForm } from "../config.js";
 import { login } from "./login.js";
 import { timeFormat } from "../helpers/timeFormat.js";
 import { HandleComments } from "./createComments.js";
 import { HandleLikes } from "./HandleLikes.js";
-import { fetchComments, fetchPosts } from "../helpers/api.js";
+import { fetchComments, fetchPosts, fetchUsers } from "../helpers/api.js";
 import { renderCommentsStyled } from "../helpers/randerComments.js"
-
-
-
-
-
-
+import { createPost } from "./createPost.js";
 
 export async function home() {
   let header = document.createElement("header");
   let Postform = document.createElement("div");
+  Postform.className = "Post-form";
+  let parentContainer = document.createElement("div")
+  parentContainer.className = "parentContainer"
   let allPost = document.createElement("div");
   let aside = document.createElement("div")
   aside.className="aside2"
   allPost.className = "allPost";
+  //fetch users 
+  let users = await fetchUsers()
+
+  for (const user of users.data) {
+    const div = document.createElement("div")
+    div.className = "users"
+    div.innerHTML = `
+ <img src="https://robohash.org/${user
+      }.png?size=50x50" class="avatar" />
+<span class="username">${user}</span>
+<span class="online">.</span>
+`
+    aside.appendChild(div)
+  }
+
+  //end fetch users 
+
+  //fetch posts 
   let obj = await fetchPosts();
 
   for (const post of obj.data.Posts) {
-    const postCombine = document.createElement("div");
-    postCombine.className = "post-combine";
-
     const postId = post.id;
     const commentToggleId = `commentshow-${postId}`;
     const commentsSectionId = `comments-section-${postId}`;
 
-    postCombine.innerHTML = `
+    allPost.innerHTML += `
     <div class="post-card" id="post-${postId}">
       <div class="first-part">
         <div class="post-header">
@@ -122,17 +135,22 @@ export async function home() {
       }
     }, 0);
 
-    allPost.appendChild(postCombine);
   }
 
   container.innerHTML = "";
   header.innerHTML = Header;
   Postform.innerHTML = PostForm;
 
+  //end  fetch posts 
+
+  parentContainer.appendChild(allPost)
+  parentContainer.appendChild(aside)
+
   container.appendChild(header);
-  container.appendChild(Postform);
-  container.append(allPost);
-  container.appendChild(aside)
+  document.body.appendChild(Postform);
+  container.append(parentContainer);
+
+
   const logoutButton = header.querySelector(".logout");
   let createButton = header.querySelector(".create");
 
@@ -143,16 +161,20 @@ export async function home() {
   document.querySelectorAll(".likesForm").forEach((form) => {
     form.addEventListener("submit", HandleLikes);
   });
-
+ 
   logoutButton.addEventListener("click", Logout);
 
   createButton.addEventListener("click", () => {
-    const postForm = document.querySelector(".Post-form");
+    Navigate("/createpost");
+    const postForm = document.querySelector(".Post-form");    
     postForm.style.display =
       postForm.style.display === "none" || postForm.style.display === ""
         ? "block"
         : "none";
+    container.style.opacity = postForm.style.display === "block" ? "0.2" : "1";
   });
+  let form = document.querySelector(".post-form");  
+  form.addEventListener("submit", createPost);
 }
 
 async function Logout(e) {
@@ -161,9 +183,13 @@ async function Logout(e) {
     method: "POST",
   });
   if (!response.ok) {
-    console.log("Logout failed");
+    errorDiv.style.display = "flex";
+    errorMessage.textContent = "logout failed";
+    return;
   }
-  const data = await response.json();
+  errorDiv.style.display = "flex";
+  errorDiv.style.backgroundColor = "#04e17a";
+  errorMessage.textContent = "logout successfully";
   Navigate("/login");
   login();
 }

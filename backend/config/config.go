@@ -23,6 +23,7 @@ type Users struct {
 	Password  string `json:"password"`
 }
 
+
 type Categories struct {
 	Name   string `json:"name"`
 	Id     int    `json:"id"`

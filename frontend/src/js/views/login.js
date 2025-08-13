@@ -1,4 +1,4 @@
-import { container, loginPage, Navigate } from "../config.js";
+import { container, errorDiv, errorMessage, loginPage, Navigate } from "../config.js";
 import { loadPage } from "../loadPage.js";
 import { home } from "./home.js";
 
@@ -17,8 +17,6 @@ export async function login() {
 
 async function HandleLogin(e) {
     e.preventDefault();
-    let errMsg = document.querySelector(".error")
-    errMsg.innerHTML = "";
     let username = document.getElementById("username").value;
     let password = document.getElementById("password").value;
 
@@ -32,11 +30,14 @@ async function HandleLogin(e) {
 
     const data = await response.json();
     if (!response.ok) {
-        errMsg.innerHTML = data.message;
+        errorDiv.style.display = "flex";
+        errorMessage.textContent = data.message;
         return;
     }
 
-    errMsg.innerHTML = "logged in successfully";
+    errorDiv.style.display = "flex";
+    errorDiv.style.backgroundColor = "#04e17a";
+    errorMessage.textContent = "User logged in successfully";
     Navigate("/");
     home(data.data);
 }
