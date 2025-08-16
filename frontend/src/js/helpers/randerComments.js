@@ -32,7 +32,7 @@ export  function renderCommentsStyled(section, comments) {
           .join("")}
       </div>
     `
-      : `<div class="commentaires"><h1 class="messageErr">No Commentaires 🤷‍♂️</h1></div>`;
+      : `<div class="commentaires" id="cmnt"><h1 class="messageErr">No Commentaires 🤷‍♂️</h1></div>`;
 
   commentsContainer.innerHTML = commentsHTML;
 }

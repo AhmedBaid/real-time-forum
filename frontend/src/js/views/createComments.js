@@ -38,7 +38,10 @@ export async function HandleComments(e) {
 
     let div = document.createElement("div");
     div.className = "comments";
-
+   let j  =   document.querySelector(".messageErr")
+   if (j) {
+    j.innerHTML=""
+   }
     div.innerHTML = `
       <img src="https://robohash.org/${data.data.Username}.png?size=50x50" />
       <div class="comment-content">
