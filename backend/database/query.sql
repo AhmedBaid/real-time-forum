@@ -67,6 +67,21 @@ CREATE TABLE IF NOT EXISTS commentsLikes (
     FOREIGN KEY (commentID) REFERENCES comments (id) ON DELETE CASCADE
 );
 
+
+
+
+CREATE TABLE messages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    sender_id INT NOT NULL,
+    receiver_id INT NOT NULL,
+    message TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (sender_id) REFERENCES users(id),
+    FOREIGN KEY (receiver_id) REFERENCES users(id)
+);
+
+
+
 CREATE TRIGGER IF NOT EXISTS post_cleanup_trigger
 AFTER DELETE ON posts
 BEGIN
@@ -84,5 +99,5 @@ CREATE TRIGGER IF NOT EXISTS user_cleanup_trigger
 AFTER DELETE ON users
 BEGIN
     DELETE FROM posts WHERE userID = OLD.id;
-
+    DELETE FROM messages WHERE  sender_id = OLD.id Or  receiver_id = OLD.id;
 END;

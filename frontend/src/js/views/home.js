@@ -6,6 +6,7 @@ import { HandleLikes } from "./HandleLikes.js";
 import { fetchComments, fetchPosts, fetchUsers } from "../helpers/api.js";
 import { renderCommentsStyled } from "../helpers/randerComments.js"
 import { createPost } from "./createPost.js";
+import { HandleMessages } from "./HandleMessages.js";
 
 export async function home() {
   let header = document.createElement("header");
@@ -22,7 +23,9 @@ export async function home() {
 
   for (const user of users.data) {
     const div = document.createElement("div")
+
     div.className = "users"
+    div.dataset.username=user
     div.innerHTML = `
  <img src="https://robohash.org/${user
       }.png?size=50x50" class="avatar" />
@@ -153,6 +156,11 @@ export async function home() {
 
   const logoutButton = header.querySelector(".logout");
   let createButton = header.querySelector(".create");
+
+
+  document.querySelectorAll(".users").forEach((user)=>{
+    user.addEventListener("click",HandleMessages)
+  })
 
   document.querySelectorAll(".formComment").forEach((form) => {
     form.addEventListener("submit", HandleComments);
