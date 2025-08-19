@@ -7,6 +7,7 @@ import (
 	"real_time/backend/config"
 )
 
+
 func GetUsers(w http.ResponseWriter, r *http.Request) {
 	session, err := r.Cookie("session")
 	var sessValue string
@@ -23,7 +24,7 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 
 	config.Db.QueryRow(query, sessValue).Scan(&userId, &sess, &username)
 
-	userQuery := ` select username from users where id != ?`
+	userQuery := ` select username , id  from users where id != ?`
 	rows, err := config.Db.Query(userQuery, userId)
 	if err != nil {
 		fmt.Println(err)
@@ -36,12 +37,13 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 
 	defer rows.Close()
 
-	var Users []string
+	var Users []config.UserStatus
 	for rows.Next() {
-		var user string
-		err := rows.Scan(&user)
+		var user config.UserStatus
+		user.Status= "offline"
+		err := rows.Scan(&user.Username, &user.Id)
 		if err != nil {
-		fmt.Println(err)
+			fmt.Println(err)
 
 			config.ResponseJSON(w, config.ErrorInternalServerErr.Code, map[string]any{
 				"message": "database  Error  2 ",

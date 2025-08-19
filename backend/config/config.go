@@ -6,6 +6,13 @@ import (
 	"time"
 )
 
+
+type UserStatus struct {
+	Status string   `json:"status"`
+	Username string   `json:"username"`
+	Id int   `json:"id"`
+}
+
 type Messages struct {
 	Id       int       `json:"id"`
 	Sender   int       `json:"sender"`

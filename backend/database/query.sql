@@ -69,9 +69,8 @@ CREATE TABLE IF NOT EXISTS commentsLikes (
 
 
 
-
 CREATE TABLE   IF NOT EXISTS messages (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     sender_id INT NOT NULL,
     receiver_id INT NOT NULL,
     message TEXT NOT NULL,

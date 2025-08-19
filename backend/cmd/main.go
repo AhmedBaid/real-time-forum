@@ -7,12 +7,14 @@ import (
 	"os"
 
 	"real_time/backend/config"
+	"real_time/backend/handler"
 	"real_time/backend/router"
 
 	_ "modernc.org/sqlite"
 )
 
 func main() {
+	  go handler.HandleBroadcast() 
 	var err error
 	config.Db, err = sql.Open("sqlite", "./backend/database/db.db")
 	if err != nil {

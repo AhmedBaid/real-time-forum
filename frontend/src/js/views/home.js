@@ -8,6 +8,52 @@ import { renderCommentsStyled } from "../helpers/randerComments.js"
 import { createPost } from "./createPost.js";
 import { HandleMessages } from "./HandleMessages.js";
 
+  export  let socket = new WebSocket("ws://localhost:8080/ws");
+
+  socket.onmessage = (event) => {
+    let data = JSON.parse(event.data);
+
+    switch (data.type) {
+      case "message":
+        appendMessage(data);
+        break;
+      case "online":
+        setUserOnline(data.userId);
+        break;
+      case "offline":
+        setUserOffline(data.userId);
+        break;
+      default:
+        console.log("Unknown event:", data);
+    }
+  };
+
+  function appendMessage(msg) {
+  let chatDiv = document.getElementById(`chat-${msg.senderName}`);
+  if (!chatDiv) {
+    HandleMessages({ currentTarget: { dataset: { username: msg.senderName } } });
+    chatDiv = document.getElementById(`chat-${msg.senderName}`);
+  }
+
+  let messagesBox = chatDiv.querySelector(".chat-messages");
+  messagesBox.innerHTML += `
+    <div class="msg left">
+      <p>${msg.message}</p>
+      <span class="time">Now</span>
+    </div>
+  `;
+  messagesBox.scrollTop = messagesBox.scrollHeight;
+}
+function setUserOnline(userId) {
+  let el = document.querySelector(`[data-userid="${userId}"] .online`);
+  if (el) el.style.color = "green";
+}
+
+function setUserOffline(userId) {
+  let el = document.querySelector(`[data-userid="${userId}"] .online`);
+  if (el) el.style.color = "gray";
+}
+
 export async function home() {
   let header = document.createElement("header");
   let Postform = document.createElement("div");
@@ -16,7 +62,7 @@ export async function home() {
   parentContainer.className = "parentContainer"
   let allPost = document.createElement("div");
   let aside = document.createElement("div")
-  aside.className="aside2"
+  aside.className = "aside2"
   allPost.className = "allPost";
   //fetch users 
   let users = await fetchUsers()
@@ -25,11 +71,12 @@ export async function home() {
     const div = document.createElement("div")
 
     div.className = "users"
-    div.dataset.username=user
+    div.dataset.username = user.username
+    div.dataset.id = user.id
     div.innerHTML = `
- <img src="https://robohash.org/${user
+ <img src="https://robohash.org/${user.username
       }.png?size=50x50" class="avatar" />
-<span class="username">${user}</span>
+<span class="username">${user.username}</span>
 <span class="online">.</span>
 `
     aside.appendChild(div)
@@ -158,8 +205,8 @@ export async function home() {
   let createButton = header.querySelector(".create");
 
 
-  document.querySelectorAll(".users").forEach((user)=>{
-    user.addEventListener("click",HandleMessages)
+  document.querySelectorAll(".users").forEach((user) => {
+    user.addEventListener("click", HandleMessages)
   })
 
   document.querySelectorAll(".formComment").forEach((form) => {
@@ -169,20 +216,23 @@ export async function home() {
   document.querySelectorAll(".likesForm").forEach((form) => {
     form.addEventListener("submit", HandleLikes);
   });
- 
+
   logoutButton.addEventListener("click", Logout);
 
   createButton.addEventListener("click", () => {
     Navigate("/createpost");
-    const postForm = document.querySelector(".Post-form");    
+    const postForm = document.querySelector(".Post-form");
     postForm.style.display =
       postForm.style.display === "none" || postForm.style.display === ""
         ? "block"
         : "none";
     container.style.opacity = postForm.style.display === "block" ? "0.2" : "1";
   });
-  let form = document.querySelector(".post-form");  
+  let form = document.querySelector(".post-form");
   form.addEventListener("submit", createPost);
+
+
+
 }
 
 async function Logout(e) {
