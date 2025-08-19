@@ -6,6 +6,13 @@ import (
 	"time"
 )
 
+type Messages struct {
+	Id       int       `json:"id"`
+	Sender   int       `json:"sender"`
+	Reciever int       `json:"reciever"`
+	Message  string    `json:"message"`
+	Time     time.Time `json:"time"`
+}
 type Reactions struct {
 	Like              string `json:"like"`
 	PostID            int    `json:"postId"`
@@ -23,7 +30,6 @@ type Users struct {
 	Password  string `json:"password"`
 }
 
-
 type Categories struct {
 	Name   string `json:"name"`
 	Id     int    `json:"id"`
@@ -31,12 +37,12 @@ type Categories struct {
 }
 
 type Comments struct {
-	PostID   int       `json:"post_id"`
-	Id       int       `json:"Id"`
-	Username string    `json:"Username"`
-	Comment  string    `json:"Comment"`
-	Time     time.Time `json:"time"`
-	TotalComments  int `json:"totalComments"`
+	PostID        int       `json:"post_id"`
+	Id            int       `json:"Id"`
+	Username      string    `json:"Username"`
+	Comment       string    `json:"Comment"`
+	Time          time.Time `json:"time"`
+	TotalComments int       `json:"totalComments"`
 }
 
 type Catgs struct {

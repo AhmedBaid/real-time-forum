@@ -1,8 +1,6 @@
 export async function HandleMessages(e) {
     let username = e.currentTarget.dataset.username;
-
     let main = document.querySelector(".main");
-
     let chatArea = document.querySelector(".chat-area");
     if (!chatArea) {
         chatArea = document.createElement("div");
@@ -104,7 +102,6 @@ export async function HandleMessages(e) {
       <span class="time">Now</span>
     </div>
   `;
-
         input.value = "";
         messagesBox.scrollTop = messagesBox.scrollHeight;
     };
