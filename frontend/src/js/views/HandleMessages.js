@@ -53,7 +53,7 @@ export async function HandleMessages(e) {
     messagesBox.innerHTML = "";
     messages.forEach(msg => {
       messagesBox.innerHTML += `
-        <div class="msg ${msg.reciever === recieverId ? "left" : "right"}">
+        <div class="msg ${msg.reciever === recieverId ? "right" : "left"}">
           <p>${msg.message}</p>
           <span class="time">${new Date(msg.time).toLocaleTimeString()}</span>
         </div>
@@ -69,8 +69,7 @@ export async function HandleMessages(e) {
         if (input.value.trim() === "") return;
 
         let msg = {
-          id: 0,
-          sender: 0,
+         
           reciever: recieverId,
           message: input.value,
           time: new Date().toISOString()
@@ -94,10 +93,7 @@ export async function HandleMessages(e) {
         input.value = "";
         messagesBox.scrollTop = messagesBox.scrollHeight;
 
-        // Send via WebSocket for live update
-        if (socket && socket.readyState === WebSocket.OPEN) {
-          socket.send(JSON.stringify(msg));
-        }
+       
 
       } catch (error) {
         console.log(error, 5555);
@@ -105,20 +101,7 @@ export async function HandleMessages(e) {
     });
 
     // Live WebSocket updates
-    if (socket) {
-      socket.addEventListener("message", (event) => {
-        let data = JSON.parse(event.data);
-        if (data.type === "message" && data.sender === recieverId) {
-          messagesBox.innerHTML += `
-            <div class="msg left">
-              <p>${data.message}</p>
-              <span class="time">${new Date(data.time).toLocaleTimeString()}</span>
-            </div>
-          `;
-          messagesBox.scrollTop = messagesBox.scrollHeight;
-        }
-      });
-    }
+   
 
   } catch (error) {
     console.log(error);

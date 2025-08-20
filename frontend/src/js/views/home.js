@@ -7,51 +7,47 @@ import { fetchComments, fetchPosts, fetchUsers } from "../helpers/api.js";
 import { renderCommentsStyled } from "../helpers/randerComments.js"
 import { createPost } from "./createPost.js";
 import { HandleMessages } from "./HandleMessages.js";
+export let socket = new WebSocket("ws://localhost:8080/ws");
+socket.onmessage = (e) => {
+  let data = JSON.parse(e.data);
 
-  export  let socket = new WebSocket("ws://localhost:8080/ws");
+  switch (data.type) {
+    case "online":
+      setUserOnline(data.userId);
+      break;
 
-  socket.onmessage = (event) => {
-    let data = JSON.parse(event.data);
-
-    switch (data.type) {
-      case "message":
-        appendMessage(data);
-        break;
-      case "online":
-        setUserOnline(data.userId);
-        break;
-      case "offline":
-        setUserOffline(data.userId);
-        break;
-      default:
-        console.log("Unknown event:", data);
-    }
-  };
-
-  function appendMessage(msg) {
-  let chatDiv = document.getElementById(`chat-${msg.senderName}`);
-  if (!chatDiv) {
-    HandleMessages({ currentTarget: { dataset: { username: msg.senderName } } });
-    chatDiv = document.getElementById(`chat-${msg.senderName}`);
+    case "offline":
+      setUserOffline(data.userId);
+      break;
+    case "messages":
+      appendMessage(data)
+    case "online_list":
+      data.users.forEach((id) => setUserOnline(id));
+      break;
   }
+};
 
-  let messagesBox = chatDiv.querySelector(".chat-messages");
+function appendMessage(msg) {
+  let chatBox = document.getElementById(`chat-${msg.sender}`);
+  if (!chatBox) return;
+
+  let messagesBox = chatBox.querySelector(".chat-messages");
   messagesBox.innerHTML += `
-    <div class="msg left">
+    <div class="msg ${msg.sender === currentUserId ? "right" : "left"}">
       <p>${msg.message}</p>
-      <span class="time">Now</span>
+      <span class="time">${new Date(msg.time).toLocaleTimeString()}</span>
     </div>
   `;
   messagesBox.scrollTop = messagesBox.scrollHeight;
 }
 function setUserOnline(userId) {
-  let el = document.querySelector(`[data-userid="${userId}"] .online`);
-  if (el) el.style.color = "green";
+  let el = document.querySelector(`.users[data-id="${userId}"] .online`);
+  if (el) el.style.backgroundColor = "green";
 }
 
 function setUserOffline(userId) {
-  let el = document.querySelector(`[data-userid="${userId}"] .online`);
-  if (el) el.style.color = "gray";
+  let el = document.querySelector(`.users[data-id="${userId}"] .online`);
+  if (el) el.style.backgroundColor = "red";
 }
 
 export async function home() {
@@ -64,7 +60,6 @@ export async function home() {
   let aside = document.createElement("div")
   aside.className = "aside2"
   allPost.className = "allPost";
-  //fetch users 
   let users = await fetchUsers()
 
   for (const user of users.data) {
@@ -74,17 +69,14 @@ export async function home() {
     div.dataset.username = user.username
     div.dataset.id = user.id
     div.innerHTML = `
- <img src="https://robohash.org/${user.username
+  <img src="https://robohash.org/${user.username
       }.png?size=50x50" class="avatar" />
-<span class="username">${user.username}</span>
-<span class="online">.</span>
-`
+  <span class="username">${user.username}</span>
+  <span class="online">.</span>
+  `
     aside.appendChild(div)
   }
 
-  //end fetch users 
-
-  //fetch posts 
   let obj = await fetchPosts();
 
   for (const post of obj.data.Posts) {

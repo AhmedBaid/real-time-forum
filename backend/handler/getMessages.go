@@ -20,11 +20,12 @@ func GetMessagesHandler(w http.ResponseWriter, r *http.Request) {
 	config.Db.QueryRow("SELECT id FROM users WHERE session=?", session).Scan(&senderId)
 
 	rows, err := config.Db.Query(`
-        SELECT id, sender_id, receiver_id, message, created_at 
-        FROM messages 
-        WHERE (sender_id=? AND receiver_id=?) 
-        ORDER BY created_at ASC`,
-		senderId, recieverId)
+    SELECT id, sender_id, receiver_id, message, created_at 
+    FROM messages 
+    WHERE (sender_id=? AND receiver_id=?) 
+       OR (sender_id=? AND receiver_id=?)
+    ORDER BY created_at ASC`,
+    senderId, recieverId, recieverId, senderId)
 	if err != nil {
 		http.Error(w, "Database error", http.StatusInternalServerError)
 		return
