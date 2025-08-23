@@ -1,8 +1,8 @@
-import {  socket} from "./home.js";
+import { socket } from "./home.js";
 
 export async function HandleMessages(e) {
   let username = e.currentTarget.dataset.username;
-  let recieverId = Number(e.currentTarget.dataset.id);
+  let receiverId = Number(e.currentTarget.dataset.id);
 
   let main = document.querySelector(".main");
   let chatArea = document.querySelector(".chat-area");
@@ -15,12 +15,10 @@ export async function HandleMessages(e) {
   if (document.getElementById(`chat-${username}`)) return;
 
   try {
-    // Fetch messages history
-    let res = await fetch(`/getMessages?reciever=${recieverId}`);
+    let res = await fetch(`/messages?receiver=${receiverId}`);
     if (!res.ok) throw new Error(await res.text());
     let messages = await res.json();
 
-    // Create chat box
     let chatDiv = document.createElement("div");
     chatDiv.className = "chat-box";
     chatDiv.id = `chat-${username}`;
@@ -41,7 +39,6 @@ export async function HandleMessages(e) {
     `;
     chatArea.appendChild(chatDiv);
 
-    // Close button
     chatDiv.querySelector(".close-btn").onclick = () => {
       chatDiv.remove();
     };
@@ -49,59 +46,40 @@ export async function HandleMessages(e) {
     let form = chatDiv.querySelector(".chat-form");
     let messagesBox = chatDiv.querySelector(".chat-messages");
 
-    // Display message history
     messagesBox.innerHTML = "";
     messages.forEach(msg => {
       messagesBox.innerHTML += `
-        <div class="msg ${msg.reciever === recieverId ? "right" : "left"}">
+        <div class="msg ${msg.receiver === receiverId ? "right" : "left"}">
           <p>${msg.message}</p>
           <span class="time">${new Date(msg.time).toLocaleTimeString()}</span>
         </div>
       `;
+      if (msg.receiver === receiverId) {
+        fetch(`/mark-read/${msg.id}`, { method: "POST" });
+      }
     });
     messagesBox.scrollTop = messagesBox.scrollHeight;
 
-    // Form submit
-    form.addEventListener("submit", async (ev) => {
+    form.addEventListener("submit", (ev) => {
       ev.preventDefault();
-      try {
-        let input = form.querySelector("input");
-        if (input.value.trim() === "") return;
+      let input = form.querySelector("input");
+      if (input.value.trim() === "") return;
 
-        let msg = {
-         
-          reciever: recieverId,
-          message: input.value,
-          time: new Date().toISOString()
-        };
+      socket.send(JSON.stringify({
+        type: "message",
+        receiver: receiverId,
+        message: input.value,
+      }));
 
-        // Send to backend
-        let resp = await fetch("/sendMessage", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(msg),
-        });
-        if (!resp.ok) throw new Error(await resp.text());
-
-        // Append to chat box
-        messagesBox.innerHTML += `
-          <div class="msg right">
-            <p>${input.value}</p>
-            <span class="time">Now</span>
-          </div>
-        `;
-        input.value = "";
-        messagesBox.scrollTop = messagesBox.scrollHeight;
-
-       
-
-      } catch (error) {
-        console.log(error, 5555);
-      }
+      messagesBox.innerHTML += `
+        <div class="msg right">
+          <p>${input.value}</p>
+          <span class="time">${new Date().toLocaleTimeString()}</span>
+        </div>
+      `;
+      input.value = "";
+      messagesBox.scrollTop = messagesBox.scrollHeight;
     });
-
-    // Live WebSocket updates
-   
 
   } catch (error) {
     console.log(error);

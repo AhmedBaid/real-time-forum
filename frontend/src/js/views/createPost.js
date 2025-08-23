@@ -14,7 +14,9 @@ export async function createPost(e) {
         document.querySelectorAll("input[name='tags']:checked")
     ).map(tag => tag.value);
     // console.log(title, content, categories);
-    const response = await fetch("/createpost", {
+
+    try {
+          const response = await fetch("/createpost", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -39,4 +41,16 @@ export async function createPost(e) {
     errorMessage.textContent = "Post created successfully";
     Navigate("/");
     home();
+    } catch (error) {
+        console.log(error);
+        
+            const postForm = document.querySelector(".Post-form");    
+
+            postForm.style.display = "none";
+
+        errorDiv.style.display = "flex";
+        errorMessage.textContent =error;
+        return;
+    }
+  
 }
