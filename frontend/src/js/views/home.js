@@ -59,6 +59,7 @@ function connectWebSocket() {
         break;
       case "online_list":
         data.users.forEach((id) => setUserOnline(id));
+        
         break;
     }
   };

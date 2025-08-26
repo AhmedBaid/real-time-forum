@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"slices"
 
 	"real_time/backend/config"
 	"real_time/backend/helpers"
@@ -22,13 +23,31 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 	var post struct {
 		Title       string   `json:"title"`
 		Description string   `json:"description"`
-		Categories  []string    `json:"categories"`
+		Categories  []int    `json:"categories"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&post); err != nil {
 		fmt.Println(err)
 		http.Error(w, "Error in decode", http.StatusBadRequest)
 		return
 	}
+
+
+
+
+ var arr  =  []int{1,2,3,4,5,6,7,8}
+
+for _, v := range post.Categories {
+
+if !slices.Contains(arr,v) {
+		config.ResponseJSON(w, http.StatusBadRequest, map[string]any{
+			"message": "invalide categorie 55 ",
+			"status":  http.StatusBadRequest,
+		})
+		return
+}
+	
+}
+
 
 	// Validation
 	if post.Title == "" || post.Description == "" || len(post.Categories) == 0 {

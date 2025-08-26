@@ -1,9 +1,10 @@
 import { container, Navigate, PostForm } from "../config.js";
+import { fetchPosts } from "../helpers/api.js";
 import { home } from "./home.js";
 
 export async function createPost(e) {
     e.preventDefault();
-    console.log("createPost function called");
+
     const errorDiv = document.querySelector(".error");
     const errorMessage = document.getElementById("message");
     errorDiv.style.display = "none";
@@ -12,45 +13,42 @@ export async function createPost(e) {
     const content = document.querySelector(".content").value;
     const categories = Array.from(
         document.querySelectorAll("input[name='tags']:checked")
-    ).map(tag => tag.value);
-    // console.log(title, content, categories);
-
+    ).map(tag => Number(tag.value));
     try {
-          const response = await fetch("/createpost", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-            title : title,
-            description: content,
-            categories : categories,
-        }),
-    });
-    const data = await response.json();
-    if (!response.ok) {
+
+        const response = await fetch("/createpost", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                title: title,
+                description: content,
+                categories: categories,
+            }),
+        });
+        const data = await response.json();
+        if (!response.ok) {
+            errorDiv.style.display = "flex";
+            errorMessage.textContent = data.message;
+            return;
+        }
+        const postForm = document.querySelector(".Post-form");
+        postForm.style.display = "none";
+        container.style.opacity = "1";
         errorDiv.style.display = "flex";
-        errorMessage.textContent =data.message;
-        return;
-    }
-    const postForm = document.querySelector(".Post-form");    
-    postForm.style.display = "none";
-    container.style.opacity = "1";
-    errorDiv.style.display = "flex";
-    errorDiv.style.backgroundColor = "#04e17a";
-    errorMessage.textContent = "Post created successfully";
-    Navigate("/");
-    home();
+        errorDiv.style.backgroundColor = "#04e17a";
+        errorMessage.textContent = "Post created successfully";
+        Navigate("/");
+        home();
     } catch (error) {
         console.log(error);
-        
-            const postForm = document.querySelector(".Post-form");    
 
-            postForm.style.display = "none";
-
+        const postForm = document.querySelector(".Post-form");
+        postForm.style.display = "none";
         errorDiv.style.display = "flex";
-        errorMessage.textContent =error;
+        errorMessage.textContent = error;
         return;
     }
-  
+
 }
