@@ -20,7 +20,7 @@ import (
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
-	CheckOrigin:     func(r *http.Request) bool { return true }, 
+	CheckOrigin:     func(r *http.Request) bool { return true },
 }
 
 var (
@@ -29,13 +29,15 @@ var (
 	broadcast = make(chan map[string]interface{}, 256)
 )
 
+// إضافة connection جديد
 func addUserConn(userID int, conn *websocket.Conn) {
 	usersMu.Lock()
 	defer usersMu.Unlock()
 	users[userID] = append(users[userID], conn)
-	log.Printf("Added connection for user %d, total connections: %d", userID, len(users[userID]))
+	log.Printf("✅ Added connection for user %d, total connections: %d", userID, len(users[userID]))
 }
 
+// حذف connection ملي كيتسكر
 func removeUserConn(userID int, conn *websocket.Conn) {
 	usersMu.Lock()
 	defer usersMu.Unlock()
@@ -51,15 +53,17 @@ func removeUserConn(userID int, conn *websocket.Conn) {
 	}
 	if len(users[userID]) == 0 {
 		delete(users, userID)
+		// نعلن للناس أنو offline
 		broadcast <- map[string]interface{}{
 			"type":   "offline",
 			"userId": userID,
 			"time":   time.Now().Format(time.RFC3339),
 		}
-		log.Printf("User %d is offline, no remaining connections", userID)
+		log.Printf("⚠️ User %d is offline, no remaining connections", userID)
 	}
 }
 
+// إرسال المسجات الغير مقروءة
 func sendUnreadMessages(userID int, conn *websocket.Conn, db *sql.DB) {
 	if db == nil {
 		log.Println("Error: Database connection is nil in sendUnreadMessages")
@@ -104,13 +108,13 @@ func sendUnreadMessages(userID int, conn *websocket.Conn, db *sql.DB) {
 	}
 }
 
+// broadcaster (كيبعث المسجات لكلشي)
 func HandleBroadcast(db *sql.DB) {
 	if db == nil {
 		log.Fatal("Error: Database connection is nil in HandleBroadcast")
 	}
 	for {
 		data := <-broadcast
-
 		msgType, ok := data["type"].(string)
 		if !ok {
 			log.Println("⚠️ Invalid broadcast type:", data)
@@ -121,13 +125,12 @@ func HandleBroadcast(db *sql.DB) {
 		if receiver, ok := data["receiver"].(int); ok && msgType == "message" {
 			if conns, ok := users[receiver]; ok {
 				for _, conn := range conns {
-					err := conn.WriteJSON(data)
-					if err != nil {
+					if err := conn.WriteJSON(data); err != nil {
 						log.Printf("WebSocket send error for user %d: %v", receiver, err)
 						conn.Close()
 						removeUserConn(receiver, conn)
 					} else if msgID, ok := data["id"].(int); ok {
-						_, err = db.Exec("UPDATE messages SET is_read = TRUE WHERE id = ?", msgID)
+						_, err := db.Exec("UPDATE messages SET is_read = TRUE WHERE id = ?", msgID)
 						if err != nil {
 							log.Printf("Error updating is_read: %v", err)
 						}
@@ -146,8 +149,7 @@ func HandleBroadcast(db *sql.DB) {
 		} else {
 			for userID, conns := range users {
 				for _, conn := range conns {
-					err := conn.WriteJSON(data)
-					if err != nil {
+					if err := conn.WriteJSON(data); err != nil {
 						log.Printf("WebSocket send error for user %d: %v", userID, err)
 						conn.Close()
 						removeUserConn(userID, conn)
@@ -160,92 +162,76 @@ func HandleBroadcast(db *sql.DB) {
 	}
 }
 
+// reader مبسط بلا ping/pong بلا ticker
 func reader(userID int, conn *websocket.Conn, db *sql.DB) {
 	defer func() {
 		removeUserConn(userID, conn)
 		conn.Close()
 	}()
 
-	conn.SetReadLimit(512)
-	conn.SetReadDeadline(time.Now().Add(60 * time.Second))
-	conn.SetPongHandler(func(string) error {
-		conn.SetReadDeadline(time.Now().Add(60 * time.Second))
-		return nil
-	})
-
-	ticker := time.NewTicker(30 * time.Second)
-	defer ticker.Stop()
-
 	for {
-		select {
-		case <-ticker.C:
-			if err := conn.WriteMessage(websocket.PingMessage, nil); err != nil {
-				log.Printf("Ping error for user %d: %v", userID, err)
-				return
-			}
-		default:
-			_, data, err := conn.ReadMessage()
-			if err != nil {
-				log.Printf("Client disconnected: %d, %v", userID, err)
-				return
-			}
+		_, data, err := conn.ReadMessage()
+		if err != nil {
+			log.Printf("❌ Client disconnected: %d, %v", userID, err)
+			return
+		}
 
-			var msg map[string]interface{}
-			if err := json.Unmarshal(data, &msg); err != nil {
-				log.Printf("Invalid JSON from user %d: %v", userID, err)
+		var msg map[string]interface{}
+		if err := json.Unmarshal(data, &msg); err != nil {
+			log.Printf("Invalid JSON from user %d: %v", userID, err)
+			continue
+		}
+
+		msgType, ok := msg["type"].(string)
+		if !ok {
+			continue
+		}
+
+		if msgType == "message" {
+			receiver, ok := msg["receiver"].(float64)
+			if !ok {
 				continue
 			}
-
-			msgType, ok := msg["type"].(string)
+			content, ok := msg["message"].(string)
 			if !ok {
 				continue
 			}
 
-			if msgType == "message" {
-				receiver, ok := msg["receiver"].(float64)
-				if !ok {
-					continue
-				}
-				content, ok := msg["message"].(string)
-				if !ok {
-					continue
-				}
+			if db == nil {
+				log.Println("Error: Database connection is nil in reader")
+				continue
+			}
 
-				if db == nil {
-					log.Println("Error: Database connection is nil in reader")
-					continue
-				}
+			var senderUsername string
+			err = db.QueryRow("SELECT username FROM users WHERE id = ?", userID).Scan(&senderUsername)
+			if err != nil {
+				log.Printf("Error fetching sender username: %v", err)
+				continue
+			}
 
-				var senderUsername string
-				err = db.QueryRow("SELECT username FROM users WHERE id = ?", userID).Scan(&senderUsername)
-				if err != nil {
-					log.Printf("Error fetching sender username: %v", err)
-					continue
-				}
+			res, err := db.Exec(`
+                INSERT INTO messages (sender_id, receiver_id, message, is_read)
+                VALUES (?, ?, ?, FALSE)`, userID, int(receiver), content)
+			if err != nil {
+				log.Printf("Database error: %v", err)
+				continue
+			}
+			msgID, _ := res.LastInsertId()
 
-				res, err := db.Exec(`
-                    INSERT INTO messages (sender_id, receiver_id, message, is_read)
-                    VALUES (?, ?, ?, FALSE)`, userID, int(receiver), content)
-				if err != nil {
-					log.Printf("Database error: %v", err)
-					continue
-				}
-				msgID, _ := res.LastInsertId()
-
-				broadcast <- map[string]interface{}{
-					"type":           "message",
-					"id":             int(msgID),
-					"sender":         userID,
-					"receiver":       int(receiver),
-					"message":        content,
-					"time":           time.Now().Format(time.RFC3339),
-					"senderUsername": senderUsername,
-				}
+			broadcast <- map[string]interface{}{
+				"type":           "message",
+				"id":             int(msgID),
+				"sender":         userID,
+				"receiver":       int(receiver),
+				"message":        content,
+				"time":           time.Now().Format(time.RFC3339),
+				"senderUsername": senderUsername,
 			}
 		}
 	}
 }
 
+// handler الرئيسي
 func WsHandler(w http.ResponseWriter, r *http.Request) {
 	_, session := helpers.SessionChecked(w, r)
 	var userID int
@@ -268,7 +254,7 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	addUserConn(userID, conn)
-	log.Println("User connected:", userID)
+	log.Println("✅ User connected:", userID)
 
 	broadcast <- map[string]interface{}{
 		"type":   "online",
@@ -276,6 +262,7 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 		"time":   time.Now().Format(time.RFC3339),
 	}
 
+	// لائحة ديال users online
 	usersMu.Lock()
 	onlineUsers := []int{}
 	for id := range users {
@@ -296,10 +283,14 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// إرسال المسجات الغير مقروءة
 	sendUnreadMessages(userID, conn, config.Db)
+
+	// تشغيل القارئ
 	go reader(userID, conn, config.Db)
 }
 
+// مارك مسج مقروء
 func MarkReadHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -332,6 +323,7 @@ func MarkReadHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+// جلب المسجات
 func GetMessagesHandler(w http.ResponseWriter, r *http.Request) {
 	receiverIDStr := r.URL.Query().Get("receiver")
 	receiverID, err := strconv.Atoi(receiverIDStr)
@@ -375,7 +367,6 @@ func GetMessagesHandler(w http.ResponseWriter, r *http.Request) {
 			log.Printf("Error scanning message: %v", err)
 			continue
 		}
-		m.Time, _ = time.Parse(time.RFC3339, t)
 		messages = append(messages, map[string]interface{}{
 			"id":             m.Id,
 			"sender":         m.Sender,

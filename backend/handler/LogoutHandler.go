@@ -7,7 +7,7 @@ import (
 	"real_time/backend/config"
 	"real_time/backend/helpers"
 )
-
+var LoggedOut bool =  false 
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		exist, session := helpers.SessionChecked(w, r)
@@ -42,5 +42,7 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 			"message": "user logged out successfully",
 			"status":  http.StatusOK,
 		})
+
+		LoggedOut = true 
 	}
 }
