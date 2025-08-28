@@ -11,7 +11,7 @@ export async function HandleMessages(e) {
     chatArea.className = "chat-area";
     main.appendChild(chatArea);
   }
-
+chatArea.innerHTML=""
   if (document.getElementById(`chat-${username}`)) return;
 
   try {
@@ -24,10 +24,11 @@ export async function HandleMessages(e) {
     chatDiv.id = `chat-${username}`;
     chatDiv.innerHTML = `
       <div class="chat-header">
-        <span class="avatar">👤</span>
-        <div>
+
+<img src="https://robohash.org/${username}.png?size=50x50" class="avatar" />
+
+      <div>
           <strong>${username}</strong>
-          <div class="status">Online</div>
         </div>
         <button class="close-btn">✖</button>
       </div>

@@ -109,8 +109,13 @@ export async function home() {
   aside.className = "aside2";
   allPost.className = "allPost";
   let users = await fetchUsers();
-
-  for (const user of users.data) {
+users =  users.data.sort((a,b) =>{
+  if (a>b ) {
+    return  -1
+  }
+  return  1
+})
+  for (const user of users) {
     const div = document.createElement("div");
     div.className = "users";
     div.dataset.username = user.username;
