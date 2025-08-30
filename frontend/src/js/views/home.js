@@ -25,8 +25,9 @@ async function fetchCurrentUserId() {
 export let socket = null;
 
 function connectWebSocket() {
+
   socket = new WebSocket("ws://localhost:8080/ws");
-  
+
   socket.onopen = () => {
     console.log('WebSocket connected');
     fetchCurrentUserId();
@@ -37,10 +38,25 @@ function connectWebSocket() {
 
     switch (data.type) {
       case "online":
-        setUserOnline(data.userId);
+        const idon = setInterval(() => {
+          let el = document.querySelector(`.users`);
+          if (el) {
+            setUserOnline(data.userId);
+            clearInterval(idon)
+          }
+        }, 200);
         break;
       case "offline":
-        setUserOffline(data.userId);
+
+        const ido = setInterval(() => {
+          let el = document.querySelector(`.users`);
+          if (el) {
+            setUserOffline(data.userId);
+            clearInterval(ido)
+          }
+        }, 200);
+
+
         break;
       case "message":
         if (currentUserId) {
@@ -58,21 +74,31 @@ function connectWebSocket() {
         console.log(`Notification from ${data.from}: ${data.message}`);
         break;
       case "online_list":
-        data.users.forEach((id) => setUserOnline(id));
-        
+        const id = setInterval(() => {
+          console.log(data);
+          let el = document.querySelector(`.users`);
+          if (el) {
+            data.users.forEach((id) => setUserOnline(Number(id)));
+            clearInterval(id)
+          }
+        }, 200);
+
         break;
     }
   };
 
   socket.onerror = (err) => console.error('WebSocket error:', err);
-  
+
   socket.onclose = () => {
     console.log('WebSocket disconnected');
     setTimeout(connectWebSocket, 5000);
   };
 }
+window.onload = () => {
+  connectWebSocket();
 
-connectWebSocket();
+}
+
 
 function appendMessage(msg) {
   let chatBox = document.getElementById(`chat-${msg.senderUsername}`);
@@ -90,6 +116,7 @@ function appendMessage(msg) {
 
 function setUserOnline(userId) {
   let el = document.querySelector(`.users[data-id="${userId}"] .online`);
+  console.log("sds", el);
   if (el) el.style.backgroundColor = "green";
 }
 
@@ -109,12 +136,12 @@ export async function home() {
   aside.className = "aside2";
   allPost.className = "allPost";
   let users = await fetchUsers();
-users =  users.data.sort((a,b) =>{
-  if (a>b ) {
-    return  -1
-  }
-  return  1
-})
+  users = users.data.sort((a, b) => {
+    if (a > b) {
+      return -1
+    }
+    return 1
+  })
   for (const user of users) {
     const div = document.createElement("div");
     div.className = "users";
@@ -259,6 +286,11 @@ async function Logout(e) {
   errorDiv.style.display = "flex";
   errorDiv.style.backgroundColor = "#04e17a";
   errorMessage.textContent = "logout successfully";
+  socket.close()
   Navigate("/login");
   login();
+
+
+
+
 }
