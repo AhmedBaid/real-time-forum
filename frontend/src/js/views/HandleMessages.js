@@ -13,13 +13,8 @@ export async function HandleMessages(e) {
   }
 chatArea.innerHTML=""
   if (document.getElementById(`chat-${username}`)) return;
-
-  try {
-    let res = await fetch(`/messages?receiver=${receiverId}`);
-    if (!res.ok) throw new Error(await res.text());
-    let messages = await res.json();
-
-    let chatDiv = document.createElement("div");
+let offset =  0 
+  let chatDiv = document.createElement("div");
     chatDiv.className = "chat-box";
     chatDiv.id = `chat-${username}`;
     chatDiv.innerHTML = `
@@ -47,6 +42,23 @@ chatArea.innerHTML=""
     let form = chatDiv.querySelector(".chat-form");
     let messagesBox = chatDiv.querySelector(".chat-messages");
 
+
+
+
+messagesBox.addEventListener("scroll" , async () => {
+
+  
+  
+})
+
+
+
+   try {
+    let res = await fetch(`/messages?receiver=${receiverId}&offset=${offset}`);
+    if (!res.ok) throw new Error(await res.text());
+    let messages = await res.json();
+
+  
     messagesBox.innerHTML = "";
     messages.forEach(msg => {
       messagesBox.innerHTML += `

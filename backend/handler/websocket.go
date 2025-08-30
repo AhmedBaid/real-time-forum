@@ -3,6 +3,7 @@ package handler
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -251,12 +252,22 @@ func MarkReadHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetMessagesHandler(w http.ResponseWriter, r *http.Request) {
+fmt.Println("11111111111")
 	receiverIDStr := r.URL.Query().Get("receiver")
+	offsetStr := r.URL.Query().Get("offset")
+
+	offsetId, err := strconv.Atoi(offsetStr)
+	if err != nil {
+		http.Error(w, "Invalid offset", http.StatusBadRequest)
+		return
+	}
+
 	receiverID, err := strconv.Atoi(receiverIDStr)
 	if err != nil {
 		http.Error(w, "Invalid receiver ID", http.StatusBadRequest)
 		return
 	}
+
 	_, session := helpers.SessionChecked(w, r)
 	var senderID int
 	err = config.Db.QueryRow("SELECT id FROM users WHERE session = ?", session).Scan(&senderID)
@@ -264,32 +275,39 @@ func GetMessagesHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
+
 	rows, err := config.Db.Query(`
 		SELECT m.id, m.sender_id, m.receiver_id, m.message, m.created_at, u.username
 		FROM messages m
 		JOIN users u ON m.sender_id = u.id
 		WHERE (m.sender_id = ? AND m.receiver_id = ?) OR (m.sender_id = ? AND m.receiver_id = ?)
-		ORDER BY m.created_at ASC`, senderID, receiverID, receiverID, senderID)
+		ORDER BY m.created_at ASC LIMIT 10 OFFSET ?`, senderID, receiverID, receiverID, senderID, offsetId)
 	if err != nil {
 		http.Error(w, "Database error", http.StatusInternalServerError)
 		return
 	}
 	defer rows.Close()
+
 	messages := []map[string]interface{}{}
 	for rows.Next() {
 		var m config.Messages
 		var senderUsername string
-		var t string
-		rows.Scan(&m.Id, &m.Sender, &m.Reciever, &m.Message, &t, &senderUsername)
+		var createdAt string
+		if err := rows.Scan(&m.Id, &m.Sender, &m.Reciever, &m.Message, &createdAt, &senderUsername); err != nil {
+			log.Printf("Error scanning message: %v", err)
+			continue
+		}
 		messages = append(messages, map[string]interface{}{
 			"id":             m.Id,
 			"sender":         m.Sender,
 			"receiver":       m.Reciever,
 			"message":        m.Message,
-			"time":           t,
+			"time":           createdAt,
 			"senderUsername": senderUsername,
 		})
 	}
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(messages)
+	fmt.Println("1", messages)
 }
