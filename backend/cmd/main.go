@@ -56,10 +56,8 @@ func main() {
         return
     }
 
-    // تشغيل HandleBroadcast بعد تهيئة config.Db
     go handler.HandleBroadcast(config.Db)
 
-    // تسجيل معالجات HTTP
     http.HandleFunc("/api/current-user", func(w http.ResponseWriter, r *http.Request) {
         _, session := helpers.SessionChecked(w, r)
         var userID int
@@ -76,7 +74,6 @@ func main() {
     http.HandleFunc("/messages", handler.GetMessagesHandler)
     http.HandleFunc("/mark-read/", handler.MarkReadHandler)
 
-    // تسجيل باقي المسارات من router
     router.Router()
 
     fmt.Println("Server listening on http://localhost:8080/")
