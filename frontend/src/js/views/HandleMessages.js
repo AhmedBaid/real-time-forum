@@ -1,12 +1,12 @@
 import { socket } from "./home.js";
 
 export async function HandleMessages(e) {
-          const user = document.querySelector(`.users[data-id="${e.currentTarget.dataset.id}"] .text-wrapper .notification`)
-          if (user.textContent !== "") {
-            user.innerHTML=""
-          }
+  const user = document.querySelector(`.users[data-id="${e.currentTarget.dataset.id}"] .text-wrapper .notification`)
+  if (user.textContent !== "") {
+    user.innerHTML = ""
+  }
 
-  
+
   let username = e.currentTarget.dataset.username;
   let receiverId = Number(e.currentTarget.dataset.id);
 
@@ -55,18 +55,22 @@ export async function HandleMessages(e) {
     if (messages.length === 0) return;
 
     let oldScrollHeight = messagesBox.scrollHeight;
- 
+
     messages.forEach(msg => {
       let div = document.createElement("div");
       div.className = `msg ${msg.receiver === receiverId ? "right" : "left"}`;
       div.innerHTML = `
-        <p>${msg.message}</p>
-        <span class="time">${new Date(msg.time).toLocaleTimeString()}</span>
+        <p></p>
+        <span class="time"></span>
       `;
+      let p = div.querySelector("p")
+      let span = div.querySelector("span")
+      span.textContent = new Date(msg.time).toLocaleTimeString()
+      p.textContent = msg.message
       if (prepend) {
         messagesBox.prepend(div);
       } else {
-        messagesBox.appendChild(div); 
+        messagesBox.appendChild(div);
       }
 
       if (msg.receiver === receiverId) {
@@ -75,7 +79,7 @@ export async function HandleMessages(e) {
     });
 
     if (!prepend) {
-      messagesBox.scrollTop = messagesBox.scrollHeight; 
+      messagesBox.scrollTop = messagesBox.scrollHeight;
     } else {
       messagesBox.scrollTop = messagesBox.scrollHeight - oldScrollHeight;
     }
@@ -105,9 +109,13 @@ export async function HandleMessages(e) {
     let div = document.createElement("div");
     div.className = "msg right";
     div.innerHTML = `
-      <p>${input.value}</p>
-      <span class="time">${new Date().toLocaleTimeString()}</span>
+      <p></p>
+      <span class="time"></span>
     `;
+    let p  =   div.querySelector("p")
+    let span  =   div.querySelector("span")
+span.textContent=new Date().toLocaleTimeString()
+    p.textContent=input.value
     messagesBox.appendChild(div);
 
     input.value = "";

@@ -43,7 +43,6 @@ export async function createPost(e) {
         home();
     } catch (error) {
         console.log(error);
-
         const postForm = document.querySelector(".Post-form");
         postForm.style.display = "none";
         errorDiv.style.display = "flex";
