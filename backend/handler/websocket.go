@@ -3,7 +3,6 @@ package handler
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -252,7 +251,6 @@ func MarkReadHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetMessagesHandler(w http.ResponseWriter, r *http.Request) {
-fmt.Println("11111111111")
 	receiverIDStr := r.URL.Query().Get("receiver")
 	offsetStr := r.URL.Query().Get("offset")
 
@@ -281,7 +279,7 @@ fmt.Println("11111111111")
 		FROM messages m
 		JOIN users u ON m.sender_id = u.id
 		WHERE (m.sender_id = ? AND m.receiver_id = ?) OR (m.sender_id = ? AND m.receiver_id = ?)
-		ORDER BY m.created_at ASC LIMIT 10 OFFSET ?`, senderID, receiverID, receiverID, senderID, offsetId)
+		ORDER BY m.created_at Desc LIMIT 10 OFFSET ?`, senderID, receiverID, receiverID, senderID, offsetId)
 	if err != nil {
 		http.Error(w, "Database error", http.StatusInternalServerError)
 		return
@@ -309,5 +307,4 @@ fmt.Println("11111111111")
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(messages)
-	fmt.Println("1", messages)
 }

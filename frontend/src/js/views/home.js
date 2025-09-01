@@ -71,10 +71,19 @@ function connectWebSocket() {
         }
         break;
       case "notification":
-        console.log(`Notification from ${data.from}: ${data.message}`);
+        const ids = setTimeout(() => {
+          console.log(data);
+          const user = document.querySelector(`.users[data-id="${data.from}"] .text-wrapper .notification`)
+          if (user) {
+            user.innerHTML="new Message"
+            clearInterval(ids)
+          }
+        }, 200);
+        
+
         break;
       case "online_list":
-        const id = setInterval(() => {
+        const id = setTimeout(() => {
           console.log(data);
           let el = document.querySelector(`.users`);
           if (el) {
@@ -149,7 +158,11 @@ export async function home() {
     div.dataset.id = user.id;
     div.innerHTML = `
       <img src="https://robohash.org/${user.username}.png?size=50x50" class="avatar" />
+        <div class="text-wrapper">
+
       <span class="username">${user.username}</span>
+        <span class="notification"></span>
+  </div>
       <span class="online">.</span>
     `;
     aside.appendChild(div);
