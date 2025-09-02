@@ -16,52 +16,6 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-var connMu = struct{
-    sync.Mutex
-    m map[*websocket.Conn]*sync.Mutex
-}{m: make(map[*websocket.Conn]*sync.Mutex)}
-
-func writeJSONSafe(conn *websocket.Conn, data interface{}) error {
-    // كل conn عندو mutex
-    connMu.Lock()
-    m, exists := connMu.m[conn]
-    if !exists {
-        m = &sync.Mutex{}
-        connMu.m[conn] = m
-    }
-    connMu.Unlock()
-
-    m.Lock()
-    defer m.Unlock()
-
-    // catch panic إذا كانت conn مغلقة
-    defer func() {
-        if r := recover(); r != nil {
-            log.Printf("Recovered from websocket panic: %v", r)
-            removeClosedConn(conn)
-        }
-    }()
-
-    return conn.WriteJSON(data)
-}
-
-func removeClosedConn(conn *websocket.Conn) {
-    usersMu.Lock()
-    defer usersMu.Unlock()
-    for userID, conns := range users {
-        for i, c := range conns {
-            if c == conn {
-                users[userID] = append(conns[:i], conns[i+1:]...)
-                break
-            }
-        }
-        if len(users[userID]) == 0 {
-            delete(users, userID)
-        }
-    }
-}
-
-
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool { return true },
 }
@@ -130,7 +84,7 @@ func sendUnreadMessages(userID int, conn *websocket.Conn, db *sql.DB) {
 			"time":           createdAt,
 			"senderUsername": senderUsername,
 		}
-		writeJSONSafe(conn, data)
+		conn.WriteJSON(data)
 		db.Exec("UPDATE messages SET is_read = TRUE WHERE id = ?", msgID)
 	}
 }
@@ -149,7 +103,7 @@ func HandleBroadcast(db *sql.DB) {
 		if receiver, ok := data["receiver"].(int); ok && msgType == "message" {
 			if conns, ok := users[receiver]; ok {
 				for _, conn := range conns {
-		writeJSONSafe(conn, data)
+					conn.WriteJSON(data)
 					if msgID, ok := data["id"].(int); ok {
 						db.Exec("UPDATE messages SET is_read = TRUE WHERE id = ?", msgID)
 					}
@@ -167,7 +121,7 @@ func HandleBroadcast(db *sql.DB) {
 		} else {
 			for _, conns := range users {
 				for _, conn := range conns {
-		writeJSONSafe(conn, data)
+					conn.WriteJSON(data)
 				}
 			}
 		}

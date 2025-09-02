@@ -44,6 +44,7 @@ export async function HandleMessages(e) {
   let offset = 0;
   let chatDiv = document.createElement("div");
   chatDiv.className = "chat-box";
+  chatDiv.dataset.idU = receiverId
   chatDiv.id = `chat-${username}`;
   chatDiv.innerHTML = `
     <div class="chat-header">
@@ -108,6 +109,7 @@ let oldScrollHeight = messagesBox.scrollHeight;
   }, 200, {leading:false ,trailing: true }));
 
   form.addEventListener("submit", (ev) => {
+    offset+=1
     ev.preventDefault();
     let input = form.querySelector("input");
     if (input.value.trim() === "") return;

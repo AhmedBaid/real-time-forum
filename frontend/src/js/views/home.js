@@ -1,4 +1,3 @@
-// home.js
 import { container, errorDiv, errorMessage, Header, Navigate, PostForm } from "../config.js";
 import { login } from "./login.js";
 import { timeFormat } from "../helpers/timeFormat.js";
@@ -14,7 +13,6 @@ let currentUserId = null;
 
 window.addEventListener("load", async () => {
 
-  connectWebSocket();
   await loadUnreadNotifications();
 })
 
@@ -45,58 +43,49 @@ function connectWebSocket() {
 
     switch (data.type) {
       case "online":
-        const idon = setInterval(() => {
+        setTimeout(() => {
           let el = document.querySelector(`.users`);
           if (el) {
             setUserOnline(data.userId);
-            clearInterval(idon)
           }
         }, 200);
         break;
       case "offline":
 
-        const ido = setInterval(() => {
+        setTimeout(() => {
           let el = document.querySelector(`.users`);
           if (el) {
             setUserOffline(data.userId);
-            clearInterval(ido)
           }
         }, 200);
 
 
         break;
       case "message":
-        if (currentUserId) {
-          appendMessage(data);
-          if (data.receiver === currentUserId) {
-            const userElement = document.querySelector(`.users[data-id="${data.sender}"]`);
-            if (userElement) {
-              const notification = userElement.querySelector(".notification");
-              if (notification) notification.textContent = "new Message";
-            }
+
+          if (currentUserId) {
+            appendMessage(data);
+           
           }
-        }
         break;
 
       case "notification":
-        const ids = setTimeout(() => {
+        setTimeout(() => {
           console.log(data);
           const user = document.querySelector(`.users[data-id="${data.from}"] .text-wrapper .notification`)
           if (user) {
             user.innerHTML = "new Message"
-            clearInterval(ids)
           }
         }, 200);
 
 
         break;
       case "online_list":
-        const id = setTimeout(() => {
+        setTimeout(() => {
           console.log(data);
           let el = document.querySelector(`.users`);
           if (el) {
             data.users.forEach((id) => setUserOnline(Number(id)));
-            clearInterval(id)
           }
         }, 200);
 
@@ -116,7 +105,6 @@ window.onload = () => {
 
 }
 
-
 function appendMessage(msg) {
   let chatBox = document.getElementById(`chat-${msg.senderUsername}`);
   if (!chatBox) return;
@@ -124,17 +112,15 @@ function appendMessage(msg) {
   let messagesBox = chatBox.querySelector(".chat-messages");
   messagesBox.innerHTML += `
     <div class="msg ${msg.sender === currentUserId ? "right" : "left"}">
-      <p></p>
-      <span class="time"></span>
+      <p>${msg.message}</p>
+      <span class="time">${new Date(msg.time).toLocaleTimeString()}</span>
     </div>
   `;
-
-  let p = messagesBox.querySelector("div p")
-  let span = messagesBox.querySelector("div span")
-  span.textContent = new Date(msg.time).toLocaleTimeString()
-  p.textContent = msg.message
   messagesBox.scrollTop = messagesBox.scrollHeight;
+  
 }
+
+
 
 function setUserOnline(userId) {
   let el = document.querySelector(`.users[data-id="${userId}"] .online`);
