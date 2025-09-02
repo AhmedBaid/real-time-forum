@@ -47,13 +47,15 @@ export async function HandleComments(e) {
       <div class="comment-content">
         <div>
           <p class="user"><strong>${data.data.Username}</strong></p>
-          <p class="comm">${data.data.Comment}</p>
+          <p class="comm"></p>
         </div>
         <div class="comment-actions">
           <span class="time">${timeFormat(data.data.time)}</span>
         </div>
       </div>
     `;
+let p  = div.querySelector(".comm")
+p.textContent=data.data.Comment
 
     form.reset();
 

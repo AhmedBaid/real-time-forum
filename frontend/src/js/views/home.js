@@ -8,8 +8,15 @@ import { fetchComments, fetchPosts, fetchUsers } from "../helpers/api.js";
 import { renderCommentsStyled } from "../helpers/randerComments.js";
 import { createPost } from "./createPost.js";
 import { HandleMessages } from "./HandleMessages.js";
-
+import { loadUnreadNotifications } from "./notification.js"
 let currentUserId = null;
+
+
+window.addEventListener("load", async () => {
+
+  connectWebSocket();
+  await loadUnreadNotifications();
+})
 
 async function fetchCurrentUserId() {
   try {
@@ -61,20 +68,30 @@ function connectWebSocket() {
       case "message":
         if (currentUserId) {
           appendMessage(data);
-          const chatBox = document.getElementById(`chat-${data.senderUsername}`);
-          if (!chatBox && data.receiver === currentUserId) {
+          if (data.receiver === currentUserId) {
             const userElement = document.querySelector(`.users[data-id="${data.sender}"]`);
             if (userElement) {
-              HandleMessages({ currentTarget: userElement });
+              const notification = userElement.querySelector(".notification");
+              if (notification) notification.textContent = "new Message";
             }
           }
         }
         break;
+
       case "notification":
-        console.log(`Notification from ${data.from}: ${data.message}`);
+        const ids = setTimeout(() => {
+          console.log(data);
+          const user = document.querySelector(`.users[data-id="${data.from}"] .text-wrapper .notification`)
+          if (user) {
+            user.innerHTML = "new Message"
+            clearInterval(ids)
+          }
+        }, 200);
+
+
         break;
       case "online_list":
-        const id = setInterval(() => {
+        const id = setTimeout(() => {
           console.log(data);
           let el = document.querySelector(`.users`);
           if (el) {
@@ -107,16 +124,20 @@ function appendMessage(msg) {
   let messagesBox = chatBox.querySelector(".chat-messages");
   messagesBox.innerHTML += `
     <div class="msg ${msg.sender === currentUserId ? "right" : "left"}">
-      <p>${msg.message}</p>
-      <span class="time">${new Date(msg.time).toLocaleTimeString()}</span>
+      <p></p>
+      <span class="time"></span>
     </div>
   `;
+
+  let p = messagesBox.querySelector("div p")
+  let span = messagesBox.querySelector("div span")
+  span.textContent = new Date(msg.time).toLocaleTimeString()
+  p.textContent = msg.message
   messagesBox.scrollTop = messagesBox.scrollHeight;
 }
 
 function setUserOnline(userId) {
   let el = document.querySelector(`.users[data-id="${userId}"] .online`);
-  console.log("sds", el);
   if (el) el.style.backgroundColor = "green";
 }
 
@@ -137,11 +158,17 @@ export async function home() {
   allPost.className = "allPost";
   let users = await fetchUsers();
   users = users.data.sort((a, b) => {
-    if (a > b) {
-      return -1
+    const aHasMsg = !!a.lastMessageTime;
+    const bHasMsg = !!b.lastMessageTime;
+
+    if (aHasMsg && bHasMsg) {
+      return new Date(b.lastMessageTime) - new Date(a.lastMessageTime);
     }
-    return 1
-  })
+    if (aHasMsg) return -1;
+    if (bHasMsg) return 1;
+    return a.username.localeCompare(b.username);
+  });
+
   for (const user of users) {
     const div = document.createElement("div");
     div.className = "users";
@@ -149,7 +176,11 @@ export async function home() {
     div.dataset.id = user.id;
     div.innerHTML = `
       <img src="https://robohash.org/${user.username}.png?size=50x50" class="avatar" />
+        <div class="text-wrapper">
+
       <span class="username">${user.username}</span>
+        <span class="notification"></span>
+  </div>
       <span class="online">.</span>
     `;
     aside.appendChild(div);

@@ -7,7 +7,6 @@ import (
 	"real_time/backend/config"
 )
 
-
 func GetUsers(w http.ResponseWriter, r *http.Request) {
 	session, err := r.Cookie("session")
 	var sessValue string
@@ -16,20 +15,23 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 	} else {
 		sessValue = session.Value
 	}
-	query := `select id ,  session , username  from users where session = ?`
 	var userId int
-	var username string
+	query := `select id  from users where session = ?`
+	config.Db.QueryRow(query, sessValue).Scan(&userId)
 
-	sess := ""
-
-	config.Db.QueryRow(query, sessValue).Scan(&userId, &sess, &username)
-
-	userQuery := ` select username , id  from users where id != ?`
+	userQuery := `
+    SELECT u.username, u.id, MAX(m.created_at) as last_message_time
+    FROM users u
+    LEFT JOIN messages m 
+        ON u.id = m.sender_id OR u.id = m.receiver_id
+    WHERE u.id != ?
+    GROUP BY u.id, u.username
+`
 	rows, err := config.Db.Query(userQuery, userId)
 	if err != nil {
 		fmt.Println(err)
 		config.ResponseJSON(w, config.ErrorInternalServerErr.Code, map[string]any{
-			"message": "database  Error   1 ",
+			"message": "database Error 1",
 			"status":  config.ErrorInternalServerErr.Code,
 		})
 		return
@@ -38,19 +40,18 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 	defer rows.Close()
 
 	var Users []config.UserStatus
+	var user config.UserStatus
 	for rows.Next() {
-		var user config.UserStatus
-		user.Status= "offline"
-		err := rows.Scan(&user.Username, &user.Id)
+		err := rows.Scan(&user.Username, &user.Id, &user.LastMessageTime)
 		if err != nil {
 			fmt.Println(err)
-
 			config.ResponseJSON(w, config.ErrorInternalServerErr.Code, map[string]any{
-				"message": "database  Error  2 ",
+				"message": "database Error 2",
 				"status":  config.ErrorInternalServerErr.Code,
 			})
 			return
 		}
+		user.Status = "offline"
 		Users = append(Users, user)
 	}
 
