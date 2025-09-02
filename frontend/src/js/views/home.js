@@ -8,7 +8,8 @@ import { renderCommentsStyled } from "../helpers/randerComments.js";
 import { createPost } from "./createPost.js";
 import { HandleMessages } from "./HandleMessages.js";
 import { loadUnreadNotifications } from "./notification.js"
-let currentUserId = null;
+export  let currentUserId = null;
+export  let Currentusername= null
 
 
 window.addEventListener("load", async () => {
@@ -22,6 +23,7 @@ async function fetchCurrentUserId() {
     if (!res.ok) throw new Error('Failed to fetch user ID');
     const data = await res.json();
     currentUserId = data.userId;
+    Currentusername= data.username
   } catch (error) {
     console.error('Error fetching current user ID:', error);
   }
@@ -106,6 +108,8 @@ window.onload = () => {
 }
 
 function appendMessage(msg) {
+  console.log(msg);
+  
   let chatBox = document.getElementById(`chat-${msg.senderUsername}`);
   if (!chatBox) return;
 
@@ -113,7 +117,7 @@ function appendMessage(msg) {
   messagesBox.innerHTML += `
     <div class="msg ${msg.sender === currentUserId ? "right" : "left"}">
       <p>${msg.message}</p>
-      <span class="time">${new Date(msg.time).toLocaleTimeString()}</span>
+      <span class="time">${msg.senderUsername}- ${new Date(msg.time).toLocaleTimeString()}</span>
     </div>
   `;
   messagesBox.scrollTop = messagesBox.scrollHeight;

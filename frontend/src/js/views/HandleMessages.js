@@ -1,4 +1,4 @@
-import { socket } from "./home.js";
+import { socket  , Currentusername} from "./home.js";
 
 
 function throttle(func, time, option = { leading: false, trailing: false }) {
@@ -71,6 +71,7 @@ export async function HandleMessages(e) {
     let res = await fetch(`/messages?receiver=${receiverId}&offset=${offset}`);
     if (!res.ok) throw new Error(await res.text());
     let messages = await res.json();
+console.log(messages);
 
     if (messages.length === 0) return;
 let oldScrollHeight = messagesBox.scrollHeight;
@@ -79,7 +80,7 @@ let oldScrollHeight = messagesBox.scrollHeight;
       div.className = `msg ${msg.receiver === receiverId ? "right" : "left"}`;
       div.innerHTML = `
         <p>${msg.message}</p>
-        <span class="time">${new Date(msg.time).toLocaleTimeString()}</span>
+        <span class="time">${msg.senderUsername}-${new Date(msg.time).toLocaleTimeString()}</span>
       `;
       messagesBox.prepend(div);
       /* 
@@ -124,7 +125,7 @@ let oldScrollHeight = messagesBox.scrollHeight;
     div.className = "msg right";
     div.innerHTML = `
       <p>${input.value}</p>
-      <span class="time">${new Date().toLocaleTimeString()}</span>
+      <span class="time"> ${Currentusername}-${new Date().toLocaleTimeString()}</span>
     `;
     messagesBox.appendChild(div);
 
