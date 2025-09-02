@@ -325,7 +325,7 @@ func GetMessagesHandler(w http.ResponseWriter, r *http.Request) {
 		FROM messages m
 		JOIN users u ON m.sender_id = u.id
 		WHERE (m.sender_id = ? AND m.receiver_id = ?) OR (m.sender_id = ? AND m.receiver_id = ?)
-		ORDER BY m.created_at Desc LIMIT 10 OFFSET ?`, senderID, receiverID, receiverID, senderID, offsetId)
+		ORDER BY m.id Desc LIMIT 10 OFFSET ?`, senderID, receiverID, receiverID, senderID, offsetId)
 	if err != nil {
 		http.Error(w, "Database error", http.StatusInternalServerError)
 		return
