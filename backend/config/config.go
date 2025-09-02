@@ -7,11 +7,14 @@ import (
 )
 
 
+
 type UserStatus struct {
-	Status string   `json:"status"`
-	Username string   `json:"username"`
-	Id int   `json:"id"`
+    Id              int     `json:"id"`
+    Username        string  `json:"username"`
+    Status          string  `json:"status"`
+    LastMessageTime *string `json:"lastMessageTime,omitempty"`
 }
+
 
 type Messages struct {
 	Id       int       `json:"id"`

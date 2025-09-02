@@ -12,9 +12,6 @@ import { loadUnreadNotifications } from "./notification.js"
 let currentUserId = null;
 
 
-
-
-
 window.addEventListener("load", async () => {
 
   connectWebSocket();
@@ -161,11 +158,17 @@ export async function home() {
   allPost.className = "allPost";
   let users = await fetchUsers();
   users = users.data.sort((a, b) => {
-    if (a > b) {
-      return -1
+    const aHasMsg = !!a.lastMessageTime;
+    const bHasMsg = !!b.lastMessageTime;
+
+    if (aHasMsg && bHasMsg) {
+      return new Date(b.lastMessageTime) - new Date(a.lastMessageTime);
     }
-    return 1
-  })
+    if (aHasMsg) return -1;
+    if (bHasMsg) return 1;
+    return a.username.localeCompare(b.username);
+  });
+
   for (const user of users) {
     const div = document.createElement("div");
     div.className = "users";
