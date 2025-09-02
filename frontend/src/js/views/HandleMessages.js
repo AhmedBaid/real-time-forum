@@ -1,5 +1,26 @@
 import { socket } from "./home.js";
 
+
+function throttle(func, time, option = { leading: false, trailing: false }) {
+    let wait = false
+    return (...args) => {
+
+        if (!wait) {
+            if (option.leading) {
+                func.apply(this, args)
+            }
+            wait = true
+            setTimeout(() => {
+                if (!option.leading && option.trailing) {
+                    func.apply(this, args)
+                }
+                wait = false
+            }, time);
+        }
+    }
+}
+
+
 export async function HandleMessages(e) {
   const user = document.querySelector(`.users[data-id="${e.currentTarget.dataset.id}"] .text-wrapper .notification`)
   if (user.textContent !== "") {
@@ -45,55 +66,46 @@ export async function HandleMessages(e) {
   let form = chatDiv.querySelector(".chat-form");
   let messagesBox = chatDiv.querySelector(".chat-messages");
 
-  async function loadMessages(prepend = false) {
+  async function loadMessages(scroll) {
     let res = await fetch(`/messages?receiver=${receiverId}&offset=${offset}`);
     if (!res.ok) throw new Error(await res.text());
     let messages = await res.json();
 
-
-
     if (messages.length === 0) return;
-
-    let oldScrollHeight = messagesBox.scrollHeight;
-
+let oldScrollHeight = messagesBox.scrollHeight;
     messages.forEach(msg => {
       let div = document.createElement("div");
       div.className = `msg ${msg.receiver === receiverId ? "right" : "left"}`;
       div.innerHTML = `
-        <p></p>
-        <span class="time"></span>
+        <p>${msg.message}</p>
+        <span class="time">${new Date(msg.time).toLocaleTimeString()}</span>
       `;
-      let p = div.querySelector("p")
-      let span = div.querySelector("span")
-      span.textContent = new Date(msg.time).toLocaleTimeString()
-      p.textContent = msg.message
-      if (prepend) {
-        messagesBox.prepend(div);
-      } else {
-        messagesBox.appendChild(div);
-      }
-
-      if (msg.receiver === receiverId) {
-        fetch(`/mark-read/${msg.id}`, { method: "POST" });
-      }
+      messagesBox.prepend(div);
+      /* 
+          if (msg.receiver === receiverId) {
+            fetch(`/mark-read/${msg.id}`, { method: "POST" });
+          } */
     });
 
-    if (!prepend) {
+    if (scroll) {
       messagesBox.scrollTop = messagesBox.scrollHeight;
     } else {
-      messagesBox.scrollTop = messagesBox.scrollHeight - oldScrollHeight;
+       messagesBox.scrollTop = messagesBox.scrollHeight - oldScrollHeight;
     }
+
+    console.log(messages);
 
     offset += 10;
   }
 
-  await loadMessages(false);
+  await loadMessages(true);
 
-  messagesBox.addEventListener("scroll", async () => {
+  messagesBox.addEventListener("scroll", throttle(async () => {
     if (messagesBox.scrollTop === 0) {
-      await loadMessages(true);
+      await loadMessages(false);
     }
-  });
+
+  }, 200, {leading:false ,trailing: true }));
 
   form.addEventListener("submit", (ev) => {
     ev.preventDefault();
@@ -109,13 +121,9 @@ export async function HandleMessages(e) {
     let div = document.createElement("div");
     div.className = "msg right";
     div.innerHTML = `
-      <p></p>
-      <span class="time"></span>
+      <p>${input.value}</p>
+      <span class="time">${new Date().toLocaleTimeString()}</span>
     `;
-    let p  =   div.querySelector("p")
-    let span  =   div.querySelector("span")
-span.textContent=new Date().toLocaleTimeString()
-    p.textContent=input.value
     messagesBox.appendChild(div);
 
     input.value = "";
