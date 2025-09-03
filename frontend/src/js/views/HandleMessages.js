@@ -1,23 +1,23 @@
-import { socket  , Currentusername} from "./home.js";
+import { socket, Currentusername, currentUserId } from "./home.js";
 
 
 function throttle(func, time, option = { leading: false, trailing: false }) {
-    let wait = false
-    return (...args) => {
+  let wait = false
+  return (...args) => {
 
-        if (!wait) {
-            if (option.leading) {
-                func.apply(this, args)
-            }
-            wait = true
-            setTimeout(() => {
-                if (!option.leading && option.trailing) {
-                    func.apply(this, args)
-                }
-                wait = false
-            }, time);
+    if (!wait) {
+      if (option.leading) {
+        func.apply(this, args)
+      }
+      wait = true
+      setTimeout(() => {
+        if (!option.leading && option.trailing) {
+          func.apply(this, args)
         }
+        wait = false
+      }, time);
     }
+  }
 }
 
 
@@ -54,7 +54,7 @@ export async function HandleMessages(e) {
     </div>
     <div class="chat-messages"></div>
     <form class="chat-form" method="post">
-      <input type="text" placeholder="Type a message..." />
+      <input type="text" placeholder="Type a message..." id="input"/>
       <button type="submit">➤</button>
     </form>
   `;
@@ -64,17 +64,48 @@ export async function HandleMessages(e) {
     chatDiv.remove();
   };
 
+
+
+
+
   let form = chatDiv.querySelector(".chat-form");
   let messagesBox = chatDiv.querySelector(".chat-messages");
+
+
+  let inputt = form.querySelector("#input")
+  let typingTimeout;
+
+inputt.addEventListener("input", () => {
+  clearTimeout(typingTimeout);
+
+  socket.send(JSON.stringify({
+    type: "typing",
+    senderUsername: Currentusername,
+    senderId: currentUserId,
+    receiver: receiverId,
+  }));
+
+  typingTimeout = setTimeout(() => {
+    socket.send(JSON.stringify({
+      type: "stopTyping",
+      senderUsername: Currentusername,
+      senderId: currentUserId,
+      receiver: receiverId,
+    }));
+  }, 1000);
+});
+
+
+
 
   async function loadMessages(scroll) {
     let res = await fetch(`/messages?receiver=${receiverId}&offset=${offset}`);
     if (!res.ok) throw new Error(await res.text());
     let messages = await res.json();
-console.log(messages);
+    console.log(messages);
 
     if (messages.length === 0) return;
-let oldScrollHeight = messagesBox.scrollHeight;
+    let oldScrollHeight = messagesBox.scrollHeight;
     messages.forEach(msg => {
       let div = document.createElement("div");
       div.className = `msg ${msg.receiver === receiverId ? "right" : "left"}`;
@@ -92,7 +123,7 @@ let oldScrollHeight = messagesBox.scrollHeight;
     if (scroll) {
       messagesBox.scrollTop = messagesBox.scrollHeight;
     } else {
-       messagesBox.scrollTop = messagesBox.scrollHeight - oldScrollHeight;
+      messagesBox.scrollTop = messagesBox.scrollHeight - oldScrollHeight;
     }
 
     console.log(messages);
@@ -107,10 +138,10 @@ let oldScrollHeight = messagesBox.scrollHeight;
       await loadMessages(false);
     }
 
-  }, 200, {leading:false ,trailing: true }));
+  }, 200, { leading: false, trailing: true }));
 
   form.addEventListener("submit", (ev) => {
-    offset+=1
+    offset += 1
     ev.preventDefault();
     let input = form.querySelector("input");
     if (input.value.trim() === "") return;
@@ -127,10 +158,10 @@ let oldScrollHeight = messagesBox.scrollHeight;
       <p></p>
       <span class="time"></span>
     `;
-    let p  =  div.querySelector("p")
-    let span  =  div.querySelector("span")
-    p.textContent=input.value
-span.textContent=  Currentusername + "  -    " + new Date().toLocaleString();
+    let p = div.querySelector("p")
+    let span = div.querySelector("span")
+    p.textContent = input.value
+    span.textContent = Currentusername + "  -    " + new Date().toLocaleString();
     messagesBox.appendChild(div);
 
     input.value = "";

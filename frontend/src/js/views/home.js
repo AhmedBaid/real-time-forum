@@ -92,6 +92,19 @@ function connectWebSocket() {
         }, 200);
 
         break;
+      case "typing":
+
+        setTimeout(() => {
+          const user = document.querySelector(`.users[data-id="${data.senderId}"] .text-wrapper .notification`)
+          user.textContent = data.senderUsername +  "typing"
+
+        }, 200);
+        
+        break;
+      case "stopTyping":
+        const user = document.querySelector(`.users[data-id="${data.senderId}"] .text-wrapper .notification`);
+        if (user) user.textContent = "";
+        break;
     }
   };
 
@@ -323,3 +336,5 @@ async function Logout(e) {
 
 
 }
+
+

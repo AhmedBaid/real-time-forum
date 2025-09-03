@@ -24,9 +24,15 @@
   <body>
     <div class="error">
       <span id="message"></span>
+      <span id="close">x</span>
     </div>
     <div class="main">
     </div>
-    <script type="module" src="frontend/src/js/main.js"></script>
+    <script type="module" src="frontend/src/js/main.js">
+      let closeb =  document.getElementById("close")
+      closeb.addEventListener("click", ()=>{
+        document.querySelector(".error").innerHTML=""
+      })
+    </script>
   </body>
 </html>

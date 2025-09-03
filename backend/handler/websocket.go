@@ -76,8 +76,8 @@ func sendUnreadMessages(userID int, conn *websocket.Conn, db *sql.DB) {
 		if err := rows.Scan(&msgID, &senderID, &message, &createdAt, &senderUsername); err != nil {
 			continue
 		}
-		message= html.EscapeString(message)
-		senderUsername= html.EscapeString(senderUsername)
+		message = html.EscapeString(message)
+		senderUsername = html.EscapeString(senderUsername)
 		data := map[string]interface{}{
 			"type":           "message",
 			"id":             msgID,
@@ -197,6 +197,27 @@ func reader(userID int, conn *websocket.Conn, db *sql.DB) {
 				"senderUsername": senderUsername,
 			}
 		}
+		if msgType == "typing" || msgType == "stopTyping" {
+			receiverID, ok := msg["receiver"].(float64)
+			if !ok {
+				continue
+			}
+
+			usersMu.Lock()
+			if conns, exists := users[int(receiverID)]; exists {
+				for _, conn := range conns {
+					conn.WriteJSON(map[string]interface{}{
+						"type":           msgType,
+						"senderId":       userID,
+						"senderUsername": msg["senderUsername"],
+						"time":           time.Now().Format(time.RFC3339),
+					})
+				}
+			}
+			usersMu.Unlock()
+			continue
+		}
+
 	}
 }
 
@@ -298,8 +319,8 @@ func GetMessagesHandler(w http.ResponseWriter, r *http.Request) {
 			log.Printf("Error scanning message: %v", err)
 			continue
 		}
-		m.Message =  html.EscapeString(m.Message)
-		senderUsername =  html.EscapeString(senderUsername)
+		m.Message = html.EscapeString(m.Message)
+		senderUsername = html.EscapeString(senderUsername)
 
 		messages = append(messages, map[string]interface{}{
 			"id":             m.Id,
