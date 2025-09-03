@@ -1,6 +1,9 @@
 package helpers
 
-import "real_time/backend/config"
+import (
+	"html"
+	"real_time/backend/config"
+)
 
 func FetchCategories() (map[int][]config.Categories, error) {
 	//! get categories
@@ -21,6 +24,7 @@ func FetchCategories() (map[int][]config.Categories, error) {
 		if errcat != nil {
 			return nil, errcat
 		}
+		categor.Name = html.EscapeString(categor.Name)
 		category = append(category, categor)
 	}
 

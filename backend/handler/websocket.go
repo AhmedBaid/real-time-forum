@@ -3,6 +3,7 @@ package handler
 import (
 	"database/sql"
 	"encoding/json"
+	"html"
 	"log"
 	"net/http"
 	"strconv"
@@ -75,6 +76,8 @@ func sendUnreadMessages(userID int, conn *websocket.Conn, db *sql.DB) {
 		if err := rows.Scan(&msgID, &senderID, &message, &createdAt, &senderUsername); err != nil {
 			continue
 		}
+		message= html.EscapeString(message)
+		senderUsername= html.EscapeString(senderUsername)
 		data := map[string]interface{}{
 			"type":           "message",
 			"id":             msgID,
@@ -295,6 +298,9 @@ func GetMessagesHandler(w http.ResponseWriter, r *http.Request) {
 			log.Printf("Error scanning message: %v", err)
 			continue
 		}
+		m.Message =  html.EscapeString(m.Message)
+		senderUsername =  html.EscapeString(senderUsername)
+
 		messages = append(messages, map[string]interface{}{
 			"id":             m.Id,
 			"sender":         m.Sender,

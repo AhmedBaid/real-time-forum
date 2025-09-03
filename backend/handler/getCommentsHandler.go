@@ -2,6 +2,7 @@ package handler
 
 import (
 	"fmt"
+	"html"
 	"net/http"
 
 	"real_time/backend/config"
@@ -60,8 +61,13 @@ func GetComments(w http.ResponseWriter, r *http.Request) {
 			})
 			return
 		}
+
+		comment.Comment =  html.EscapeString(comment.Comment)
+		comment.Username =  html.EscapeString(comment.Username)
+		
 		comments = append(comments, comment)
 	}
+
 	//  !  end get comments
 
 	// !  add the communts to   map

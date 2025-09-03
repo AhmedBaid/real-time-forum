@@ -8,8 +8,8 @@ import { renderCommentsStyled } from "../helpers/randerComments.js";
 import { createPost } from "./createPost.js";
 import { HandleMessages } from "./HandleMessages.js";
 import { loadUnreadNotifications } from "./notification.js"
-export  let currentUserId = null;
-export  let Currentusername= null
+export let currentUserId = null;
+export let Currentusername = null
 
 
 window.addEventListener("load", async () => {
@@ -23,7 +23,7 @@ async function fetchCurrentUserId() {
     if (!res.ok) throw new Error('Failed to fetch user ID');
     const data = await res.json();
     currentUserId = data.userId;
-    Currentusername= data.username
+    Currentusername = data.username
   } catch (error) {
     console.error('Error fetching current user ID:', error);
   }
@@ -65,10 +65,10 @@ function connectWebSocket() {
         break;
       case "message":
 
-          if (currentUserId) {
-            appendMessage(data);
-           
-          }
+        if (currentUserId) {
+          appendMessage(data);
+
+        }
         break;
 
       case "notification":
@@ -108,20 +108,28 @@ window.onload = () => {
 }
 
 function appendMessage(msg) {
-  console.log(msg);
-  
+
   let chatBox = document.getElementById(`chat-${msg.senderUsername}`);
   if (!chatBox) return;
 
   let messagesBox = chatBox.querySelector(".chat-messages");
-  messagesBox.innerHTML += `
-    <div class="msg ${msg.sender === currentUserId ? "right" : "left"}">
-      <p>${msg.message}</p>
-      <span class="time">${msg.senderUsername}- ${new Date(msg.time).toLocaleTimeString()}</span>
-    </div>
-  `;
+  let div = document.createElement("div");
+  div.className = `msg ${msg.sender === currentUserId ? "right" : "left"}`;
+
+  let p = document.createElement("p");
+  p.textContent = msg.message;
+
+  let span = document.createElement("span");
+  span.className = "time";
+  span.textContent = msg.senderUsername + " - " + new Date(msg.time).toLocaleString();
+
+  div.appendChild(p);
+  div.appendChild(span);
+  messagesBox.appendChild(div);
+
+
   messagesBox.scrollTop = messagesBox.scrollHeight;
-  
+
 }
 
 

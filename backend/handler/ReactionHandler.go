@@ -3,6 +3,7 @@ package handler
 import (
 	"database/sql"
 	"encoding/json"
+	"html"
 	"net/http"
 
 	"real_time/backend/config"
@@ -55,7 +56,7 @@ func ReactionHandler(w http.ResponseWriter, r *http.Request) {
 
 	var reactionValue string
 	err = row.Scan(&reactionValue)
-
+reactionValue =  html.EscapeString(reactionValue)
 	if err == sql.ErrNoRows {
 		// insert
 		stmt := `INSERT INTO likes (postID, userID, value) VALUES (?, ?, ?)`

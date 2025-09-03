@@ -80,7 +80,7 @@ let oldScrollHeight = messagesBox.scrollHeight;
       div.className = `msg ${msg.receiver === receiverId ? "right" : "left"}`;
       div.innerHTML = `
         <p>${msg.message}</p>
-        <span class="time">${msg.senderUsername}-${new Date(msg.time).toLocaleTimeString()}</span>
+        <span class="time">${msg.senderUsername}-${new Date(msg.time).toLocaleString()}</span>
       `;
       messagesBox.prepend(div);
       /* 
@@ -124,9 +124,13 @@ let oldScrollHeight = messagesBox.scrollHeight;
     let div = document.createElement("div");
     div.className = "msg right";
     div.innerHTML = `
-      <p>${input.value}</p>
-      <span class="time"> ${Currentusername}-${new Date().toLocaleTimeString()}</span>
+      <p></p>
+      <span class="time"></span>
     `;
+    let p  =  div.querySelector("p")
+    let span  =  div.querySelector("span")
+    p.textContent=input.value
+span.textContent=  Currentusername + "  -    " + new Date().toLocaleString();
     messagesBox.appendChild(div);
 
     input.value = "";
