@@ -52,6 +52,14 @@ export async function HandleMessages(e) {
       <button class="close-btn">✖</button>
     </div>
     <div class="chat-messages"></div>
+    <span class="chatTyping"><strong></strong>
+    <span class="dots2">
+    <span class="d1"></span>
+    <span class="d2"></span>
+    <span class="d3"></span>
+
+    </span>
+    </span>
     <form class="chat-form" method="post">
       <input type="text" placeholder="Type a message..." id="input"/>
       <button type="submit">➤</button>

@@ -10,7 +10,7 @@ import { HandleMessages } from "./HandleMessages.js";
 import { loadUnreadNotifications } from "./notification.js"
 export let currentUserId = null;
 export let Currentusername = null
-export let offset = {"nbr" : 0}
+export let offset = { "nbr": 0 }
 
 window.addEventListener("load", async () => {
 
@@ -96,17 +96,28 @@ function connectWebSocket() {
 
         setTimeout(() => {
           const typing = document.querySelector(`.users[data-id="${data.senderId}"] .text-wrapper .typing  `)
-          let chatbox = doc
-          typing.style.display="block"
-        /*   const str =  typing.querySelector("strong")
-          str.textContent = data.senderUsername
- */
+          typing.style.display = "block"
+
+
+          let chatBox = document.querySelector(`#chat-${data.senderUsername} .chatTyping`);
+          chatBox.style.display = "block"
+          const str = chatBox.querySelector("strong")
+          str.textContent = data.senderUsername +" typing"
+
+          /*   const str =  typing.querySelector("strong")
+            str.textContent = data.senderUsername
+   */
         }, 200);
 
         break;
       case "stopTyping":
-                 const typing = document.querySelector(`.users[data-id="${data.senderId}"] .text-wrapper .typing  `)
-          typing.style.display="none"
+        const typing = document.querySelector(`.users[data-id="${data.senderId}"] .text-wrapper .typing  `)
+        typing.style.display = "none"
+
+          let chatBox = document.querySelector(`#chat-${data.senderUsername} .chatTyping`);
+          chatBox.style.display = "none"
+           const str = chatBox.querySelector("strong")
+          str.textContent = ""
         break;
     }
   };
@@ -145,7 +156,7 @@ function appendMessage(msg) {
 
 
   messagesBox.scrollTop = messagesBox.scrollHeight;
-  offset.nbr+=1
+  offset.nbr += 1
 }
 
 
@@ -305,8 +316,8 @@ export async function home() {
   let createButton = header.querySelector(".create");
 
   document.querySelectorAll(".users").forEach((user) => {
-    
-    user.addEventListener("click", HandleMessages );
+
+    user.addEventListener("click", HandleMessages);
   });
 
   document.querySelectorAll(".formComment").forEach((form) => {

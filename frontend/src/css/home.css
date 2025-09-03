@@ -1010,3 +1010,50 @@ body:has(#commentshow:checked) .second-part {
                 opacity: 1;
             }
         }
+
+
+
+/*  chat typing */
+  .chatTyping {
+            display:none;
+        }
+.chatTyping strong {
+  color:  #999 ;
+}
+        .dots2 {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .dots2 span {
+            width: 8px;
+            height: 8px;
+            background-color: #999;
+            border-radius: 50%;
+            display: inline-block;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+
+        .d1 {
+            animation-delay: -0.32s;
+        }
+
+        .d2 {
+            animation-delay: -0.16s;
+        }
+
+        .d3 {
+            animation-delay: 0s;
+        }
+
+        @keyframes bounce {
+            0%, 80%, 100% {
+                transform: scale(0.8) translateY(0);
+                opacity: 0.5;
+            }
+            40% {
+                transform: scale(1) translateY(-10px);
+                opacity: 1;
+            }
+        }
