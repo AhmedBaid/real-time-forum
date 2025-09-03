@@ -10,7 +10,7 @@ import { HandleMessages } from "./HandleMessages.js";
 import { loadUnreadNotifications } from "./notification.js"
 export let currentUserId = null;
 export let Currentusername = null
-
+export let offset = {"nbr" : 0}
 
 window.addEventListener("load", async () => {
 
@@ -50,7 +50,7 @@ function connectWebSocket() {
           if (el) {
             setUserOnline(data.userId);
           }
-        }, 200);
+        }, 0);
         break;
       case "offline":
 
@@ -59,7 +59,7 @@ function connectWebSocket() {
           if (el) {
             setUserOffline(data.userId);
           }
-        }, 200);
+        }, 0);
 
 
         break;
@@ -95,15 +95,18 @@ function connectWebSocket() {
       case "typing":
 
         setTimeout(() => {
-          const user = document.querySelector(`.users[data-id="${data.senderId}"] .text-wrapper .notification`)
-          user.textContent = data.senderUsername +  "typing"
-
+          const typing = document.querySelector(`.users[data-id="${data.senderId}"] .text-wrapper .typing  `)
+          let chatbox = doc
+          typing.style.display="block"
+        /*   const str =  typing.querySelector("strong")
+          str.textContent = data.senderUsername
+ */
         }, 200);
-        
+
         break;
       case "stopTyping":
-        const user = document.querySelector(`.users[data-id="${data.senderId}"] .text-wrapper .notification`);
-        if (user) user.textContent = "";
+                 const typing = document.querySelector(`.users[data-id="${data.senderId}"] .text-wrapper .typing  `)
+          typing.style.display="none"
         break;
     }
   };
@@ -142,7 +145,7 @@ function appendMessage(msg) {
 
 
   messagesBox.scrollTop = messagesBox.scrollHeight;
-
+  offset.nbr+=1
 }
 
 
@@ -168,6 +171,8 @@ export async function home() {
   aside.className = "aside2";
   allPost.className = "allPost";
   let users = await fetchUsers();
+
+
   users = users.data.sort((a, b) => {
     const aHasMsg = !!a.lastMessageTime;
     const bHasMsg = !!b.lastMessageTime;
@@ -191,6 +196,14 @@ export async function home() {
 
       <span class="username">${user.username}</span>
         <span class="notification"></span>
+<span class="typing"> 
+<strong>typing</strong>
+        <span class="dots">
+            <span class="dot">.</span>
+            <span class="dot">.</span>
+            <span class="dot">.</span>
+        </span></span>
+
   </div>
       <span class="online">.</span>
     `;
@@ -292,7 +305,8 @@ export async function home() {
   let createButton = header.querySelector(".create");
 
   document.querySelectorAll(".users").forEach((user) => {
-    user.addEventListener("click", HandleMessages);
+    
+    user.addEventListener("click", HandleMessages );
   });
 
   document.querySelectorAll(".formComment").forEach((form) => {

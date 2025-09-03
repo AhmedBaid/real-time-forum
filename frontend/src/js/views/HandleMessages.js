@@ -1,5 +1,4 @@
-import { socket, Currentusername, currentUserId } from "./home.js";
-
+import { offset, socket, Currentusername, currentUserId } from "./home.js";
 
 function throttle(func, time, option = { leading: false, trailing: false }) {
   let wait = false
@@ -22,6 +21,7 @@ function throttle(func, time, option = { leading: false, trailing: false }) {
 
 
 export async function HandleMessages(e) {
+  offset.nbr=0
   const user = document.querySelector(`.users[data-id="${e.currentTarget.dataset.id}"] .text-wrapper .notification`)
   if (user.textContent !== "") {
     user.innerHTML = ""
@@ -41,7 +41,6 @@ export async function HandleMessages(e) {
   chatArea.innerHTML = "";
   if (document.getElementById(`chat-${username}`)) return;
 
-  let offset = 0;
   let chatDiv = document.createElement("div");
   chatDiv.className = "chat-box";
   chatDiv.dataset.idU = receiverId
@@ -61,6 +60,7 @@ export async function HandleMessages(e) {
   chatArea.appendChild(chatDiv);
 
   chatDiv.querySelector(".close-btn").onclick = () => {
+    offset.nbr = 0
     chatDiv.remove();
   };
 
@@ -75,31 +75,31 @@ export async function HandleMessages(e) {
   let inputt = form.querySelector("#input")
   let typingTimeout;
 
-inputt.addEventListener("input", () => {
-  clearTimeout(typingTimeout);
+  inputt.addEventListener("input", () => {
+    clearTimeout(typingTimeout);
 
-  socket.send(JSON.stringify({
-    type: "typing",
-    senderUsername: Currentusername,
-    senderId: currentUserId,
-    receiver: receiverId,
-  }));
-
-  typingTimeout = setTimeout(() => {
     socket.send(JSON.stringify({
-      type: "stopTyping",
+      type: "typing",
       senderUsername: Currentusername,
       senderId: currentUserId,
       receiver: receiverId,
     }));
-  }, 1000);
-});
+
+    typingTimeout = setTimeout(() => {
+      socket.send(JSON.stringify({
+        type: "stopTyping",
+        senderUsername: Currentusername,
+        senderId: currentUserId,
+        receiver: receiverId,
+      }));
+    }, 1000);
+  });
 
 
 
 
   async function loadMessages(scroll) {
-    let res = await fetch(`/messages?receiver=${receiverId}&offset=${offset}`);
+    let res = await fetch(`/messages?receiver=${receiverId}&offset=${offset.nbr}`);
     if (!res.ok) throw new Error(await res.text());
     let messages = await res.json();
     console.log(messages);
@@ -128,7 +128,7 @@ inputt.addEventListener("input", () => {
 
     console.log(messages);
 
-    offset += 10;
+    offset.nbr += 10;
   }
 
   await loadMessages(true);
@@ -141,7 +141,7 @@ inputt.addEventListener("input", () => {
   }, 200, { leading: false, trailing: true }));
 
   form.addEventListener("submit", (ev) => {
-    offset += 1
+    offset.nbr += 1
     ev.preventDefault();
     let input = form.querySelector("input");
     if (input.value.trim() === "") return;
@@ -161,7 +161,7 @@ inputt.addEventListener("input", () => {
     let p = div.querySelector("p")
     let span = div.querySelector("span")
     p.textContent = input.value
-    span.textContent = Currentusername + "  -    " + new Date().toLocaleString();
+    span.textContent = Currentusername + "  -  " + new Date().toLocaleString();
     messagesBox.appendChild(div);
 
     input.value = "";

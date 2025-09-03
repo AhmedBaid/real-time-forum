@@ -973,3 +973,40 @@ body:has(#commentshow:checked) .second-part {
   transform: translateY(-2px);
   transition: all 0.3s ease;
 }
+
+/* typing */ 
+
+ .typing {
+            color: #fff8f8;
+            display: none;
+        }
+
+        .dots {
+            display: inline-block;
+        }
+
+        .dot {
+            opacity: 0;
+            animation: fadeIn 1.5s infinite;
+        }
+
+        .dot:nth-child(1) {
+            animation-delay: 0s;
+        }
+
+        .dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes fadeIn {
+            0%, 60% {
+                opacity: 0;
+            }
+            30% {
+                opacity: 1;
+            }
+        }
