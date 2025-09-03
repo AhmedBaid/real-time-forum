@@ -3,6 +3,7 @@ package handler
 import (
 	"database/sql"
 	"encoding/json"
+	"html"
 	"log"
 	"net/http"
 	"strconv"
@@ -15,52 +16,6 @@ import (
 
 	"github.com/gorilla/websocket"
 )
-
-var connMu = struct{
-    sync.Mutex
-    m map[*websocket.Conn]*sync.Mutex
-}{m: make(map[*websocket.Conn]*sync.Mutex)}
-
-func writeJSONSafe(conn *websocket.Conn, data interface{}) error {
-    // كل conn عندو mutex
-    connMu.Lock()
-    m, exists := connMu.m[conn]
-    if !exists {
-        m = &sync.Mutex{}
-        connMu.m[conn] = m
-    }
-    connMu.Unlock()
-
-    m.Lock()
-    defer m.Unlock()
-
-    // catch panic إذا كانت conn مغلقة
-    defer func() {
-        if r := recover(); r != nil {
-            log.Printf("Recovered from websocket panic: %v", r)
-            removeClosedConn(conn)
-        }
-    }()
-
-    return conn.WriteJSON(data)
-}
-
-func removeClosedConn(conn *websocket.Conn) {
-    usersMu.Lock()
-    defer usersMu.Unlock()
-    for userID, conns := range users {
-        for i, c := range conns {
-            if c == conn {
-                users[userID] = append(conns[:i], conns[i+1:]...)
-                break
-            }
-        }
-        if len(users[userID]) == 0 {
-            delete(users, userID)
-        }
-    }
-}
-
 
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool { return true },
@@ -121,6 +76,8 @@ func sendUnreadMessages(userID int, conn *websocket.Conn, db *sql.DB) {
 		if err := rows.Scan(&msgID, &senderID, &message, &createdAt, &senderUsername); err != nil {
 			continue
 		}
+		message = html.EscapeString(message)
+		senderUsername = html.EscapeString(senderUsername)
 		data := map[string]interface{}{
 			"type":           "message",
 			"id":             msgID,
@@ -130,7 +87,7 @@ func sendUnreadMessages(userID int, conn *websocket.Conn, db *sql.DB) {
 			"time":           createdAt,
 			"senderUsername": senderUsername,
 		}
-		writeJSONSafe(conn, data)
+		conn.WriteJSON(data)
 		db.Exec("UPDATE messages SET is_read = TRUE WHERE id = ?", msgID)
 	}
 }
@@ -149,7 +106,7 @@ func HandleBroadcast(db *sql.DB) {
 		if receiver, ok := data["receiver"].(int); ok && msgType == "message" {
 			if conns, ok := users[receiver]; ok {
 				for _, conn := range conns {
-		writeJSONSafe(conn, data)
+					conn.WriteJSON(data)
 					if msgID, ok := data["id"].(int); ok {
 						db.Exec("UPDATE messages SET is_read = TRUE WHERE id = ?", msgID)
 					}
@@ -167,7 +124,7 @@ func HandleBroadcast(db *sql.DB) {
 		} else {
 			for _, conns := range users {
 				for _, conn := range conns {
-		writeJSONSafe(conn, data)
+					conn.WriteJSON(data)
 				}
 			}
 		}
@@ -240,6 +197,27 @@ func reader(userID int, conn *websocket.Conn, db *sql.DB) {
 				"senderUsername": senderUsername,
 			}
 		}
+		if msgType == "typing" || msgType == "stopTyping" {
+			receiverID, ok := msg["receiver"].(float64)
+			if !ok {
+				continue
+			}
+
+			usersMu.Lock()
+			if conns, exists := users[int(receiverID)]; exists {
+				for _, conn := range conns {
+					conn.WriteJSON(map[string]interface{}{
+						"type":           msgType,
+						"senderId":       userID,
+						"senderUsername": msg["senderUsername"],
+						"time":           time.Now().Format(time.RFC3339),
+					})
+				}
+			}
+			usersMu.Unlock()
+			continue
+		}
+
 	}
 }
 
@@ -341,6 +319,9 @@ func GetMessagesHandler(w http.ResponseWriter, r *http.Request) {
 			log.Printf("Error scanning message: %v", err)
 			continue
 		}
+		m.Message = html.EscapeString(m.Message)
+		senderUsername = html.EscapeString(senderUsername)
+
 		messages = append(messages, map[string]interface{}{
 			"id":             m.Id,
 			"sender":         m.Sender,

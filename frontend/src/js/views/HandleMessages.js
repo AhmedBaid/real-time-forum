@@ -1,24 +1,23 @@
-import { socket } from "./home.js";
-import { socket } from "./home.js";
+import { socket, Currentusername, currentUserId } from "./home.js";
 
 
 function throttle(func, time, option = { leading: false, trailing: false }) {
-    let wait = false
-    return (...args) => {
+  let wait = false
+  return (...args) => {
 
-        if (!wait) {
-            if (option.leading) {
-                func.apply(this, args)
-            }
-            wait = true
-            setTimeout(() => {
-                if (!option.leading && option.trailing) {
-                    func.apply(this, args)
-                }
-                wait = false
-            }, time);
+    if (!wait) {
+      if (option.leading) {
+        func.apply(this, args)
+      }
+      wait = true
+      setTimeout(() => {
+        if (!option.leading && option.trailing) {
+          func.apply(this, args)
         }
+        wait = false
+      }, time);
     }
+  }
 }
 
 
@@ -45,6 +44,7 @@ export async function HandleMessages(e) {
   let offset = 0;
   let chatDiv = document.createElement("div");
   chatDiv.className = "chat-box";
+  chatDiv.dataset.idU = receiverId
   chatDiv.id = `chat-${username}`;
   chatDiv.innerHTML = `
     <div class="chat-header">
@@ -54,7 +54,7 @@ export async function HandleMessages(e) {
     </div>
     <div class="chat-messages"></div>
     <form class="chat-form" method="post">
-      <input type="text" placeholder="Type a message..." />
+      <input type="text" placeholder="Type a message..." id="input"/>
       <button type="submit">➤</button>
     </form>
   `;
@@ -64,22 +64,54 @@ export async function HandleMessages(e) {
     chatDiv.remove();
   };
 
+
+
+
+
   let form = chatDiv.querySelector(".chat-form");
   let messagesBox = chatDiv.querySelector(".chat-messages");
+
+
+  let inputt = form.querySelector("#input")
+  let typingTimeout;
+
+inputt.addEventListener("input", () => {
+  clearTimeout(typingTimeout);
+
+  socket.send(JSON.stringify({
+    type: "typing",
+    senderUsername: Currentusername,
+    senderId: currentUserId,
+    receiver: receiverId,
+  }));
+
+  typingTimeout = setTimeout(() => {
+    socket.send(JSON.stringify({
+      type: "stopTyping",
+      senderUsername: Currentusername,
+      senderId: currentUserId,
+      receiver: receiverId,
+    }));
+  }, 1000);
+});
+
+
+
 
   async function loadMessages(scroll) {
     let res = await fetch(`/messages?receiver=${receiverId}&offset=${offset}`);
     if (!res.ok) throw new Error(await res.text());
     let messages = await res.json();
+    console.log(messages);
 
     if (messages.length === 0) return;
-let oldScrollHeight = messagesBox.scrollHeight;
+    let oldScrollHeight = messagesBox.scrollHeight;
     messages.forEach(msg => {
       let div = document.createElement("div");
       div.className = `msg ${msg.receiver === receiverId ? "right" : "left"}`;
       div.innerHTML = `
         <p>${msg.message}</p>
-        <span class="time">${new Date(msg.time).toLocaleTimeString()}</span>
+        <span class="time">${msg.senderUsername}-${new Date(msg.time).toLocaleString()}</span>
       `;
       messagesBox.prepend(div);
       /* 
@@ -91,7 +123,7 @@ let oldScrollHeight = messagesBox.scrollHeight;
     if (scroll) {
       messagesBox.scrollTop = messagesBox.scrollHeight;
     } else {
-       messagesBox.scrollTop = messagesBox.scrollHeight - oldScrollHeight;
+      messagesBox.scrollTop = messagesBox.scrollHeight - oldScrollHeight;
     }
 
     console.log(messages);
@@ -106,125 +138,10 @@ let oldScrollHeight = messagesBox.scrollHeight;
       await loadMessages(false);
     }
 
-  }, 200, {leading:false ,trailing: true }));
+  }, 200, { leading: false, trailing: true }));
 
   form.addEventListener("submit", (ev) => {
-    ev.preventDefault();
-    let input = form.querySelector("input");
-    if (input.value.trim() === "") return;
-
-    socket.send(JSON.stringify({
-      type: "message",
-      receiver: receiverId,
-      message: input.value,
-    }));
-
-    let div = document.createElement("div");
-    div.className = "msg right";
-    div.innerHTML = `
-      <p>${input.value}</p>
-      <span class="time">${new Date().toLocaleTimeString()}</span>
-    `;
-    messagesBox.appendChild(div);
-
-    input.value = "";
-    messagesBox.scrollTop = messagesBox.scrollHeight;
-  });
-}
-
-export async function HandleMessages(e) {
-  
-
-
-  let username = e.currentTarget.dataset.username;
-  let receiverId = Number(e.currentTarget.dataset.id);
-
-  let main = document.querySelector(".main");
-  let chatArea = document.querySelector(".chat-area");
-  if (!chatArea) {
-    chatArea = document.createElement("div");
-    chatArea.className = "chat-area";
-    main.appendChild(chatArea);
-  }
-  chatArea.innerHTML = "";
-  if (document.getElementById(`chat-${username}`)) return;
-
-  let offset = 0;
-  let chatDiv = document.createElement("div");
-  chatDiv.className = "chat-box";
-  chatDiv.id = `chat-${username}`;
-  chatDiv.innerHTML = `
-    <div class="chat-header">
-      <img src="https://robohash.org/${username}.png?size=50x50" class="avatar" />
-      <div><strong>${username}</strong></div>
-      <button class="close-btn">✖</button>
-    </div>
-    <div class="chat-messages"></div>
-    <form class="chat-form" method="post">
-      <input type="text" placeholder="Type a message..." />
-      <button type="submit">➤</button>
-    </form>
-  `;
-  chatArea.appendChild(chatDiv);
-
-  chatDiv.querySelector(".close-btn").onclick = () => {
-    chatDiv.remove();
-  };
-
-  let form = chatDiv.querySelector(".chat-form");
-  let messagesBox = chatDiv.querySelector(".chat-messages");
-
-  async function loadMessages(prepend = false) {
-    let res = await fetch(`/messages?receiver=${receiverId}&offset=${offset}`);
-    if (!res.ok) throw new Error(await res.text());
-    let messages = await res.json();
-
-
-
-    if (messages.length === 0) return;
-
-    let oldScrollHeight = messagesBox.scrollHeight;
-
-    messages.forEach(msg => {
-      let div = document.createElement("div");
-      div.className = `msg ${msg.receiver === receiverId ? "right" : "left"}`;
-      div.innerHTML = `
-        <p></p>
-        <span class="time"></span>
-      `;
-      let p = div.querySelector("p")
-      let span = div.querySelector("span")
-      span.textContent = new Date(msg.time).toLocaleTimeString()
-      p.textContent = msg.message
-      if (prepend) {
-        messagesBox.prepend(div);
-      } else {
-        messagesBox.appendChild(div);
-      }
-
-      if (msg.receiver === receiverId) {
-        fetch(`/mark-read/${msg.id}`, { method: "POST" });
-      }
-    });
-
-    if (!prepend) {
-      messagesBox.scrollTop = messagesBox.scrollHeight;
-    } else {
-      messagesBox.scrollTop = messagesBox.scrollHeight - oldScrollHeight;
-    }
-
-    offset += 10;
-  }
-
-  await loadMessages(false);
-
-  messagesBox.addEventListener("scroll", async () => {
-    if (messagesBox.scrollTop === 0) {
-      await loadMessages(true);
-    }
-  });
-
-  form.addEventListener("submit", (ev) => {
+    offset += 1
     ev.preventDefault();
     let input = form.querySelector("input");
     if (input.value.trim() === "") return;
@@ -241,10 +158,10 @@ export async function HandleMessages(e) {
       <p></p>
       <span class="time"></span>
     `;
-    let p  =   div.querySelector("p")
-    let span  =   div.querySelector("span")
-span.textContent=new Date().toLocaleTimeString()
-    p.textContent=input.value
+    let p = div.querySelector("p")
+    let span = div.querySelector("span")
+    p.textContent = input.value
+    span.textContent = Currentusername + "  -    " + new Date().toLocaleString();
     messagesBox.appendChild(div);
 
     input.value = "";

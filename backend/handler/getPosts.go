@@ -2,6 +2,7 @@ package handler
 
 import (
 	"fmt"
+	"html"
 	"net/http"
 
 	"real_time/backend/config"
@@ -84,6 +85,10 @@ func GetPosts(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		var Total int 
+post.Username =  html.EscapeString(post.Username)
+post.Title  =  html.EscapeString(post.Title)
+post.Description =  html.EscapeString(post.Description)
+
 		config.Db.QueryRow(totalcmnts, post.Id).Scan(&Total)
 		post.Categories = categorMap[post.Id]
 		post.TotalLikes = totalLikes

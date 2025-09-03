@@ -17,7 +17,6 @@ import (
 )
 
 func main() {
-    // فتح قاعدة البيانات أولاً
     var err error
     config.Db, err = sql.Open("sqlite", "./backend/database/db.db")
     if err != nil {
@@ -26,7 +25,6 @@ func main() {
     }
     defer config.Db.Close()
 
-    // قراءة وتنفيذ ملف query.sql
     query, err := os.ReadFile("./backend/database/query.sql")
     if err != nil {
         fmt.Println("Error reading query file:", err)
@@ -39,7 +37,6 @@ func main() {
         return
     }
 
-    // إضافة الفئات
     _, err = config.Db.Exec(`
         INSERT OR IGNORE INTO categories (name, icon) VALUES
         ('Sport', '<i class="fa-solid fa-medal"></i>'),
@@ -61,13 +58,14 @@ func main() {
     http.HandleFunc("/api/current-user", func(w http.ResponseWriter, r *http.Request) {
         _, session := helpers.SessionChecked(w, r)
         var userID int
-        err := config.Db.QueryRow("SELECT id FROM users WHERE session = ?", session).Scan(&userID)
+        var username string
+        err := config.Db.QueryRow("SELECT id,  username FROM users WHERE session = ?", session).Scan(&userID, &username)
         if err != nil {
             http.Error(w, "Unauthorized", http.StatusUnauthorized)
             return
         }
         w.Header().Set("Content-Type", "application/json")
-        json.NewEncoder(w).Encode(map[string]interface{}{"userId": userID})
+        json.NewEncoder(w).Encode(map[string]interface{}{"userId": userID, "username" :  username})
     })
 
     http.HandleFunc("/ws", handler.WsHandler)

@@ -1,4 +1,3 @@
-// home.js
 import { container, errorDiv, errorMessage, Header, Navigate, PostForm } from "../config.js";
 import { login } from "./login.js";
 import { timeFormat } from "../helpers/timeFormat.js";
@@ -9,12 +8,12 @@ import { renderCommentsStyled } from "../helpers/randerComments.js";
 import { createPost } from "./createPost.js";
 import { HandleMessages } from "./HandleMessages.js";
 import { loadUnreadNotifications } from "./notification.js"
-let currentUserId = null;
+export let currentUserId = null;
+export let Currentusername = null
 
 
 window.addEventListener("load", async () => {
 
-  connectWebSocket();
   await loadUnreadNotifications();
 })
 
@@ -24,6 +23,7 @@ async function fetchCurrentUserId() {
     if (!res.ok) throw new Error('Failed to fetch user ID');
     const data = await res.json();
     currentUserId = data.userId;
+    Currentusername = data.username
   } catch (error) {
     console.error('Error fetching current user ID:', error);
   }
@@ -45,61 +45,65 @@ function connectWebSocket() {
 
     switch (data.type) {
       case "online":
-        const idon = setInterval(() => {
+        setTimeout(() => {
           let el = document.querySelector(`.users`);
           if (el) {
             setUserOnline(data.userId);
-            clearInterval(idon)
           }
         }, 200);
         break;
       case "offline":
 
-        const ido = setInterval(() => {
+        setTimeout(() => {
           let el = document.querySelector(`.users`);
           if (el) {
             setUserOffline(data.userId);
-            clearInterval(ido)
           }
         }, 200);
 
 
         break;
       case "message":
+
         if (currentUserId) {
           appendMessage(data);
-          if (data.receiver === currentUserId) {
-            const userElement = document.querySelector(`.users[data-id="${data.sender}"]`);
-            if (userElement) {
-              const notification = userElement.querySelector(".notification");
-              if (notification) notification.textContent = "new Message";
-            }
-          }
+
         }
         break;
 
       case "notification":
-        const ids = setTimeout(() => {
+        setTimeout(() => {
           console.log(data);
           const user = document.querySelector(`.users[data-id="${data.from}"] .text-wrapper .notification`)
           if (user) {
             user.innerHTML = "new Message"
-            clearInterval(ids)
           }
         }, 200);
 
 
         break;
       case "online_list":
-        const id = setTimeout(() => {
+        setTimeout(() => {
           console.log(data);
           let el = document.querySelector(`.users`);
           if (el) {
             data.users.forEach((id) => setUserOnline(Number(id)));
-            clearInterval(id)
           }
         }, 200);
 
+        break;
+      case "typing":
+
+        setTimeout(() => {
+          const user = document.querySelector(`.users[data-id="${data.senderId}"] .text-wrapper .notification`)
+          user.textContent = data.senderUsername +  "typing"
+
+        }, 200);
+        
+        break;
+      case "stopTyping":
+        const user = document.querySelector(`.users[data-id="${data.senderId}"] .text-wrapper .notification`);
+        if (user) user.textContent = "";
         break;
     }
   };
@@ -116,25 +120,32 @@ window.onload = () => {
 
 }
 
-
 function appendMessage(msg) {
+
   let chatBox = document.getElementById(`chat-${msg.senderUsername}`);
   if (!chatBox) return;
 
   let messagesBox = chatBox.querySelector(".chat-messages");
-  messagesBox.innerHTML += `
-    <div class="msg ${msg.sender === currentUserId ? "right" : "left"}">
-      <p></p>
-      <span class="time"></span>
-    </div>
-  `;
+  let div = document.createElement("div");
+  div.className = `msg ${msg.sender === currentUserId ? "right" : "left"}`;
 
-  let p = messagesBox.querySelector("div p")
-  let span = messagesBox.querySelector("div span")
-  span.textContent = new Date(msg.time).toLocaleTimeString()
-  p.textContent = msg.message
+  let p = document.createElement("p");
+  p.textContent = msg.message;
+
+  let span = document.createElement("span");
+  span.className = "time";
+  span.textContent = msg.senderUsername + " - " + new Date(msg.time).toLocaleString();
+
+  div.appendChild(p);
+  div.appendChild(span);
+  messagesBox.appendChild(div);
+
+
   messagesBox.scrollTop = messagesBox.scrollHeight;
+
 }
+
+
 
 function setUserOnline(userId) {
   let el = document.querySelector(`.users[data-id="${userId}"] .online`);
@@ -325,3 +336,5 @@ async function Logout(e) {
 
 
 }
+
+
