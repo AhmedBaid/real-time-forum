@@ -8,15 +8,20 @@ import { renderCommentsStyled } from "../helpers/randerComments.js";
 import { createPost } from "./createPost.js";
 import { HandleMessages } from "./HandleMessages.js";
 import { loadUnreadNotifications } from "./notification.js"
+import { sortUsers } from "../helpers/sortUsers.js"
 export let currentUserId = null;
 export let Currentusername = null
 export let offset = { "nbr": 0 }
 let id = null
+
 window.addEventListener("load", async () => {
 
   await loadUnreadNotifications();
 })
 
+
+
+// get the current user 
 async function fetchCurrentUserId() {
   try {
     const res = await fetch('/api/current-user');
@@ -30,7 +35,7 @@ async function fetchCurrentUserId() {
 }
 
 export let socket = null;
-
+// websocket andler 
 function connectWebSocket() {
 
   socket = new WebSocket("ws://localhost:8080/ws");
@@ -72,7 +77,10 @@ function connectWebSocket() {
         break;
 
       case "notification":
-        setTimeout(() => {
+        setTimeout(async () => {
+        /*   let aside = document.querySelector(".aside2")
+          aside.innerHTML=""
+          await sortUsers(aside) */
           console.log(data);
           const user = document.querySelector(`.users[data-id="${data.from}"] .text-wrapper .notification`)
           if (user) {
@@ -138,11 +146,12 @@ function connectWebSocket() {
     setTimeout(connectWebSocket, 5000);
   };
 }
+
 window.onload = () => {
   connectWebSocket();
 
 }
-
+// messages realtime 
 function appendMessage(msg) {
 
   let chatBox = document.getElementById(`chat-${msg.senderUsername}`);
@@ -169,12 +178,12 @@ function appendMessage(msg) {
 }
 
 
-
+// online handler
 function setUserOnline(userId) {
   let el = document.querySelector(`.users[data-id="${userId}"] .online`);
   if (el) el.style.backgroundColor = "green";
 }
-
+//offline handler
 function setUserOffline(userId) {
   let el = document.querySelector(`.users[data-id="${userId}"] .online`);
   if (el) el.style.backgroundColor = "red";
@@ -190,46 +199,8 @@ export async function home() {
   let aside = document.createElement("div");
   aside.className = "aside2";
   allPost.className = "allPost";
-  let users = await fetchUsers();
 
-
-  users = users.data.sort((a, b) => {
-    const aHasMsg = !!a.lastMessageTime;
-    const bHasMsg = !!b.lastMessageTime;
-
-    if (aHasMsg && bHasMsg) {
-      return new Date(b.lastMessageTime) - new Date(a.lastMessageTime);
-    }
-    if (aHasMsg) return -1;
-    if (bHasMsg) return 1;
-    return a.username.localeCompare(b.username);
-  });
-
-  for (const user of users) {
-    const div = document.createElement("div");
-    div.className = "users";
-    div.dataset.username = user.username;
-    div.dataset.id = user.id;
-    div.innerHTML = `
-      <img src="https://robohash.org/${user.username}.png?size=50x50" class="avatar" />
-        <div class="text-wrapper">
-
-      <span class="username">${user.username}</span>
-        <span class="notification"></span>
-<span class="typing"> 
-<strong>typing</strong>
-        <span class="dots">
-            <span class="dot">.</span>
-            <span class="dot">.</span>
-            <span class="dot">.</span>
-        </span></span>
-
-  </div>
-      <span class="online">.</span>
-    `;
-    aside.appendChild(div);
-  }
-
+  await sortUsers(aside)
   let obj = await fetchPosts();
 
   for (const post of obj.data.Posts) {
