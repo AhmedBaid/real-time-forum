@@ -134,6 +134,14 @@ func HandleBroadcast(db *sql.DB) {
 
 func reader(userID int, conn *websocket.Conn, db *sql.DB) {
 	defer func() {
+		/* usersMu.Lock()
+		broadcast <- map[string]interface{}{
+			"type":           "stoptyping",
+			"senderId":       userID,
+			"time":           time.Now().Format(time.RFC3339),
+		}
+		usersMu.Unlock() */
+
 		removeUserConn(userID, conn)
 		conn.Close()
 

@@ -11,7 +11,7 @@ import { loadUnreadNotifications } from "./notification.js"
 export let currentUserId = null;
 export let Currentusername = null
 export let offset = { "nbr": 0 }
-
+let id = null
 window.addEventListener("load", async () => {
 
   await loadUnreadNotifications();
@@ -50,7 +50,7 @@ function connectWebSocket() {
           if (el) {
             setUserOnline(data.userId);
           }
-        }, 0);
+        }, 200);
         break;
       case "offline":
 
@@ -59,7 +59,7 @@ function connectWebSocket() {
           if (el) {
             setUserOffline(data.userId);
           }
-        }, 0);
+        }, 200);
 
 
         break;
@@ -102,22 +102,31 @@ function connectWebSocket() {
           let chatBox = document.querySelector(`#chat-${data.senderUsername} .chatTyping`);
           chatBox.style.display = "block"
           const str = chatBox.querySelector("strong")
-          str.textContent = data.senderUsername +" typing"
+          str.textContent = data.senderUsername + " typing"
 
-          /*   const str =  typing.querySelector("strong")
-            str.textContent = data.senderUsername
-   */
         }, 200);
+        clearTimeout(id)
+        id = setTimeout(() => {
 
+          const typing = document.querySelector(`.users[data-id="${data.senderId}"] .text-wrapper .typing  `)
+          typing.style.display = "none"
+
+          let chatBox = document.querySelector(`#chat-${data.senderUsername} .chatTyping`);
+          chatBox.style.display = "none"
+          const str = chatBox.querySelector("strong")
+          str.textContent = ""
+
+
+        }, 1000);
         break;
       case "stopTyping":
         const typing = document.querySelector(`.users[data-id="${data.senderId}"] .text-wrapper .typing  `)
         typing.style.display = "none"
 
-          let chatBox = document.querySelector(`#chat-${data.senderUsername} .chatTyping`);
-          chatBox.style.display = "none"
-           const str = chatBox.querySelector("strong")
-          str.textContent = ""
+        let chatBox = document.querySelector(`#chat-${data.senderUsername} .chatTyping`);
+        chatBox.style.display = "none"
+        const str = chatBox.querySelector("strong")
+        str.textContent = ""
         break;
     }
   };
