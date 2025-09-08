@@ -78,9 +78,14 @@ function connectWebSocket() {
 
       case "notification":
         setTimeout(async () => {
-        /*   let aside = document.querySelector(".aside2")
-          aside.innerHTML=""
-          await sortUsers(aside) */
+          /*   let aside = document.querySelector(".aside2")
+            aside.innerHTML=""
+            await sortUsers(aside) */
+          let chatbox = document.querySelector(`.chat-box[data-id-u="${data.from}"]`);
+          if (chatbox) {
+            return;
+          }
+
           console.log(data);
           const user = document.querySelector(`.users[data-id="${data.from}"] .text-wrapper .notification`)
           if (user) {
