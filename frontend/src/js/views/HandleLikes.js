@@ -1,9 +1,10 @@
+import { errorDiv, errorMessage } from "../config.js";
+import { showToast } from "../helpers/showToast.js";
+
 export async function HandleLikes(e) {
   e.preventDefault();
 
   const form = e.target.closest("form");
-  const errorDiv = document.querySelector(".error");
-  const errorMessage = document.getElementById("message");
 
   errorDiv.style.display = "none";
   errorMessage.textContent = "";
@@ -49,7 +50,6 @@ export async function HandleLikes(e) {
     }
 
   } catch (error) {
-    errorMessage.textContent = error.message;
-    errorDiv.style.display = "flex";
+    showToast("error", error.message);
   }
 }

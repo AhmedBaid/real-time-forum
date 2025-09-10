@@ -47,7 +47,7 @@ func Authorisation(HandlerFunc http.HandlerFunc) http.HandlerFunc {
 		cookie, err := r.Cookie("session")
 		if err != nil || cookie.Value == "" {
 			config.ResponseJSON(w, config.ErrorUnauthorized.Code, map[string]any{
-				"message": "user is not logged",
+				"message": "you are not authorized",
 				"status":  config.ErrorUnauthorized.Code,
 			})
 			return
@@ -58,7 +58,7 @@ func Authorisation(HandlerFunc http.HandlerFunc) http.HandlerFunc {
 			err = config.Db.QueryRow(stmt, cookie.Value).Scan(&userID)
 			if err != nil {
 				config.ResponseJSON(w, config.ErrorUnauthorized.Code, map[string]any{
-					"message": "user is not logged",
+					"message": "you are not authorized",
 					"status":  config.ErrorUnauthorized.Code,
 				})
 				return

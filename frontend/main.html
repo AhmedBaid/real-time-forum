@@ -1,38 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Real-Time-Forum</title>
 
-    <link rel="stylesheet" href="frontend/src/css/login.css" />
-    <link rel="stylesheet" href="frontend/src/css/register.css" />
-    <link rel="stylesheet" href="frontend/src/css/global.css" />
-    <link rel="stylesheet" href="frontend/src/css/home.css" />
-    <link
-      rel="shortcut icon"
-      href="frontend/src/assets/icon.png"
-      type="image/x-icon"
-    />
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Real-Time-Forum</title>
 
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
-    />
-  </head>
+  <link rel="stylesheet" href="frontend/src/css/login.css" />
+  <link rel="stylesheet" href="frontend/src/css/register.css" />
+  <link rel="stylesheet" href="frontend/src/css/global.css" />
+  <link rel="stylesheet" href="frontend/src/css/home.css" />
+  <link rel="shortcut icon" href="frontend/src/assets/icon.png" type="image/x-icon" />
 
-  <body>
-    <div class="error">
-      <span id="message"></span>
-      <span id="close">x</span>
-    </div>
-    <div class="main">
-    </div>
-    <script type="module" src="frontend/src/js/main.js">
-      let closeb =  document.getElementById("close")
-      closeb.addEventListener("click", ()=>{
-        document.querySelector(".error").innerHTML=""
-      })
-    </script>
-  </body>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
+</head>
+
+<body>
+  <div class="error">
+    <span id="errmessage">This is an error!</span>
+    <i class="fa-solid fa-xmark"></i>
+  </div>
+  <div class="success">
+    <span id="successmessage">This is a success message!</span>
+    <i class="fa-solid fa-xmark"></i>
+  </div>
+
+  <div class="main">
+  </div>
+  <script type="module" src="frontend/src/js/main.js">
+  </script>
+</body>
+
 </html>

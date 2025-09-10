@@ -5,10 +5,10 @@ export function Navigate(url) {
 }
 
 export const errorDiv = document.querySelector(".error");
-export const errorMessage = document.getElementById("message");
+export const successDiv = document.querySelector(".success");
+export const errorMessage = document.getElementById("errmessage");
+export const successMessage = document.getElementById("successmessage");
 
-errorDiv.style.display = "none";
-errorMessage.textContent = "";
 
 export const registerPage = `<div class="register">
             <form id="form" method="post" class="register-form">
@@ -61,13 +61,13 @@ export const PostForm = `
       <textarea id="content" class="content" placeholder="Description"></textarea>
       <div class="categories">
         ${categories
-          .map(
-            (category) => `
+    .map(
+      (category) => `
               <input type="checkbox" id="tag${category.id}" class="tag-checkk" name="tags" value="${category.id}" hidden />
               <label for="tag${category.id}" class="tagCC">${category.name}</label>
             `
-          )
-          .join("")}
+    )
+    .join("")}
       </div>
       <button type="submit">Create Post</button>
     </form>`;

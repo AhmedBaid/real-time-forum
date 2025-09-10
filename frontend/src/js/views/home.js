@@ -1,4 +1,4 @@
-import { container, errorDiv, errorMessage, Header, Navigate, PostForm } from "../config.js";
+import { container, errorDiv, errorMessage, Header, Navigate, PostForm, successDiv, successMessage } from "../config.js";
 import { login } from "./login.js";
 import { timeFormat } from "../helpers/timeFormat.js";
 import { HandleComments } from "./createComments.js";
@@ -9,6 +9,7 @@ import { createPost } from "./createPost.js";
 import { HandleMessages } from "./HandleMessages.js";
 import { loadUnreadNotifications } from "./notification.js"
 import { sortUsers } from "../helpers/sortUsers.js"
+import { showToast } from "../helpers/showToast.js";
 export let currentUserId = null;
 export let Currentusername = null
 export let offset = { "nbr": 0 }
@@ -196,8 +197,6 @@ function setUserOffline(userId) {
 
 export async function home() {
   let header = document.createElement("header");
-  let Postform = document.createElement("div");
-  Postform.className = "Post-form";
   let parentContainer = document.createElement("div");
   parentContainer.className = "parentContainer";
   let allPost = document.createElement("div");
@@ -290,11 +289,9 @@ export async function home() {
 
   container.innerHTML = "";
   header.innerHTML = Header;
-  Postform.innerHTML = PostForm;
   parentContainer.appendChild(allPost);
   parentContainer.appendChild(aside);
   container.appendChild(header);
-  document.body.appendChild(Postform);
   container.append(parentContainer);
 
   const logoutButton = header.querySelector(".logout");
@@ -316,35 +313,43 @@ export async function home() {
   logoutButton.addEventListener("click", Logout);
 
   createButton.addEventListener("click", () => {
-    Navigate("/createpost");
     const postForm = document.querySelector(".Post-form");
-    postForm.style.display = postForm.style.display === "none" || postForm.style.display === "" ? "block" : "none";
-    container.style.opacity = postForm.style.display === "block" ? "0.2" : "1";
+    if (!postForm) {
+      Navigate("/createpost");
+      const injecthtml = document.createElement("div");
+      injecthtml.className = "Post-form";
+      injecthtml.innerHTML = PostForm;
+
+      document.body.appendChild(injecthtml);
+      container.style.opacity = "0.2";
+      const form = injecthtml.querySelector("form");
+      form.addEventListener("submit", createPost);
+    } else {
+      Navigate("/");
+      postForm.remove();
+      container.style.opacity = "1";
+    }
   });
 
-  let form = document.querySelector(".post-form");
-  form.addEventListener("submit", createPost);
+
 }
 async function Logout(e) {
+  errorDiv.style.display = "none";
+  errorMessage.textContent = "";
+  successDiv.style.display = "none";
+  successMessage.textContent = "";
   e.preventDefault();
   const response = await fetch("/logout", {
     method: "POST",
   });
   if (!response.ok) {
-    errorDiv.style.display = "flex";
-    errorMessage.textContent = "logout failed";
+    showToast("error", "Failed to logout");
+    Navigate("/login");
+    login();
     return;
   }
-  errorDiv.style.display = "flex";
-  errorDiv.style.backgroundColor = "#04e17a";
-  errorMessage.textContent = "logout successfully";
+  showToast("success", "Logged out successfully");
   socket.close()
   Navigate("/login");
   login();
-
-
-
-
 }
-
-

@@ -1,12 +1,10 @@
+import { errorDiv, errorMessage } from "../config.js";
+import { showToast } from "../helpers/showToast.js";
 import { timeFormat } from "../helpers/timeFormat.js";
 
 export async function HandleComments(e) {
   e.preventDefault();
   let form = e.target;
-
-  const errorDiv = document.querySelector(".error");
-  const errorMessage = document.getElementById("message");
-
   errorDiv.style.display = "none";
   errorMessage.textContent = "";
 
@@ -14,8 +12,7 @@ export async function HandleComments(e) {
   let Comment = form.querySelector("[name='comment']").value;
 
   if (post_id === 0 || Comment.trim() === "" || Comment.length < 3) {
-    errorMessage.textContent = "Comment must be at least 3 characters.";
-    errorDiv.style.display = "flex";
+    showToast("error", "Comment must be at least 3 characters.");
     return;
   }
   try {
@@ -38,10 +35,10 @@ export async function HandleComments(e) {
 
     let div = document.createElement("div");
     div.className = "comments";
-   let j  =   document.querySelector(".messageErr")
-   if (j) {
-    j.innerHTML=""
-   }
+    let j = document.querySelector(".messageErr")
+    if (j) {
+      j.innerHTML = ""
+    }
     div.innerHTML = `
       <img src="https://robohash.org/${data.data.Username}.png?size=50x50" />
       <div class="comment-content">
@@ -54,8 +51,8 @@ export async function HandleComments(e) {
         </div>
       </div>
     `;
-let p  = div.querySelector(".comm")
-p.textContent=data.data.Comment
+    let p = div.querySelector(".comm")
+    p.textContent = data.data.Comment
 
     form.reset();
 
@@ -66,7 +63,6 @@ p.textContent=data.data.Comment
       totalSpan.textContent = current + 1;
     }
   } catch (error) {
-    errorMessage.textContent = error.message;
-    errorDiv.style.display = "flex";
+    showToast("error", error.message);
   }
 }

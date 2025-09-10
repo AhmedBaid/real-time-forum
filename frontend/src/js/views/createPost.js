@@ -1,53 +1,49 @@
-import { container, Navigate, PostForm } from "../config.js";
-import { fetchPosts } from "../helpers/api.js";
+import { container, errorDiv, errorMessage, Navigate, successDiv, successMessage } from "../config.js";
+import { showToast } from "../helpers/showToast.js";
 import { home } from "./home.js";
+import { login } from "./login.js";
 
 export async function createPost(e) {
     e.preventDefault();
-
-    const errorDiv = document.querySelector(".error");
-    const errorMessage = document.getElementById("message");
+    const postForm = document.querySelector(".Post-form");
     errorDiv.style.display = "none";
     errorMessage.textContent = "";
+    successDiv.style.display = "none";
+    successMessage.textContent = "";
     const title = document.querySelector(".title").value;
     const content = document.querySelector(".content").value;
     const categories = Array.from(
         document.querySelectorAll("input[name='tags']:checked")
     ).map(tag => Number(tag.value));
-    try {
+    console.log({ title, content, categories });
 
-        const response = await fetch("/createpost", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                title: title,
-                description: content,
-                categories: categories,
-            }),
-        });
-        const data = await response.json();
-        if (!response.ok) {
-            errorDiv.style.display = "flex";
-            errorMessage.textContent = data.message;
+    const response = await fetch("/createpost", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            title: title,
+            description: content,
+            categories: categories,
+        }),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+        if (response.status === 401) {
+            postForm.remove();
+            container.style.opacity = "1";
+            showToast("error", data.message);
+            Navigate("/login");
+            login();
             return;
         }
-        const postForm = document.querySelector(".Post-form");
-        postForm.style.display = "none";
-        container.style.opacity = "1";
-        errorDiv.style.display = "flex";
-        errorDiv.style.backgroundColor = "#04e17a";
-        errorMessage.textContent = "Post created successfully";
-        Navigate("/");
-        home();
-    } catch (error) {
-        console.log(error);
-        const postForm = document.querySelector(".Post-form");
-        postForm.style.display = "none";
-        errorDiv.style.display = "flex";
-        errorMessage.textContent = error;
+        showToast("error", data.message);
         return;
     }
-
+    postForm.remove();
+    container.style.opacity = "1";
+    showToast("success", "Post created successfully");
+    Navigate("/");
+    home();
 }

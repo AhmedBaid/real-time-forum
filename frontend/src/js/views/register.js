@@ -1,8 +1,11 @@
-import { container, errorDiv, errorMessage, Navigate, registerPage } from "../config.js";
+import { container, errorDiv, errorMessage, Navigate, registerPage, successDiv, successMessage } from "../config.js";
+import { showToast } from "../helpers/showToast.js";
 import { loadPage } from "../loadPage.js";
 import { home } from "./home.js";
 
 export function register() {
+    errorDiv.style.display = "none";
+    errorMessage.textContent = "";
     container.innerHTML = ""
     container.innerHTML = registerPage;
     let form = document.querySelector("form");
@@ -35,13 +38,10 @@ async function HandleRegister(e) {
     const data = await response.json();
 
     if (!response.ok) {
-        errorDiv.style.display = "flex";
-        errorMessage.textContent = data.message;
+        showToast("error", data.message);
         return;
     }
-    errorDiv.style.display = "flex";
-    errorDiv.style.backgroundColor = "#04e17a";
-    errorMessage.textContent = "User registered successfully";
+    showToast("success", "user registered successfully");
     Navigate("/");
     home(data.data)
 }

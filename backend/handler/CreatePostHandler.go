@@ -21,9 +21,9 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 
 	// Decode JSON
 	var post struct {
-		Title       string   `json:"title"`
-		Description string   `json:"description"`
-		Categories  []int    `json:"categories"`
+		Title       string `json:"title"`
+		Description string `json:"description"`
+		Categories  []int  `json:"categories"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&post); err != nil {
 		fmt.Println(err)
@@ -31,23 +31,17 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	arr := []int{1, 2, 3, 4, 5, 6, 7, 8}
 
-
-
- var arr  =  []int{1,2,3,4,5,6,7,8}
-
-for _, v := range post.Categories {
-
-if !slices.Contains(arr,v) {
-		config.ResponseJSON(w, http.StatusBadRequest, map[string]any{
-			"message": "invalide categorie 55 ",
-			"status":  http.StatusBadRequest,
-		})
-		return
-}
-	
-}
-
+	for _, v := range post.Categories {
+		if !slices.Contains(arr, v) {
+			config.ResponseJSON(w, http.StatusBadRequest, map[string]any{
+				"message": "invalide categories",
+				"status":  http.StatusBadRequest,
+			})
+			return
+		}
+	}
 
 	// Validation
 	if post.Title == "" || post.Description == "" || len(post.Categories) == 0 {

@@ -1,4 +1,5 @@
 import { errorMessage, errorDiv } from "../config.js"
+import { showToast } from "./showToast.js";
 
 
 export async function fetchPosts() {
@@ -10,8 +11,7 @@ export async function fetchPosts() {
     }
     return await res.json();
   } catch (error) {
-    errorMessage.textContent = error;
-    errorDiv.style.display = "flex";
+    showToast("error", error.message);
   }
 }
 
@@ -28,8 +28,7 @@ export async function fetchComments(postID) {
 
     return await res.json();
   } catch (error) {
-    errorMessage.textContent = error;
-    errorDiv.style.display = "flex";
+    showToast("error", error.message);
   }
 }
 
@@ -45,7 +44,6 @@ export async function fetchUsers() {
     return await res.json();
     
   } catch (error) {
-    errorMessage.textContent = error;
-    errorDiv.style.display = "flex";
+    showToast("error", error.message);
   }
 }

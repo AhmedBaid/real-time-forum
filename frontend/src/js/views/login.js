@@ -1,4 +1,5 @@
-import { container, errorDiv, errorMessage, loginPage, Navigate } from "../config.js";
+import { container, errorDiv, errorMessage, loginPage, Navigate, successDiv, successMessage } from "../config.js";
+import { showToast } from "../helpers/showToast.js";
 import { loadPage } from "../loadPage.js";
 import { home } from "./home.js";
 
@@ -30,14 +31,11 @@ async function HandleLogin(e) {
 
     const data = await response.json();
     if (!response.ok) {
-        errorDiv.style.display = "flex";
-        errorMessage.textContent = data.message;
+        showToast("error", data.message);
         return;
     }
 
-    errorDiv.style.display = "flex";
-    errorDiv.style.backgroundColor = "#04e17a";
-    errorMessage.textContent = "User logged in successfully";
+    showToast("success", "Logged in successfully");
     Navigate("/");
     home(data.data);
 }
