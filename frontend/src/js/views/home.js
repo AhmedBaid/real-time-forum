@@ -343,7 +343,7 @@ async function Logout(e) {
     method: "POST",
   });
   if (!response.ok) {
-    showToast("error", "Failed to logout");
+    showToast("Failed to logout");
     Navigate("/login");
     login();
     return;
