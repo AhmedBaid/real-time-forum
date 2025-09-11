@@ -1,4 +1,4 @@
-import { container, errorDiv, errorMessage, Header, Navigate, PostForm, successDiv, successMessage } from "../config.js";
+import { container, errorDiv, errorMessage, Header, isLogged, Navigate, PostForm, successDiv, successMessage } from "../config.js";
 import { login } from "./login.js";
 import { timeFormat } from "../helpers/timeFormat.js";
 import { HandleComments } from "./createComments.js";
@@ -46,9 +46,19 @@ function connectWebSocket() {
     fetchCurrentUserId();
   };
 
-  socket.onmessage = (e) => {
+  socket.onmessage = async (e) => {
     let data = JSON.parse(e.data);
 
+
+
+    let checklogged = await isLogged()
+    console.log(checklogged);
+
+    if (!checklogged) {
+      Navigate("/login")
+      login()
+      return
+    }
     switch (data.type) {
       case "online":
         setTimeout(() => {
@@ -82,8 +92,8 @@ function connectWebSocket() {
           const userDiv = document.querySelector(`.users[data-id="${data.from}"]`);
           let aside = document.querySelector(".aside2")
           if (userDiv) {
-            userDiv.remove(); 
-            aside.prepend(userDiv); 
+            userDiv.remove();
+            aside.prepend(userDiv);
           }
 
           let chatbox = document.querySelector(`.chat-box[data-id-u="${data.from}"]`);
@@ -118,9 +128,12 @@ function connectWebSocket() {
 
 
           let chatBox = document.querySelector(`#chat-${data.senderUsername} .chatTyping`);
-          chatBox.style.display = "block"
-          const str = chatBox.querySelector("strong")
-          str.textContent = data.senderUsername + " typing"
+          if (chatBox) {
+
+            chatBox.style.display = "block"
+            const str = chatBox.querySelector("strong")
+            str.textContent = data.senderUsername + " typing"
+          }
 
         }, 200);
         clearTimeout(id)
@@ -130,9 +143,12 @@ function connectWebSocket() {
           typing.style.display = "none"
 
           let chatBox = document.querySelector(`#chat-${data.senderUsername} .chatTyping`);
-          chatBox.style.display = "none"
-          const str = chatBox.querySelector("strong")
-          str.textContent = ""
+          if (chatBox) {
+
+            chatBox.style.display = "none"
+            const str = chatBox.querySelector("strong")
+            str.textContent = ""
+          }
 
 
         }, 1000);
@@ -142,9 +158,12 @@ function connectWebSocket() {
         typing.style.display = "none"
 
         let chatBox = document.querySelector(`#chat-${data.senderUsername} .chatTyping`);
-        chatBox.style.display = "none"
-        const str = chatBox.querySelector("strong")
-        str.textContent = ""
+        if (chatBox) {
+
+          chatBox.style.display = "none"
+          const str = chatBox.querySelector("strong")
+          str.textContent = ""
+        }
         break;
     }
   };

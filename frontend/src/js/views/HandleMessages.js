@@ -149,6 +149,14 @@ export async function HandleMessages(e) {
   }, 200, { leading: false, trailing: true }));
 
   form.addEventListener("submit", (ev) => {
+
+
+
+
+
+
+
+    
     offset.nbr += 1
     ev.preventDefault();
     let input = form.querySelector("input");
