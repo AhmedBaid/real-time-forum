@@ -8,13 +8,7 @@ import (
 )
 
 func IsLogged(w http.ResponseWriter, r *http.Request) {
-	/* 	if r.Method != http.MethodGet {
-		config.ResponseJSON(w, config.ErrorMethodnotAll.Code, map[string]any{
-			"message": "Method not allowrd",
-			"status":  config.ErrorMethodnotAll.Code,
-		})
-		return
-	} */
+	
 	exist, _ := helpers.SessionChecked(w, r)
 	if !exist {
 		config.ResponseJSON(w, config.ErrorUnauthorized.Code, map[string]any{
@@ -23,17 +17,7 @@ func IsLogged(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	/* 	var UserId int
-	   	var Username string
-	   	query := `select id,username from users where session = ?`
-	   	err := config.Db.QueryRow(query, session).Scan(&UserId, &Username)
-	   	if err != nil {
-	   		config.ResponseJSON(w, config.ErrorUnauthorized.Code, map[string]any{
-	   			"message": "you are not authorized",
-	   			"status":  config.ErrorUnauthorized.Code,
-	   		})
-	   		return
-	   	} */
+	
 	config.ResponseJSON(w, http.StatusOK, map[string]any{
 		"message": "user is logged",
 	})

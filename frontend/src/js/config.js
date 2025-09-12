@@ -74,7 +74,6 @@ export const PostForm = `
 
 export async function isLogged() {
   let response = await fetch("/isloged", {
-    method: "GET",
     credentials: "include"
   });
   return response.ok;
