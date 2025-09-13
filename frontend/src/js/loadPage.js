@@ -7,7 +7,7 @@ export function loadPage(data) {
     if (location.pathname == "/login") {
         return login()
     } else if (location.pathname == "/") {
-        return home(data)
+        return home()
     } else if (location.pathname == "/register") {
         return register()
     } else {
