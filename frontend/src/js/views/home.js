@@ -368,6 +368,9 @@ export async function home() {
   });
 }
 async function Logout(e) {
+  const postForm = document.querySelector(".Post-form");
+  console.log(postForm);
+  
   errorDiv.style.display = "none";
   errorMessage.textContent = "";
   successDiv.style.display = "none";
@@ -381,6 +384,10 @@ async function Logout(e) {
     Navigate("/login");
     login();
     return;
+  }
+  if(postForm){
+    postForm.remove();
+    container.style.opacity = "1";
   }
   showToast("success", "Logged out successfully");
   socket.close();
