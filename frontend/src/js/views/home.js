@@ -369,7 +369,6 @@ export async function home() {
 }
 async function Logout(e) {
   const postForm = document.querySelector(".Post-form");
-  console.log(postForm);
   
   errorDiv.style.display = "none";
   errorMessage.textContent = "";

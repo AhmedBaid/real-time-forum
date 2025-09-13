@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"slices"
 
@@ -12,42 +11,42 @@ import (
 
 func CreatePost(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		config.ResponseJSON(w, config.ErrorMethodnotAll.Code, config.ErrorMethodnotAll)
+		config.ResponseJSON(w, http.StatusMethodNotAllowed, map[string]any{
+			"message": "Method not allowed. Only POST is accepted.",
+			"status":  http.StatusMethodNotAllowed,
+		})
 		return
 	}
 
-	// Check session
 	_, session := helpers.SessionChecked(w, r)
 
-	// Decode JSON
 	var post struct {
 		Title       string `json:"title"`
 		Description string `json:"description"`
 		Categories  []int  `json:"categories"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&post); err != nil {
-		fmt.Println(err)
-		http.Error(w, "Error in decode", http.StatusBadRequest)
+		config.ResponseJSON(w, http.StatusBadRequest, map[string]any{
+			"message": "Invalid JSON in request body.",
+			"status":  http.StatusBadRequest,
+		})
 		return
 	}
 
-	arr := []int{1, 2, 3, 4, 5, 6, 7, 8}
-
+	validCategories := []int{1, 2, 3, 4, 5, 6, 7, 8}
 	for _, v := range post.Categories {
-		if !slices.Contains(arr, v) {
+		if !slices.Contains(validCategories, v) {
 			config.ResponseJSON(w, http.StatusBadRequest, map[string]any{
-				"message": "invalide categories",
+				"message": "Invalid category ID.",
 				"status":  http.StatusBadRequest,
 			})
 			return
 		}
 	}
 
-	// Validation
 	if post.Title == "" || post.Description == "" || len(post.Categories) == 0 {
-		fmt.Println("Title, description, or categories are empty")
 		config.ResponseJSON(w, http.StatusBadRequest, map[string]any{
-			"message": "Title, description, and categories are required",
+			"message": "Title, description, and at least one category are required.",
 			"status":  http.StatusBadRequest,
 		})
 		return
@@ -55,47 +54,57 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 	if len(post.Title) < 3 || len(post.Title) > 30 ||
 		len(post.Description) < 1 || len(post.Description) > 100 {
 		config.ResponseJSON(w, http.StatusBadRequest, map[string]any{
-			"message": "invalid data length",
+			"message": "Title or description length is invalid.",
 			"status":  http.StatusBadRequest,
 		})
 		return
 	}
 
-	// Get user
 	var userId int
 	var username string
 	stmt2 := `SELECT username, id FROM users WHERE session = ?`
 	err := config.Db.QueryRow(stmt2, session).Scan(&username, &userId)
 	if err != nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		config.ResponseJSON(w, http.StatusUnauthorized, map[string]any{
+			"message": "Unauthorized. Invalid session.",
+			"status":  http.StatusUnauthorized,
+		})
 		return
 	}
 
-	// Insert post
 	stmt := `INSERT INTO posts (title, description, username, userID) VALUES (?, ?, ?, ?)`
 	res, err := config.Db.Exec(stmt, post.Title, post.Description, username, userId)
 	if err != nil {
-		http.Error(w, "Database error", http.StatusInternalServerError)
+		config.ResponseJSON(w, http.StatusInternalServerError, map[string]any{
+			"message": "Failed to create post.",
+			"status":  http.StatusInternalServerError,
+		})
 		return
 	}
 
 	postID, err := res.LastInsertId()
 	if err != nil {
-		http.Error(w, "Error getting post ID", http.StatusInternalServerError)
+		config.ResponseJSON(w, http.StatusInternalServerError, map[string]any{
+			"message": "Failed to retrieve post ID.",
+			"status":  http.StatusInternalServerError,
+		})
 		return
 	}
 
-	// Insert categories
 	stmtcat := `INSERT INTO categories_post (categoryID, postID) VALUES (?, ?)`
 	for _, v := range post.Categories {
 		_, err := config.Db.Exec(stmtcat, v, postID)
 		if err != nil {
-			http.Error(w, "Error inserting category", http.StatusInternalServerError)
+			config.ResponseJSON(w, http.StatusInternalServerError, map[string]any{
+				"message": "Failed to assign category to post.",
+				"status":  http.StatusInternalServerError,
+			})
 			return
 		}
 	}
+
 	config.ResponseJSON(w, http.StatusOK, map[string]any{
-		"message": "Post created successfully",
+		"message": "Post created successfully.",
 		"status":  http.StatusOK,
 	})
 }
