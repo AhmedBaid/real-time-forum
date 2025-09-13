@@ -1,5 +1,7 @@
 import {  fetchUsers} from "../helpers/api.js";
 export async function sortUsers( aside) {
+
+  
   let users = await fetchUsers();
 
   users = users.data.sort((a, b) => {

@@ -57,7 +57,6 @@ function connectWebSocket() {
 
     await new Promise((resolve) => setTimeout(resolve, 500)); // Delay to avoid race
     let checklogged = await isLogged();
-
     if (!checklogged) {
       Navigate("/login");
       login();
@@ -70,7 +69,7 @@ function connectWebSocket() {
           if (el) {
             setUserOnline(data.userId);
           }
-        }, 200);
+        }, 0);
         break;
       case "offline":
         setTimeout(() => {
@@ -78,7 +77,7 @@ function connectWebSocket() {
           if (el) {
             setUserOffline(data.userId);
           }
-        }, 200);
+        }, 0);
 
         break;
       case "message":
@@ -93,11 +92,9 @@ function connectWebSocket() {
             `.users[data-id="${data.from}"]`
           );
           let aside = document.querySelector(".aside2");
-          if (userDiv) {
-            userDiv.remove();
-            aside.prepend(userDiv);
-          }
-
+       
+            await sortUsers(aside)
+      
           let chatbox = document.querySelector(
             `.chat-box[data-id-u="${data.from}"]`
           );
@@ -105,14 +102,13 @@ function connectWebSocket() {
             return;
           }
 
-          console.log(data);
           const user = document.querySelector(
             `.users[data-id="${data.from}"] .text-wrapper .notification`
           );
           if (user) {
             user.innerHTML = "new Message";
           }
-        }, 200);
+        }, 0);
 
         break;
       case "online_list":
@@ -122,7 +118,7 @@ function connectWebSocket() {
           if (el) {
             data.users.forEach((id) => setUserOnline(Number(id)));
           }
-        }, 200);
+        }, 0);
 
         break;
       case "typing":
@@ -140,7 +136,7 @@ function connectWebSocket() {
             const str = chatBox.querySelector("strong");
             str.textContent = data.senderUsername + " typing";
           }
-        }, 200);
+        }, 0);
         clearTimeout(id);
         id = setTimeout(() => {
           const typing = document.querySelector(
@@ -184,9 +180,8 @@ function connectWebSocket() {
   };
 }
 
-window.onload = () => {
-  connectWebSocket();
-};
+connectWebSocket();
+
 // messages realtime
 function appendMessage(msg) {
   let chatBox = document.getElementById(`chat-${msg.senderUsername}`);
@@ -245,9 +240,8 @@ export async function home() {
         <div class="first-part">
           <div class="post-header">
             <div class="user-info">
-              <img src="https://robohash.org/${
-                post.username
-              }.png?size=50x50" class="avatar" />
+              <img src="https://robohash.org/${post.username
+      }.png?size=50x50" class="avatar" />
               <span class="username">${post.username}</span>
             </div>
             <span class="post-time">${timeFormat(post.time)}</span>
@@ -256,36 +250,31 @@ export async function home() {
           <p class="post-description">${post.description}</p>
           <div class="post-tags">
             ${post.categories
-              .map((cat) => `<span class="tag">${cat.name}</span>`)
-              .join("")}
+        .map((cat) => `<span class="tag">${cat.name}</span>`)
+        .join("")}
           </div>
           <div class="post-reactions">
             <form method="post" class="likesForm">
               <div class="reaction">
-                <span class="span-like ${
-                  post.userReactionPosts === 1 ? "active-like" : ""
-                }">${post.totalLikes}</span>
-                <button name="reaction1" value="1" class="like-btn ${
-                  post.userReactionPosts === 1 ? "active-like" : ""
-                }" type="submit">
+                <span class="span-like ${post.userReactionPosts === 1 ? "active-like" : ""
+      }">${post.totalLikes}</span>
+                <button name="reaction1" value="1" class="like-btn ${post.userReactionPosts === 1 ? "active-like" : ""
+      }" type="submit">
                   <i class="fa-solid fa-thumbs-up"></i>
                 </button>
               </div>
               <div class="reaction">
-                <span class="span-dislike ${
-                  post.userReactionPosts === -1 ? "active-dislike" : ""
-                }">${post.totalDislikes}</span>
-                <button name="reaction2" value="-1" class="dislike-btn ${
-                  post.userReactionPosts === -1 ? "active-dislike" : ""
-                }" type="submit">
+                <span class="span-dislike ${post.userReactionPosts === -1 ? "active-dislike" : ""
+      }">${post.totalDislikes}</span>
+                <button name="reaction2" value="-1" class="dislike-btn ${post.userReactionPosts === -1 ? "active-dislike" : ""
+      }" type="submit">
                   <i class="fa-solid fa-thumbs-down"></i>
                 </button>
               </div>
               <div class="reaction">
                 <span class="totalComnts">${post.totalComments}</span>
-                <input type="checkbox" class="hidd" value="${
-                  post.id
-                }" id="${commentToggleId}" />
+                <input type="checkbox" class="hidd" value="${post.id
+      }" id="${commentToggleId}" />
                 <label for="${commentToggleId}" class="comment-icon">
                   <i class="fa-solid fa-comment"></i>
                 </label>
@@ -298,9 +287,8 @@ export async function home() {
           <div class="comment">
             <form method="post" id="${postId}" class="formComment">
               <input type="hidden" name="postID" value="${postId}" />
-              <img src="https://robohash.org/${
-                obj.data.UserActive
-              }.png?size=50x50" />
+              <img src="https://robohash.org/${obj.data.UserActive
+      }.png?size=50x50" />
               <input type="text" name="comment" placeholder="Add Comment" required />
               <button type="submit">Add</button>
             </form>
