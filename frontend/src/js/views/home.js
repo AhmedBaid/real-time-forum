@@ -70,7 +70,7 @@ function connectWebSocket() {
           if (el) {
             setUserOnline(data.userId);
           }
-        }, 200);
+        }, 0);
         break;
       case "offline":
         setTimeout(() => {
@@ -78,7 +78,7 @@ function connectWebSocket() {
           if (el) {
             setUserOffline(data.userId);
           }
-        }, 200);
+        }, 0);
 
         break;
       case "message":
@@ -110,7 +110,7 @@ function connectWebSocket() {
           if (user) {
             user.innerHTML = "new Message";
           }
-        }, 200);
+        }, 0);
 
         break;
       case "online_list":
@@ -120,7 +120,7 @@ function connectWebSocket() {
           if (el) {
             data.users.forEach((id) => setUserOnline(Number(id)));
           }
-        }, 200);
+        }, 0);
 
         break;
       case "typing":
@@ -138,7 +138,7 @@ function connectWebSocket() {
             const str = chatBox.querySelector("strong");
             str.textContent = data.senderUsername + " typing";
           }
-        }, 200);
+        }, 0);
         clearTimeout(id);
         id = setTimeout(() => {
           const typing = document.querySelector(
@@ -154,7 +154,7 @@ function connectWebSocket() {
             const str = chatBox.querySelector("strong");
             str.textContent = "";
           }
-        }, 1000);
+        }, 500);
         break;
       case "stopTyping":
         const typing = document.querySelector(

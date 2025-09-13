@@ -100,7 +100,7 @@ export async function HandleMessages(e) {
         senderId: currentUserId,
         receiver: receiverId,
       }));
-    }, 1000);
+    }, 500);
   });
 
 
@@ -122,10 +122,7 @@ export async function HandleMessages(e) {
         <span class="time">${msg.senderUsername}-${new Date(msg.time).toLocaleString()}</span>
       `;
       messagesBox.prepend(div);
-      /* 
-          if (msg.receiver === receiverId) {
-            fetch(`/mark-read/${msg.id}`, { method: "POST" });
-          } */
+    
     });
 
     if (scroll) {
