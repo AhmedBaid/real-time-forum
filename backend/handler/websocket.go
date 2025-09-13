@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	"strings"
 	"sync"
 	"time"
 
@@ -45,23 +44,19 @@ func removeUserConn(userID int, conn *websocket.Conn) {
 	}
 	for i, c := range conns {
 		if c == conn {
-			// remove that connection
 			users[userID] = append(conns[:i], conns[i+1:]...)
 			break
 		}
 	}
 	if len(users[userID]) == 0 {
 		delete(users, userID)
-		// broadcast offline synchronously to all connections
 		msg := map[string]interface{}{
 			"type":   "offline",
 			"userId": userID,
 			"time":   time.Now().Format(time.RFC3339),
 		}
-		// send to everyone
 		for _, conns := range users {
 			for _, c := range conns {
-				// ignore write errors here
 				_ = c.WriteJSON(msg)
 			}
 		}
@@ -74,7 +69,6 @@ func writeToConnSafe(c *websocket.Conn, v interface{}) error {
 		return nil
 	}
 	if err := c.WriteJSON(v); err != nil {
-		// on error, try to close
 		_ = c.Close()
 		return err
 	}
@@ -82,7 +76,6 @@ func writeToConnSafe(c *websocket.Conn, v interface{}) error {
 }
 
 // sendToUser sends data to all connections of a given userID.
-// If a connection write fails it removes that connection.
 func sendToUser(userID int, data map[string]interface{}) {
 	usersMu.Lock()
 	conns := users[userID]
@@ -90,7 +83,6 @@ func sendToUser(userID int, data map[string]interface{}) {
 
 	for _, c := range conns {
 		if err := writeToConnSafe(c, data); err != nil {
-			// remove this failed connection
 			removeUserConn(userID, c)
 		}
 	}
@@ -107,9 +99,6 @@ func broadcastToAll(data map[string]interface{}) {
 
 	for _, c := range all {
 		if err := writeToConnSafe(c, data); err != nil {
-			// best-effort removal: find which user had this conn and remove
-			// (acquire lock inside removeUserConn)
-			// We can't easily know owner here; just attempt remove by scanning users map:
 			usersMu.Lock()
 			for uid, conns := range users {
 				for i, cc := range conns {
@@ -120,13 +109,11 @@ func broadcastToAll(data map[string]interface{}) {
 				}
 				if len(users[uid]) == 0 {
 					delete(users, uid)
-					// also notify others about offline
 					offlineMsg := map[string]interface{}{
 						"type":   "offline",
 						"userId": uid,
 						"time":   time.Now().Format(time.RFC3339),
 					}
-					// send notification to remaining conns (best-effort)
 					for _, remaining := range users {
 						for _, rc := range remaining {
 							_ = rc.WriteJSON(offlineMsg)
@@ -139,7 +126,7 @@ func broadcastToAll(data map[string]interface{}) {
 	}
 }
 
-// sendUnreadMessages sends unread DB messages to the provided conn for userID.
+// sendUnreadMessages sends last X messages to the provided conn for userID.
 func sendUnreadMessages(userID int, conn *websocket.Conn, db *sql.DB) {
 	if db == nil || conn == nil {
 		return
@@ -148,8 +135,9 @@ func sendUnreadMessages(userID int, conn *websocket.Conn, db *sql.DB) {
 		SELECT m.id, m.sender_id, m.message, m.created_at, u.username
 		FROM messages m
 		JOIN users u ON m.sender_id = u.id
-		WHERE m.receiver_id = ? AND m.is_read = FALSE
-		ORDER BY m.created_at ASC`, userID)
+		WHERE m.receiver_id = ?
+		ORDER BY m.created_at ASC
+		LIMIT 50`, userID) // optional limit
 	if err != nil {
 		return
 	}
@@ -171,27 +159,20 @@ func sendUnreadMessages(userID int, conn *websocket.Conn, db *sql.DB) {
 			"time":           createdAt,
 			"senderUsername": senderUsername,
 		}
-		if err := writeToConnSafe(conn, data); err != nil {
-			// if writing unread fails, stop trying further (conn probably dead)
-			return
-		}
-		_, _ = db.Exec("UPDATE messages SET is_read = TRUE WHERE id = ?", msgID)
+		_ = writeToConnSafe(conn, data)
 	}
 }
 
-// handleConnection reads & handles messages from a connection (synchronously).
-// It does NOT spawn a goroutine — caller should call this inline.
+// handleConnection reads & handles messages from a connection.
 func handleConnection(userID int, conn *websocket.Conn, db *sql.DB) {
 	defer func() {
 		removeUserConn(userID, conn)
 		_ = conn.Close()
-		// if no connections left for this user, an offline broadcast already handled in removeUserConn
 	}()
 
 	for {
 		_, data, err := conn.ReadMessage()
 		if err != nil {
-			// read error: client disconnected or protocol error
 			return
 		}
 		var msg map[string]interface{}
@@ -205,7 +186,6 @@ func handleConnection(userID int, conn *websocket.Conn, db *sql.DB) {
 
 		switch msgType {
 		case "message":
-			// receiver expected numeric (float64 from JSON)
 			receiverF, ok := msg["receiver"].(float64)
 			if !ok {
 				continue
@@ -215,17 +195,14 @@ func handleConnection(userID int, conn *websocket.Conn, db *sql.DB) {
 			if !ok {
 				continue
 			}
-			// sanitize
 			content = html.EscapeString(content)
 
-			// get sender username
 			var senderUsername string
 			_ = db.QueryRow("SELECT username FROM users WHERE id = ?", userID).Scan(&senderUsername)
 
-			// insert into DB
 			res, err := db.Exec(`
-				INSERT INTO messages (sender_id, receiver_id, message, is_read)
-				VALUES (?, ?, ?, FALSE)`, userID, receiver, content)
+				INSERT INTO messages (sender_id, receiver_id, message)
+				VALUES (?, ?, ?)`, userID, receiver, content)
 			if err != nil {
 				continue
 			}
@@ -242,10 +219,8 @@ func handleConnection(userID int, conn *websocket.Conn, db *sql.DB) {
 				"senderUsername": senderUsername,
 			}
 
-			// send to receiver(s)
 			sendToUser(receiver, out)
 
-			// send back to sender connections (confirm)
 			sendToUser(userID, map[string]interface{}{
 				"type":           "message_sent",
 				"id":             msgID,
@@ -256,7 +231,6 @@ func handleConnection(userID int, conn *websocket.Conn, db *sql.DB) {
 				"senderUsername": senderUsername,
 			})
 
-			// send a notification to receiver (synchronously)
 			notification := map[string]interface{}{
 				"type":     "notification",
 				"receiver": receiver,
@@ -281,13 +255,12 @@ func handleConnection(userID int, conn *websocket.Conn, db *sql.DB) {
 			sendToUser(receiver, typingMsg)
 
 		default:
-			// unknown type - optionally broadcast to all
-			// broadcast synchronously
 			broadcastToAll(msg)
 		}
 	}
 }
 
+// WsHandler handles websocket connection
 func WsHandler(w http.ResponseWriter, r *http.Request) {
 	_, session := helpers.SessionChecked(w, r)
 	var userID int
@@ -302,10 +275,8 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// register connection
 	addUserConn(userID, conn)
 
-	// broadcast online to everyone (synchronously)
 	onlineMsg := map[string]interface{}{
 		"type":   "online",
 		"userId": userID,
@@ -313,7 +284,6 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	broadcastToAll(onlineMsg)
 
-	// send current online list to this connection
 	usersMu.Lock()
 	onlineUsers := []int{}
 	for id := range users {
@@ -326,34 +296,12 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 		"time":  time.Now().Format(time.RFC3339),
 	})
 
-	// send unread messages to this connection
 	sendUnreadMessages(userID, conn, config.Db)
 
-	// handle this connection in the same goroutine (no go routine)
 	handleConnection(userID, conn, config.Db)
 }
 
-// MarkReadHandler - unchanged logic, marks message read
-func MarkReadHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-	pathParts := strings.Split(r.URL.Path, "/")
-	if len(pathParts) < 3 {
-		http.Error(w, "Invalid message ID", http.StatusBadRequest)
-		return
-	}
-	msgID, err := strconv.Atoi(pathParts[2])
-	if err != nil {
-		http.Error(w, "Invalid message ID", http.StatusBadRequest)
-		return
-	}
-	config.Db.Exec("UPDATE messages SET is_read = TRUE WHERE id = ?", msgID)
-	w.WriteHeader(http.StatusOK)
-}
-
-// GetMessagesHandler - unchanged core logic
+// GetMessagesHandler - fetch messages normally
 func GetMessagesHandler(w http.ResponseWriter, r *http.Request) {
 	receiverIDStr := r.URL.Query().Get("receiver")
 	offsetStr := r.URL.Query().Get("offset")
@@ -416,7 +364,7 @@ func GetMessagesHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(messages)
 }
 
-// MessageHandler - keep existing HTTP message send route but send synchronously to connections
+// MessageHandler - HTTP route for sending messages
 func MessageHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		config.ResponseJSON(w, http.StatusMethodNotAllowed, map[string]any{
@@ -468,7 +416,6 @@ func MessageHandler(w http.ResponseWriter, r *http.Request) {
 		"senderUsername": username,
 	}
 
-	// send directly to recipient and sender synchronously
 	sendToUser(message.Reciever, out)
 	sendToUser(message.Sender, map[string]any{
 		"type":           "message_sent",
@@ -480,7 +427,6 @@ func MessageHandler(w http.ResponseWriter, r *http.Request) {
 		"senderUsername": username,
 	})
 
-	// notification
 	notif := map[string]any{
 		"type":     "notification",
 		"reciever": message.Reciever,

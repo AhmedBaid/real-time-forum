@@ -100,7 +100,7 @@ export async function HandleMessages(e) {
         senderId: currentUserId,
         receiver: receiverId,
       }));
-    }, 500);
+    }, 300);
   });
 
 
