@@ -8,9 +8,10 @@ import (
 )
 
 func Router() {
-
+	http.HandleFunc("/api/current-user", handler.CurrentUserHandler)
+	http.HandleFunc("/ws", handler.WsHandler)
+	http.HandleFunc("/messages", handler.GetMessagesHandler)
 	http.HandleFunc("/unread-messages", handler.UnreadMessagesHandler)
-
 	http.HandleFunc("/ReactionHandler", handler.ReactionHandler)
 	http.HandleFunc("/getComments", handler.GetComments)
 	http.HandleFunc("/getUsers", handler.GetUsers)
