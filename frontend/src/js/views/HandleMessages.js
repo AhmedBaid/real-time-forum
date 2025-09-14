@@ -114,7 +114,6 @@ export async function HandleMessages(e) {
     let res = await fetch(`/messages?receiver=${receiverId}&offset=${offset.nbr}`);
     if (!res.ok) throw new Error(await res.text());
     let messages = await res.json();
-    console.log(messages);
 
     if (messages.length === 0) return;
     let oldScrollHeight = messagesBox.scrollHeight;
@@ -135,7 +134,6 @@ export async function HandleMessages(e) {
       messagesBox.scrollTop = messagesBox.scrollHeight - oldScrollHeight;
     }
 
-    console.log(messages);
 
     offset.nbr += 10;
   }

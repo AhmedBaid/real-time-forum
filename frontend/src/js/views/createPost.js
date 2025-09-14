@@ -37,7 +37,10 @@ export async function createPost(e) {
         return;
     }
     overlay.remove();
-    showToast("success", "Post created successfully");
+    
     Navigate("/");
     home();
+    
+    showToast("success", "Post created successfully");
+
 }

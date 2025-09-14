@@ -21,9 +21,7 @@ export let Currentusername = null;
 export let offset = { nbr: 0 };
 let id = null;
 
-window.addEventListener("load", async () => {
-  await loadUnreadNotifications();
-});
+
 
 // get the current user
 async function fetchCurrentUserId() {
@@ -183,8 +181,10 @@ function connectWebSocket() {
     setTimeout(connectWebSocket, 5000);
   };
 }
-
-connectWebSocket();
+window.addEventListener("DOMContentLoaded", async () => {
+  connectWebSocket();
+  await loadUnreadNotifications();
+});
 
 // messages realtime
 function appendMessage(msg) {
@@ -373,6 +373,8 @@ export async function home() {
         if (e.target === overlay) {
           overlay.remove();
           Navigate("/");
+          aside= document.querySelector(".aside2");
+          sortUsers(aside);
         }
       });
     }
