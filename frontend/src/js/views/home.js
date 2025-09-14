@@ -1,13 +1,9 @@
 import {
   container,
-  errorDiv,
-  errorMessage,
   Header,
   isLogged,
   Navigate,
   PostForm,
-  successDiv,
-  successMessage,
 } from "../config.js";
 import { login } from "./login.js";
 import { timeFormat } from "../helpers/timeFormat.js";
@@ -380,10 +376,6 @@ export async function home() {
 }
 async function Logout(e) {
   const postForm = document.querySelector(".Post-form");
-  errorDiv.style.display = "none";
-  errorMessage.textContent = "";
-  successDiv.style.display = "none";
-  successMessage.textContent = "";
   e.preventDefault();
   Navigate("/logout");
   const response = await fetch("/logout", {

@@ -1,4 +1,4 @@
-import { container, errorDiv, errorMessage, Navigate, successDiv, successMessage } from "../config.js";
+import { Navigate } from "../config.js";
 import { showToast } from "../helpers/showToast.js";
 import { home } from "./home.js";
 import { login } from "./login.js";
@@ -7,10 +7,6 @@ export async function createPost(e) {
     e.preventDefault();
     const postForm = document.querySelector(".Post-form");
     let overlay = document.querySelector(".overlay");
-    errorDiv.style.display = "none";
-    errorMessage.textContent = "";
-    successDiv.style.display = "none";
-    successMessage.textContent = "";
     const title = document.querySelector(".title").value;
     const content = document.querySelector(".content").value;
     const categories = Array.from(

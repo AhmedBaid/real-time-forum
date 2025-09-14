@@ -1,9 +1,18 @@
+import { errorDiv, errorMessage, successDiv, successMessage } from "../config.js";
+
 export function showToast(type, message) {
   const toast = document.querySelector(`.${type}`);
-  console.log(toast);
-  
-  const span = toast.querySelector("span");
+
+  const span = toast.querySelector(".toast");
+  console.log(span);
   const closeBtn = toast.querySelector("i");
+  console.log(closeBtn);
+  
+
+  errorDiv.style.display = "none";
+  errorMessage.textContent = "";
+  successDiv.style.display = "none";
+  successMessage.textContent = "";
 
   toast.style.display = "flex"
   span.textContent = message;

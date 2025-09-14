@@ -1,4 +1,4 @@
-import { container, errorDiv, errorMessage, loginPage, Navigate, successDiv, successMessage } from "../config.js";
+import { container, loginPage, Navigate } from "../config.js";
 import { showToast } from "../helpers/showToast.js";
 import { loadPage } from "../loadPage.js";
 import { home } from "./home.js";

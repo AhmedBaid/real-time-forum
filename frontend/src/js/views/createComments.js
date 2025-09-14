@@ -1,12 +1,9 @@
-import { errorDiv, errorMessage } from "../config.js";
 import { showToast } from "../helpers/showToast.js";
 import { timeFormat } from "../helpers/timeFormat.js";
 
 export async function HandleComments(e) {
   e.preventDefault();
   let form = e.target;
-  errorDiv.style.display = "none";
-  errorMessage.textContent = "";
 
   let post_id = Number(form.querySelector("[name='postID']").value);
   let Comment = form.querySelector("[name='comment']").value;

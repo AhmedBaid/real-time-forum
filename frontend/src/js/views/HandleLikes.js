@@ -1,4 +1,3 @@
-import { errorDiv, errorMessage } from "../config.js";
 import { showToast } from "../helpers/showToast.js";
 
 export async function HandleLikes(e) {
@@ -6,8 +5,6 @@ export async function HandleLikes(e) {
 
   const form = e.target.closest("form");
 
-  errorDiv.style.display = "none";
-  errorMessage.textContent = "";
 
   const like =
     e.submitter?.value ||

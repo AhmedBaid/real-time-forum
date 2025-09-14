@@ -1,11 +1,9 @@
-import { container, errorDiv, errorMessage, Navigate, registerPage, successDiv, successMessage } from "../config.js";
+import { container, Navigate, registerPage } from "../config.js";
 import { showToast } from "../helpers/showToast.js";
 import { loadPage } from "../loadPage.js";
 import { home } from "./home.js";
 
 export function register() {
-    errorDiv.style.display = "none";
-    errorMessage.textContent = "";
     container.innerHTML = ""
     container.innerHTML = registerPage;
     let form = document.querySelector("form");
