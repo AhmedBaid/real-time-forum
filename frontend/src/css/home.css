@@ -580,8 +580,8 @@ body:has(#commentshow:checked) .second-part {
 }
 
 .users .notification {
-  color: red;
-  text-decoration: underline;
+  color: #04aa6d;
+  text-decoration: none;
   font-size: 0.85em;
   margin-top: 2px;
 }
@@ -1017,12 +1017,13 @@ body:has(#commentshow:checked) .second-part {
 
 /*notif*/
 .bell-icon {
-  font-size: 49px;
+  font-size: 30px;
   position: relative;
   cursor: pointer;
   transform-origin: top center;
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
   animation: bellRing 2s ease-in-out infinite;
+  color: #04aa6d;
 }
 
 

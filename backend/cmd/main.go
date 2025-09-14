@@ -10,12 +10,12 @@ import (
 	"real_time/backend/config"
 	"real_time/backend/router"
 
-	_ "modernc.org/sqlite"
+	_	"github.com/mattn/go-sqlite3"
 )
 
 func main() {
 	var err error
-	config.Db, err = sql.Open("sqlite", "./backend/database/db.db")
+	config.Db, err = sql.Open("sqlite3", "./backend/database/db.db")
 	if err != nil {
 		fmt.Println("Error opening database:", err)
 		return
