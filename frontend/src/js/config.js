@@ -38,10 +38,10 @@ export const loginPage = `<div class="login">
             </form>
         </div>`;
 
-export const Header = `<h1>RT-<span>FO</span>RUM</h1>
+export const Header = `<h1>RT-<span class="logo">FO</span>RUM</h1>
     <div class="buttons">
-    <button class="create">Create Post</button>
-    <button class="logout">Logout</button>
+    <button class="create"><span class="span-create">Create Post</span><i class="fa-solid fa-plus"></i></button>
+    <button class="logout"><span class="span-logout">Logout</span><i class="fa-solid fa-right-from-bracket"></i></button>
     </div>`;
 
 const categories = [

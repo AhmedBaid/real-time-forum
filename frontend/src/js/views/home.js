@@ -350,31 +350,42 @@ export async function home() {
 
   createButton.addEventListener("click", () => {
     const postForm = document.querySelector(".Post-form");
+
     if (!postForm) {
       Navigate("/createpost");
+      const overlay = document.createElement("div");
+      overlay.className = "overlay";
+
       const injecthtml = document.createElement("div");
       injecthtml.className = "Post-form";
       injecthtml.innerHTML = PostForm;
 
-      document.body.appendChild(injecthtml);
-      container.style.opacity = "0.2";
+      overlay.appendChild(injecthtml);
+      document.body.appendChild(overlay);
+
+
+
       const form = injecthtml.querySelector("form");
       form.addEventListener("submit", createPost);
-    } else {
-      Navigate("/");
-      postForm.remove();
-      container.style.opacity = "1";
+
+      overlay.addEventListener("click", (e) => {
+        if (e.target === overlay) {
+          overlay.remove();
+          Navigate("/");
+        }
+      });
     }
   });
+
 }
 async function Logout(e) {
   const postForm = document.querySelector(".Post-form");
-  
   errorDiv.style.display = "none";
   errorMessage.textContent = "";
   successDiv.style.display = "none";
   successMessage.textContent = "";
   e.preventDefault();
+  Navigate("/logout");
   const response = await fetch("/logout", {
     method: "POST",
   });
@@ -384,7 +395,7 @@ async function Logout(e) {
     login();
     return;
   }
-  if(postForm){
+  if (postForm) {
     postForm.remove();
     container.style.opacity = "1";
   }

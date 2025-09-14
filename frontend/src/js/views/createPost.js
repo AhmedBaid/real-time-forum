@@ -6,6 +6,7 @@ import { login } from "./login.js";
 export async function createPost(e) {
     e.preventDefault();
     const postForm = document.querySelector(".Post-form");
+    let overlay = document.querySelector(".overlay");
     errorDiv.style.display = "none";
     errorMessage.textContent = "";
     successDiv.style.display = "none";
@@ -32,7 +33,7 @@ export async function createPost(e) {
     if (!response.ok) {
         if (response.status === 401) {
             postForm.remove();
-            container.style.opacity = "1";
+            overlay.remove();
             showToast("error", data.message);
             Navigate("/login");
             login();
@@ -42,7 +43,7 @@ export async function createPost(e) {
         return;
     }
     postForm.remove();
-    container.style.opacity = "1";
+    overlay.remove();
     showToast("success", "Post created successfully");
     Navigate("/");
     home();
