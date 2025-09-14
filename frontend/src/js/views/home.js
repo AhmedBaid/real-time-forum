@@ -53,7 +53,6 @@ function connectWebSocket() {
 
     await new Promise((resolve) => setTimeout(resolve, 500)); // Delay to avoid race
     let checklogged = await isLogged();
-
     if (!checklogged) {
       Navigate("/login");
       login();
@@ -85,9 +84,9 @@ function connectWebSocket() {
 
       case "notification":
         setTimeout(async () => {
-          const userDiv = document.querySelector(
-            `.users[data-id="${data.from}"]`
-          );
+
+
+
           let aside = document.querySelector(".aside2");
 
 
@@ -98,11 +97,16 @@ function connectWebSocket() {
           if (chatbox) {
             return;
           }
+          let notif = document.querySelector(".notifIcon");
+          notif.innerHTML = ` <i class="fa-solid fa-bell bell-icon" id="bellIcon"></i>`
 
-          console.log(data);
+        
+
+
           const user = document.querySelector(
             `.users[data-id="${data.from}"] .text-wrapper .notification`
           );
+
           if (user) {
             user.innerHTML = "new Message";
           }
@@ -178,9 +182,8 @@ function connectWebSocket() {
   };
 }
 
-window.onload = () => {
-  connectWebSocket();
-};
+connectWebSocket();
+
 // messages realtime
 function appendMessage(msg) {
   let chatBox = document.getElementById(`chat-${msg.senderUsername}`);
