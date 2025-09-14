@@ -88,9 +88,9 @@ function connectWebSocket() {
 
       case "notification":
         setTimeout(async () => {
-          const userDiv = document.querySelector(
-            `.users[data-id="${data.from}"]`
-          );
+
+
+
           let aside = document.querySelector(".aside2");
 
 
@@ -101,10 +101,12 @@ function connectWebSocket() {
           if (chatbox) {
             return;
           }
-
+          let notif = document.querySelector(".notifIcon");
+          notif.innerHTML = ` <i class="fa-solid fa-bell bell-icon" id="bellIcon"></i>`
           const user = document.querySelector(
             `.users[data-id="${data.from}"] .text-wrapper .notification`
           );
+
           if (user) {
             user.innerHTML = "new Message";
           }
@@ -366,7 +368,7 @@ export async function home() {
 }
 async function Logout(e) {
   const postForm = document.querySelector(".Post-form");
-  
+
   errorDiv.style.display = "none";
   errorMessage.textContent = "";
   successDiv.style.display = "none";
@@ -381,7 +383,7 @@ async function Logout(e) {
     login();
     return;
   }
-  if(postForm){
+  if (postForm) {
     postForm.remove();
     container.style.opacity = "1";
   }

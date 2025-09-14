@@ -1087,3 +1087,47 @@ body:has(#commentshow:checked) .second-part {
     opacity: 1;
   }
 }
+
+
+
+
+
+
+/*notif*/
+.bell-icon {
+    font-size: 49px;
+    position: relative;
+    cursor: pointer;
+    transform-origin: top center;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+    animation: bellRing 2s ease-in-out infinite;
+}
+
+
+#bellIcon {
+    display: inline-block;
+}
+
+@keyframes bellRing {
+    0%, 100% { transform: rotate(0deg); }
+    10% { transform: rotate(-15deg); }
+    20% { transform: rotate(12deg); }
+    30% { transform: rotate(-10deg); }
+    40% { transform: rotate(8deg); }
+    50% { transform: rotate(-6deg); }
+    60% { transform: rotate(4deg); }
+    70% { transform: rotate(-2deg); }
+    80% { transform: rotate(1deg); }
+    90% { transform: rotate(0deg); }
+}
+
+@keyframes pulseGlow {
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0;
+    }
+}

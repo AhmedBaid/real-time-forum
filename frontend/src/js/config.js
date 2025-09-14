@@ -39,6 +39,12 @@ export const loginPage = `<div class="login">
         </div>`;
 
 export const Header = `<h1>RT-<span>FO</span>RUM</h1>
+<span class="notifIcon">
+ </span>
+
+
+
+
     <div class="buttons">
     <button class="create">Create Post</button>
     <button class="logout">Logout</button>

@@ -21,11 +21,14 @@ function throttle(func, time, option = { leading: false, trailing: false }) {
 
 
 export async function HandleMessages(e) {
-  offset.nbr=0
+  offset.nbr = 0
   const user = document.querySelector(`.users[data-id="${e.currentTarget.dataset.id}"] .text-wrapper .notification`)
   if (user.textContent !== "") {
     user.innerHTML = ""
   }
+  let notif = document.querySelector(".notifIcon");
+  notif.innerHTML = ""
+
 
 
   let username = e.currentTarget.dataset.username;
@@ -122,7 +125,7 @@ export async function HandleMessages(e) {
         <span class="time">${msg.senderUsername}-${new Date(msg.time).toLocaleString()}</span>
       `;
       messagesBox.prepend(div);
-    
+
     });
 
     if (scroll) {
@@ -153,7 +156,7 @@ export async function HandleMessages(e) {
 
 
 
-    
+
     offset.nbr += 1
     ev.preventDefault();
     let input = form.querySelector("input");
