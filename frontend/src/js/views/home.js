@@ -92,9 +92,9 @@ function connectWebSocket() {
             `.users[data-id="${data.from}"]`
           );
           let aside = document.querySelector(".aside2");
-       
-            await sortUsers(aside)
-      
+
+
+          sortUsers(aside)
           let chatbox = document.querySelector(
             `.chat-box[data-id-u="${data.from}"]`
           );
@@ -152,7 +152,7 @@ function connectWebSocket() {
             const str = chatBox.querySelector("strong");
             str.textContent = "";
           }
-        }, 1000);
+        }, 500);
         break;
       case "stopTyping":
         const typing = document.querySelector(
@@ -365,6 +365,8 @@ export async function home() {
   });
 }
 async function Logout(e) {
+  const postForm = document.querySelector(".Post-form");
+  
   errorDiv.style.display = "none";
   errorMessage.textContent = "";
   successDiv.style.display = "none";
@@ -378,6 +380,10 @@ async function Logout(e) {
     Navigate("/login");
     login();
     return;
+  }
+  if(postForm){
+    postForm.remove();
+    container.style.opacity = "1";
   }
   showToast("success", "Logged out successfully");
   socket.close();

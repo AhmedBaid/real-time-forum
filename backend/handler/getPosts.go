@@ -10,6 +10,16 @@ import (
 )
 
 func GetPosts(w http.ResponseWriter, r *http.Request) {
+	// Allow only GET requests
+	if r.Method != http.MethodGet {
+		config.ResponseJSON(w, http.StatusMethodNotAllowed, map[string]any{
+			"message": "Method not allowed. Only GET is permitted.",
+			"status":  http.StatusMethodNotAllowed,
+		})
+		return
+	}
+
+	// Retrieve session cookie if present
 	session, err := r.Cookie("session")
 	var sessValue string
 	if err != nil {
@@ -17,101 +27,106 @@ func GetPosts(w http.ResponseWriter, r *http.Request) {
 	} else {
 		sessValue = session.Value
 	}
-	query := `select id ,  session from users where session = ?`
+
+	// Get user ID from session
 	var userId int
-	sess := ""
-
+	var sess string
+	query := `SELECT id, session FROM users WHERE session = ?`
 	config.Db.QueryRow(query, sessValue).Scan(&userId, &sess)
-
 	sessValue = sess
-	// get comments
+
+	// Fetch categories map
 	categorMap, errcat := helpers.FetchCategories()
-
-	if  errcat != nil {
-		fmt.Println("err1efez", err)
-		fmt.Println("err2fefe", errcat)
-
-		config.ResponseJSON(w, config.ErrorInternalServerErr.Code, map[string]any{
-			"message": "server Error  1",
-			"status":  config.ErrorInternalServerErr.Code,
+	if errcat != nil {
+		fmt.Println("FetchCategories error:", errcat)
+		config.ResponseJSON(w, http.StatusInternalServerError, map[string]any{
+			"message": "Internal server error while fetching categories.",
+			"status":  http.StatusInternalServerError,
 		})
 		return
 	}
 
-	// !  get posts
-	stmt := `SELECT 
-				p.id, 
-				p.username, 
-				p.title, 
-				p.description, 
-				p.time, 
-				COUNT(CASE WHEN l.value = 1 THEN 1 END) AS total_likes, 
-				COUNT(CASE WHEN l.value = -1 THEN 1 END) AS total_dislikes,
-				COALESCE((
-					SELECT value FROM likes WHERE postID = p.id AND userID = ?
-				), 0) AS user_reaction_pub
-				FROM posts p
-				LEFT JOIN likes l ON p.id = l.postID
-				GROUP BY p.id
-				ORDER BY p.time DESC;	
+	// Query to get posts with like/dislike counts and user reaction
+	stmt := `
+		SELECT 
+			p.id, 
+			p.username, 
+			p.title, 
+			p.description, 
+			p.time, 
+			COUNT(CASE WHEN l.value = 1 THEN 1 END) AS total_likes, 
+			COUNT(CASE WHEN l.value = -1 THEN 1 END) AS total_dislikes,
+			COALESCE((
+				SELECT value FROM likes WHERE postID = p.id AND userID = ?
+			), 0) AS user_reaction_pub
+		FROM posts p
+		LEFT JOIN likes l ON p.id = l.postID
+		GROUP BY p.id
+		ORDER BY p.time DESC;
 	`
-
-
-
 	rows, err := config.Db.Query(stmt, userId)
 	if err != nil {
-		config.ResponseJSON(w, config.ErrorInternalServerErr.Code, map[string]any{
-			"message": "server Error 2 ",
-			"status":  config.ErrorInternalServerErr.Code,
+		config.ResponseJSON(w, http.StatusInternalServerError, map[string]any{
+			"message": "Internal server error while retrieving posts.",
+			"status":  http.StatusInternalServerError,
 		})
 		return
 	}
+	defer rows.Close()
+
 	var posts []config.Posts
 	var post config.Posts
 
-	 var totalcmnts = `SELECT  count(*) as totalcomments FROM comments c 
-	 INNER JOIN posts p  on p.id = c.postID
-	 WHERE c.postID = ?
+	// Query to get total comments for a post
+	totalcmnts := `
+		SELECT COUNT(*) as totalcomments FROM comments c
+		INNER JOIN posts p ON p.id = c.postID
+		WHERE c.postID = ?
 	`
-	var totalLikes, totalDislikes, user_reaction_pub int
-	defer rows.Close()
+
 	for rows.Next() {
-		err = rows.Scan(&post.Id, &post.Username, &post.Title, &post.Description, &post.Time, &totalLikes, &totalDislikes, &user_reaction_pub)
+		var totalLikes, totalDislikes, userReaction int
+		err = rows.Scan(&post.Id, &post.Username, &post.Title, &post.Description, &post.Time, &totalLikes, &totalDislikes, &userReaction)
 		if err != nil {
-			config.ResponseJSON(w, config.ErrorInternalServerErr.Code, map[string]any{
-				"message": "server Error 3",
-				"status":  config.ErrorInternalServerErr.Code,
+			config.ResponseJSON(w, http.StatusInternalServerError, map[string]any{
+				"message": "Internal server error while processing posts.",
+				"status":  http.StatusInternalServerError,
 			})
 			return
 		}
-		var Total int 
-post.Username =  html.EscapeString(post.Username)
-post.Title  =  html.EscapeString(post.Title)
-post.Description =  html.EscapeString(post.Description)
 
-		config.Db.QueryRow(totalcmnts, post.Id).Scan(&Total)
+		// Escape HTML for safety
+		post.Username = html.EscapeString(post.Username)
+		post.Title = html.EscapeString(post.Title)
+		post.Description = html.EscapeString(post.Description)
+
+		// Get total comments for this post
+		var totalComments int
+		config.Db.QueryRow(totalcmnts, post.Id).Scan(&totalComments)
+
+		// Assign post details
 		post.Categories = categorMap[post.Id]
 		post.TotalLikes = totalLikes
 		post.TotalDislikes = totalDislikes
-		post.TotalComments = Total
-		post.UserReactionPosts = user_reaction_pub
-		posts = append(posts, post)
+		post.TotalComments = totalComments
+		post.UserReactionPosts = userReaction
 
+		posts = append(posts, post)
 	}
 
-	// !  end get posts
-
-	variables := struct {
-		Session string
-		Posts   []config.Posts
+	// Prepare response data
+	responseData := struct {
+		Session string         
+		Posts   []config.Posts 
 	}{
 		Session: sessValue,
 		Posts:   posts,
 	}
 
+	// Send successful response
 	config.ResponseJSON(w, http.StatusOK, map[string]any{
-		"message": "posts successful",
+		"message": "Posts retrieved successfully.",
 		"status":  http.StatusOK,
-		"data":    variables,
+		"data":    responseData,
 	})
 }

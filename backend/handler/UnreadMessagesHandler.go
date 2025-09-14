@@ -20,7 +20,7 @@ func UnreadMessagesHandler(w http.ResponseWriter, r *http.Request) {
 	rows, _ := config.Db.Query(`
     SELECT sender_id, COUNT(*) as count
     FROM messages
-    WHERE receiver_id = ? AND is_read = FALSE
+    WHERE receiver_id = ?
     GROUP BY sender_id`, userID)
 	defer rows.Close()
 

@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	"strings"
 	"sync"
 	"time"
 
@@ -22,20 +21,23 @@ var upgrader = websocket.Upgrader{
 }
 
 var (
-	users     = make(map[int][]*websocket.Conn)
-	usersMu   sync.Mutex
-	broadcast = make(chan map[string]interface{}, 256)
+	users   = make(map[int][]*websocket.Conn)
+	usersMu sync.Mutex
 )
 
+// addUserConn adds a connection for a user (thread-safe).
 func addUserConn(userID int, conn *websocket.Conn) {
 	usersMu.Lock()
 	defer usersMu.Unlock()
 	users[userID] = append(users[userID], conn)
 }
 
+// removeUserConn removes one connection for a user. If no connections left,
+// it deletes the user entry and broadcasts offline status to friends/all users.
 func removeUserConn(userID int, conn *websocket.Conn) {
 	usersMu.Lock()
 	defer usersMu.Unlock()
+
 	conns, exists := users[userID]
 	if !exists {
 		return
@@ -48,24 +50,94 @@ func removeUserConn(userID int, conn *websocket.Conn) {
 	}
 	if len(users[userID]) == 0 {
 		delete(users, userID)
-		broadcast <- map[string]interface{}{
+		msg := map[string]interface{}{
 			"type":   "offline",
 			"userId": userID,
 			"time":   time.Now().Format(time.RFC3339),
 		}
+		for _, conns := range users {
+			for _, c := range conns {
+				_ = c.WriteJSON(msg)
+			}
+		}
 	}
 }
 
+// writeToConnSafe writes JSON to a single connection and returns write error.
+func writeToConnSafe(c *websocket.Conn, v interface{}) error {
+	if c == nil {
+		return nil
+	}
+	if err := c.WriteJSON(v); err != nil {
+		_ = c.Close()
+		return err
+	}
+	return nil
+}
+
+// sendToUser sends data to all connections of a given userID.
+func sendToUser(userID int, data map[string]interface{}) {
+	usersMu.Lock()
+	conns := users[userID]
+	usersMu.Unlock()
+
+	for _, c := range conns {
+		if err := writeToConnSafe(c, data); err != nil {
+			removeUserConn(userID, c)
+		}
+	}
+}
+
+// broadcastToAll sends data to every connected user (synchronously).
+func broadcastToAll(data map[string]interface{}) {
+	usersMu.Lock()
+	all := make([]*websocket.Conn, 0)
+	for _, conns := range users {
+		all = append(all, conns...)
+	}
+	usersMu.Unlock()
+
+	for _, c := range all {
+		if err := writeToConnSafe(c, data); err != nil {
+			usersMu.Lock()
+			for uid, conns := range users {
+				for i, cc := range conns {
+					if cc == c {
+						users[uid] = append(conns[:i], conns[i+1:]...)
+						break
+					}
+				}
+				if len(users[uid]) == 0 {
+					delete(users, uid)
+					offlineMsg := map[string]interface{}{
+						"type":   "offline",
+						"userId": uid,
+						"time":   time.Now().Format(time.RFC3339),
+					}
+					for _, remaining := range users {
+						for _, rc := range remaining {
+							_ = rc.WriteJSON(offlineMsg)
+						}
+					}
+				}
+			}
+			usersMu.Unlock()
+		}
+	}
+}
+
+// sendUnreadMessages sends last X messages to the provided conn for userID.
 func sendUnreadMessages(userID int, conn *websocket.Conn, db *sql.DB) {
-	if db == nil {
+	if db == nil || conn == nil {
 		return
 	}
 	rows, err := db.Query(`
 		SELECT m.id, m.sender_id, m.message, m.created_at, u.username
 		FROM messages m
 		JOIN users u ON m.sender_id = u.id
-		WHERE m.receiver_id = ? AND m.is_read = FALSE
-		ORDER BY m.created_at ASC`, userID)
+		WHERE m.receiver_id = ?
+		ORDER BY m.created_at ASC
+		LIMIT 50`, userID) // optional limit
 	if err != nil {
 		return
 	}
@@ -87,83 +159,17 @@ func sendUnreadMessages(userID int, conn *websocket.Conn, db *sql.DB) {
 			"time":           createdAt,
 			"senderUsername": senderUsername,
 		}
-		conn.WriteJSON(data)
-		db.Exec("UPDATE messages SET is_read = TRUE WHERE id = ?", msgID)
+		_ = writeToConnSafe(conn, data)
 	}
 }
 
-func HandleBroadcast(db *sql.DB) {
-	if db == nil {
-		log.Fatal("Database connection is nil in HandleBroadcast")
-	}
-	for {
-		data := <-broadcast
-		msgType, ok := data["type"].(string)
-		if !ok {
-			continue
-		}
-		usersMu.Lock()
-		if receiver, ok := data["receiver"].(int); ok && msgType == "message" {
-			if conns, ok := users[receiver]; ok {
-				for _, conn := range conns {
-					conn.WriteJSON(data)
-					if msgID, ok := data["id"].(int); ok {
-						db.Exec("UPDATE messages SET is_read = TRUE WHERE id = ?", msgID)
-					}
-				}
-			}
-			if sender, ok := data["sender"].(int); ok {
-				broadcast <- map[string]interface{}{
-					"type":     "notification",
-					"receiver": receiver,
-					"from":     sender,
-					"message":  "New message",
-					"time":     time.Now().Format(time.RFC3339),
-				}
-			}
-		} else {
-			for _, conns := range users {
-				for _, conn := range conns {
-					conn.WriteJSON(data)
-				}
-			}
-		}
-		usersMu.Unlock()
-	}
-}
-
-func reader(userID int, conn *websocket.Conn, db *sql.DB) {
+// handleConnection reads & handles messages from a connection.
+func handleConnection(userID int, conn *websocket.Conn, db *sql.DB) {
 	defer func() {
-		/* usersMu.Lock()
-		broadcast <- map[string]interface{}{
-			"type":           "stoptyping",
-			"senderId":       userID,
-			"time":           time.Now().Format(time.RFC3339),
-		}
-		usersMu.Unlock() */
-
 		removeUserConn(userID, conn)
-		conn.Close()
-
-		if LoggedOut {
-			usersMu.Lock()
-			_, exists := users[userID]
-			if !exists {
-				usersMu.Unlock()
-				return
-			}
-
-			delete(users, userID)
-
-			broadcast <- map[string]interface{}{
-				"type":   "offline",
-				"userId": userID,
-				"time":   time.Now().Format(time.RFC3339),
-			}
-
-			usersMu.Unlock()
-		}
+		_ = conn.Close()
 	}()
+
 	for {
 		_, data, err := conn.ReadMessage()
 		if err != nil {
@@ -177,58 +183,84 @@ func reader(userID int, conn *websocket.Conn, db *sql.DB) {
 		if !ok {
 			continue
 		}
-		if msgType == "message" {
-			receiver, ok := msg["receiver"].(float64)
+
+		switch msgType {
+		case "message":
+			receiverF, ok := msg["receiver"].(float64)
 			if !ok {
 				continue
 			}
+			receiver := int(receiverF)
 			content, ok := msg["message"].(string)
 			if !ok {
 				continue
 			}
+			content = html.EscapeString(content)
+
 			var senderUsername string
-			db.QueryRow("SELECT username FROM users WHERE id = ?", userID).Scan(&senderUsername)
+			_ = db.QueryRow("SELECT username FROM users WHERE id = ?", userID).Scan(&senderUsername)
+
 			res, err := db.Exec(`
-				INSERT INTO messages (sender_id, receiver_id, message, is_read)
-				VALUES (?, ?, ?, FALSE)`, userID, int(receiver), content)
+				INSERT INTO messages (sender_id, receiver_id, message)
+				VALUES (?, ?, ?)`, userID, receiver, content)
 			if err != nil {
 				continue
 			}
-			msgID, _ := res.LastInsertId()
-			broadcast <- map[string]interface{}{
+			msgID64, _ := res.LastInsertId()
+			msgID := int(msgID64)
+
+			out := map[string]interface{}{
 				"type":           "message",
-				"id":             int(msgID),
+				"id":             msgID,
 				"sender":         userID,
-				"receiver":       int(receiver),
+				"receiver":       receiver,
 				"message":        content,
 				"time":           time.Now().Format(time.RFC3339),
 				"senderUsername": senderUsername,
 			}
-		}
-		if msgType == "typing" || msgType == "stopTyping" {
-			receiverID, ok := msg["receiver"].(float64)
+
+			sendToUser(receiver, out)
+
+			sendToUser(userID, map[string]interface{}{
+				"type":           "message_sent",
+				"id":             msgID,
+				"sender":         userID,
+				"receiver":       receiver,
+				"message":        content,
+				"time":           time.Now().Format(time.RFC3339),
+				"senderUsername": senderUsername,
+			})
+
+			notification := map[string]interface{}{
+				"type":     "notification",
+				"receiver": receiver,
+				"from":     userID,
+				"message":  "New message",
+				"time":     time.Now().Format(time.RFC3339),
+			}
+			sendToUser(receiver, notification)
+
+		case "typing", "stopTyping":
+			receiverF, ok := msg["receiver"].(float64)
 			if !ok {
 				continue
 			}
-
-			usersMu.Lock()
-			if conns, exists := users[int(receiverID)]; exists {
-				for _, conn := range conns {
-					conn.WriteJSON(map[string]interface{}{
-						"type":           msgType,
-						"senderId":       userID,
-						"senderUsername": msg["senderUsername"],
-						"time":           time.Now().Format(time.RFC3339),
-					})
-				}
+			receiver := int(receiverF)
+			typingMsg := map[string]interface{}{
+				"type":           msgType,
+				"senderId":       userID,
+				"senderUsername": msg["senderUsername"],
+				"time":           time.Now().Format(time.RFC3339),
 			}
-			usersMu.Unlock()
-			continue
-		}
+			sendToUser(receiver, typingMsg)
 
+		default:
+			broadcastToAll(msg)
+		}
 	}
 }
 
+// WsHandler handles websocket connection
 func WsHandler(w http.ResponseWriter, r *http.Request) {
 	_, session := helpers.SessionChecked(w, r)
 	var userID int
@@ -237,51 +269,39 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
+
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		return
 	}
 
 	addUserConn(userID, conn)
-	broadcast <- map[string]interface{}{
+
+	onlineMsg := map[string]interface{}{
 		"type":   "online",
 		"userId": userID,
 		"time":   time.Now().Format(time.RFC3339),
 	}
+	broadcastToAll(onlineMsg)
+
 	usersMu.Lock()
 	onlineUsers := []int{}
 	for id := range users {
 		onlineUsers = append(onlineUsers, id)
 	}
 	usersMu.Unlock()
-	conn.WriteJSON(map[string]interface{}{
+	_ = conn.WriteJSON(map[string]interface{}{
 		"type":  "online_list",
 		"users": onlineUsers,
 		"time":  time.Now().Format(time.RFC3339),
 	})
+
 	sendUnreadMessages(userID, conn, config.Db)
-	go reader(userID, conn, config.Db)
+
+	handleConnection(userID, conn, config.Db)
 }
 
-func MarkReadHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-	pathParts := strings.Split(r.URL.Path, "/")
-	if len(pathParts) < 3 {
-		http.Error(w, "Invalid message ID", http.StatusBadRequest)
-		return
-	}
-	msgID, err := strconv.Atoi(pathParts[2])
-	if err != nil {
-		http.Error(w, "Invalid message ID", http.StatusBadRequest)
-		return
-	}
-	config.Db.Exec("UPDATE messages SET is_read = TRUE WHERE id = ?", msgID)
-	w.WriteHeader(http.StatusOK)
-}
-
+// GetMessagesHandler - fetch messages normally
 func GetMessagesHandler(w http.ResponseWriter, r *http.Request) {
 	receiverIDStr := r.URL.Query().Get("receiver")
 	offsetStr := r.URL.Query().Get("offset")
@@ -342,4 +362,82 @@ func GetMessagesHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(messages)
+}
+
+// MessageHandler - HTTP route for sending messages
+func MessageHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		config.ResponseJSON(w, http.StatusMethodNotAllowed, map[string]any{
+			"message": "method not allowed",
+			"status":  http.StatusMethodNotAllowed,
+		})
+		return
+	}
+
+	_, session := helpers.SessionChecked(w, r)
+	var senderId int
+	err := config.Db.QueryRow("SELECT id FROM users WHERE session=?", session).Scan(&senderId)
+	if err != nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	var message config.Messages
+	err = json.NewDecoder(r.Body).Decode(&message)
+	if err != nil {
+		config.ResponseJSON(w, http.StatusBadRequest, map[string]any{
+			"message": "Invalid request",
+		})
+		return
+	}
+
+	message.Sender = senderId
+
+	stmt := `INSERT INTO messages (sender_id, receiver_id, message) VALUES (?, ?, ?)`
+	res, err := config.Db.Exec(stmt, message.Sender, message.Reciever, message.Message)
+	if err != nil {
+		http.Error(w, "Database error", http.StatusInternalServerError)
+		return
+	}
+
+	messageId, _ := res.LastInsertId()
+	message.Id = int(messageId)
+
+	var username string
+	_ = config.Db.QueryRow("SELECT username FROM users WHERE id=?", senderId).Scan(&username)
+
+	out := map[string]any{
+		"type":           "message",
+		"id":             message.Id,
+		"sender":         message.Sender,
+		"reciever":       message.Reciever,
+		"message":        message.Message,
+		"time":           time.Now().Format(time.RFC3339),
+		"senderUsername": username,
+	}
+
+	sendToUser(message.Reciever, out)
+	sendToUser(message.Sender, map[string]any{
+		"type":           "message_sent",
+		"id":             message.Id,
+		"sender":         message.Sender,
+		"reciever":       message.Reciever,
+		"message":        message.Message,
+		"time":           time.Now().Format(time.RFC3339),
+		"senderUsername": username,
+	})
+
+	notif := map[string]any{
+		"type":     "notification",
+		"reciever": message.Reciever,
+		"from":     message.Sender,
+		"message":  "new Message",
+		"time":     time.Now().Format(time.RFC3339),
+	}
+	sendToUser(message.Reciever, notif)
+
+	config.ResponseJSON(w, http.StatusOK, map[string]any{
+		"message": "Message sent",
+		"data":    out,
+	})
 }
