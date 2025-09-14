@@ -100,7 +100,7 @@ function connectWebSocket() {
           let notif = document.querySelector(".notifIcon");
           notif.innerHTML = ` <i class="fa-solid fa-bell bell-icon" id="bellIcon"></i>`
 
-        
+
 
 
           const user = document.querySelector(
@@ -115,6 +115,8 @@ function connectWebSocket() {
         break;
       case "online_list":
         setTimeout(() => {
+          let aside = document.querySelector(".aside2");
+          sortUsers(aside)
           console.log(data);
           let el = document.querySelector(`.users`);
           if (el) {

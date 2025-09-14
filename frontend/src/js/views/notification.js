@@ -10,7 +10,10 @@ export async function loadUnreadNotifications() {
     return;
   }
   let notif = document.querySelector(".notifIcon");
-  notif.innerHTML = ` <i class="fa-solid fa-bell bell-icon" id="bellIcon"></i>`
+  if (notif) {
+
+    notif.innerHTML = ` <i class="fa-solid fa-bell bell-icon" id="bellIcon"></i>`
+  }
   const userElement = document.querySelector(`.users[data-id="${data.from}"] .notification`);
   if (userElement) {
     userElement.textContent = data.message;
