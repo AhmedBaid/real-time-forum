@@ -1,5 +1,7 @@
+import { Navigate } from "../config.js";
 import { showToast } from "../helpers/showToast.js";
 import { timeFormat } from "../helpers/timeFormat.js";
+import { login } from "./login.js";
 
 export async function HandleComments(e) {
   e.preventDefault();
@@ -19,12 +21,19 @@ export async function HandleComments(e) {
       body: JSON.stringify({ post_id, Comment }),
     });
 
+    const data = await response.json();
     if (!response.ok) {
-      let err = await response.text();
-      throw new Error(err);
+
+      if (response.status === 401) {
+        Navigate("/login");
+        login();
+        showToast("error", data.message);
+        return
+      }
+      showToast("error", data.message);zfùlvj
+      return;
     }
 
-    const data = await response.json();
 
     const commentaires = form
       .closest(".second-part")

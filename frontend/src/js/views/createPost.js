@@ -5,8 +5,7 @@ import { login } from "./login.js";
 
 export async function createPost(e) {
     e.preventDefault();
-    const postForm = document.querySelector(".Post-form");
-    let overlay = document.querySelector(".overlay");
+    const overlay = document.querySelector(".overlay");
     const title = document.querySelector(".title").value;
     const content = document.querySelector(".content").value;
     const categories = Array.from(
@@ -28,7 +27,6 @@ export async function createPost(e) {
     const data = await response.json();
     if (!response.ok) {
         if (response.status === 401) {
-            postForm.remove();
             overlay.remove();
             showToast("error", data.message);
             Navigate("/login");
@@ -38,7 +36,6 @@ export async function createPost(e) {
         showToast("error", data.message);
         return;
     }
-    postForm.remove();
     overlay.remove();
     showToast("success", "Post created successfully");
     Navigate("/");
