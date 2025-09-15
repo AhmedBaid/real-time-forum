@@ -37,10 +37,15 @@ export async function createPost(e) {
         return;
     }
     overlay.remove();
-    
-    Navigate("/");
-    home();
-    
-    showToast("success", "Post created successfully");
 
+    const postsContainer = document.querySelector(".posts");
+    const div = document.createElement("div");
+    div.className = "post-card";
+    div.innerHTML = `
+     <h3>${data.data.title}</h3>
+     <p>${data.data.description}</p>
+   `;
+    postsContainer.prepend(div);
+
+    showToast("success", "Post created successfully");
 }

@@ -30,7 +30,7 @@ export async function HandleComments(e) {
         showToast("error", data.message);
         return
       }
-      showToast("error", data.message);zfùlvj
+      showToast("error", data.message);
       return;
     }
 

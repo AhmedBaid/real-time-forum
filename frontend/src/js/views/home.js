@@ -382,7 +382,6 @@ export async function home() {
 
 }
 async function Logout(e) {
-  const postForm = document.querySelector(".Post-form");
   e.preventDefault();
   Navigate("/logout");
   const response = await fetch("/logout", {
@@ -393,10 +392,6 @@ async function Logout(e) {
     Navigate("/login");
     login();
     return;
-  }
-  if (postForm) {
-    postForm.remove();
-    container.style.opacity = "1";
   }
   showToast("success", "Logged out successfully");
   socket.close();
