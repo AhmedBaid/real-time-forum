@@ -4,6 +4,12 @@ import { fetchUsers } from "./api.js";
 
 export async function sortUsers(aside) {
   let users = await fetchUsers();
+  if (!users.data) {
+    aside.innerHTML = "<h2>No users found</h2>";
+    return;
+  }
+
+  aside.innerHTML = ""; // Clear previous content, including "No users found"
 
   users = users.data.sort((a, b) => {
     const aHasMsg = !!a.lastMessageTime;
@@ -40,7 +46,7 @@ export async function sortUsers(aside) {
           </div>
     ${user.id === isOnline.id
           ? `<span class="online" style="background-color: green">.</span>`
-          : `<span class="online">.</span>`
+          : `<span class="online" >.</span>`
         }
 
     `;

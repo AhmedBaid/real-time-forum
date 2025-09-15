@@ -280,18 +280,20 @@ export async function home() {
   await sortUsers(aside);
   let obj = await fetchPosts();
 
-  for (const post of obj.data.Posts) {
-    const postId = post.id;
-    const commentToggleId = `commentshow-${postId}`;
-    const commentsSectionId = `comments-section-${postId}`;
+  if (obj.data.Posts && obj.data.Posts.length > 0) {
+    allPost.innerHTML = ""; // Clear previous content, including "No posts yet"
+    for (const post of obj.data.Posts) {
+      const postId = post.id;
+      const commentToggleId = `commentshow-${postId}`;
+      const commentsSectionId = `comments-section-${postId}`;
 
-    allPost.innerHTML += `
+      allPost.innerHTML += `
       <div class="post-card" id="post-${postId}">
         <div class="first-part">
           <div class="post-header">
             <div class="user-info">
               <img src="https://robohash.org/${post.username
-      }.png?size=50x50" class="avatar" />
+        }.png?size=50x50" class="avatar" />
               <span class="username">${post.username}</span>
             </div>
             <span class="post-time">${timeFormat(post.time)}</span>
@@ -300,31 +302,31 @@ export async function home() {
           <p class="post-description">${post.description}</p>
           <div class="post-tags">
             ${post.categories
-        .map((cat) => `<span class="tag">${cat.name}</span>`)
-        .join("")}
+          .map((cat) => `<span class="tag">${cat.name}</span>`)
+          .join("")}
           </div>
           <div class="post-reactions">
             <form method="post" class="likesForm">
               <div class="reaction">
                 <span class="span-like ${post.userReactionPosts === 1 ? "active-like" : ""
-      }">${post.totalLikes}</span>
+        }">${post.totalLikes}</span>
                 <button name="reaction1" value="1" class="like-btn ${post.userReactionPosts === 1 ? "active-like" : ""
-      }" type="submit">
+        }" type="submit">
                   <i class="fa-solid fa-thumbs-up"></i>
                 </button>
               </div>
               <div class="reaction">
                 <span class="span-dislike ${post.userReactionPosts === -1 ? "active-dislike" : ""
-      }">${post.totalDislikes}</span>
+        }">${post.totalDislikes}</span>
                 <button name="reaction2" value="-1" class="dislike-btn ${post.userReactionPosts === -1 ? "active-dislike" : ""
-      }" type="submit">
+        }" type="submit">
                   <i class="fa-solid fa-thumbs-down"></i>
                 </button>
               </div>
               <div class="reaction">
                 <span class="totalComnts">${post.totalComments}</span>
                 <input type="checkbox" class="hidd" value="${post.id
-      }" id="${commentToggleId}" />
+        }" id="${commentToggleId}" />
                 <label for="${commentToggleId}" class="comment-icon">
                   <i class="fa-solid fa-comment"></i>
                 </label>
@@ -338,7 +340,7 @@ export async function home() {
             <form method="post" id="${postId}" class="formComment">
               <input type="hidden" name="postID" value="${postId}" />
               <img src="https://robohash.org/${obj.data.UserActive
-      }.png?size=50x50" />
+        }.png?size=50x50" />
               <input type="text" name="comment" placeholder="Add Comment" required />
               <button type="submit">Add</button>
             </form>
@@ -348,27 +350,33 @@ export async function home() {
       </div>
     `;
 
-    setTimeout(() => {
-      const toggle = document.getElementById(commentToggleId);
-      const section = document.getElementById(commentsSectionId);
+      setTimeout(() => {
+        const toggle = document.getElementById(commentToggleId);
+        const section = document.getElementById(commentsSectionId);
 
-      if (toggle && section) {
-        toggle.addEventListener("change", async () => {
-          section.style.display = toggle.checked ? "flex" : "none";
-          if (toggle.checked) {
-            const data = await fetchComments(toggle.value);
-            if (!data) return;
-            renderCommentsStyled(section, data.data);
-            const countSpan = section
-              .closest(".post-card")
-              .querySelector(".totalComnts");
-            if (countSpan) {
-              countSpan.innerHTML = data.data.length;
+        if (toggle && section) {
+          toggle.addEventListener("change", async () => {
+            section.style.display = toggle.checked ? "flex" : "none";
+            if (toggle.checked) {
+              const data = await fetchComments(toggle.value);
+              if (!data) return;
+              renderCommentsStyled(section, data.data);
+              const countSpan = section
+                .closest(".post-card")
+                .querySelector(".totalComnts");
+              if (countSpan) {
+                countSpan.innerHTML = !data.data ? 0  : data.data.length;   ;
+              }
             }
-          }
-        });
-      }
-    }, 0);
+          });
+        }
+      }, 0);
+    }
+
+
+
+  } else {
+    allPost.innerHTML = "<h2>No posts yet</h2>";
   }
 
   container.innerHTML = "";
