@@ -20,7 +20,7 @@ export let currentUserId = null;
 export let Currentusername = null;
 export let offset = { nbr: 0 };
 let id = null;
-
+export let isOnline = { id: null }
 
 
 // get the current user
@@ -59,6 +59,47 @@ function connectWebSocket() {
     switch (data.type) {
       case "online":
         setTimeout(() => {
+          console.log(data);
+
+          isOnline.id = data.userId
+
+          const aside = document.querySelector(".aside2")
+          // new user
+
+          /* 
+                    const usr = document.querySelector(`.users [data-id="${data.userId}"]`)
+                    if (!usr && data.userId !== currentUserId) {
+                      const div = document.createElement("div");
+                      div.className = "users";
+                      div.dataset.username = data.username;
+                      div.dataset.id = data.userId;
+                      div.innerHTML = `
+                  <img src="https://robohash.org/${data.username}.png?size=50x50" class="avatar" />
+                    <div class="text-wrapper">
+                      <span class="username">${data.username}</span>
+                      <span class="notification"></span>
+                      <span class="typing"> 
+                        <strong>typing</strong>
+                        <span class="dots">
+                            <span class="dot">.</span>
+                            <span class="dot">.</span>
+                            <span class="dot">.</span>
+                        </span>
+                      </span>
+                    </div>
+                    <span class="online"  style="backgound-color:green">.</span>
+                    
+          `
+                      div.addEventListener("click", HandleMessages)
+                      aside.append(div)
+          
+                    } */
+          //end new user  
+
+
+          sortUsers(aside)
+
+
           let el = document.querySelector(`.users`);
           if (el) {
             setUserOnline(data.userId);
@@ -95,8 +136,13 @@ function connectWebSocket() {
           if (chatbox) {
             return;
           }
+
           let notif = document.querySelector(".notifIcon");
           notif.innerHTML = ` <i class="fa-solid fa-bell bell-icon" id="bellIcon"></i>`
+          setTimeout(() => {
+            notif.innerHTML = ""
+          }, 2000);
+
 
 
 
@@ -373,7 +419,7 @@ export async function home() {
         if (e.target === overlay) {
           overlay.remove();
           Navigate("/");
-          aside= document.querySelector(".aside2");
+          aside = document.querySelector(".aside2");
           sortUsers(aside);
         }
       });

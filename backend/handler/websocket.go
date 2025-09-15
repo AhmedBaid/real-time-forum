@@ -264,7 +264,8 @@ func handleConnection(userID int, conn *websocket.Conn, db *sql.DB) {
 func WsHandler(w http.ResponseWriter, r *http.Request) {
 	_, session := helpers.SessionChecked(w, r)
 	var userID int
-	err := config.Db.QueryRow("SELECT id FROM users WHERE session = ?", session).Scan(&userID)
+	var username string
+	err := config.Db.QueryRow("SELECT id , username FROM users WHERE session = ?", session).Scan(&userID, &username)
 	if err != nil {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
@@ -278,9 +279,10 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 	addUserConn(userID, conn)
 
 	onlineMsg := map[string]interface{}{
-		"type":   "online",
-		"userId": userID,
-		"time":   time.Now().Format(time.RFC3339),
+		"type":     "online",
+		"userId":   userID,
+		"username": username,
+		"time":     time.Now().Format(time.RFC3339),
 	}
 	broadcastToAll(onlineMsg)
 

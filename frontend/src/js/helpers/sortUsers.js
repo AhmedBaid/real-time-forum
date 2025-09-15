@@ -1,3 +1,5 @@
+import { HandleMessages } from "../views/HandleMessages.js";
+import { isOnline } from "../views/home.js";
 import { fetchUsers } from "./api.js";
 
 export async function sortUsers(aside) {
@@ -18,7 +20,6 @@ export async function sortUsers(aside) {
   for (const user of users) {
     let div = aside.querySelector(`.users[data-id="${user.id}"]`);
     if (!div) {
-      // ماكاينش → نخلقو جديد
       div = document.createElement("div");
       div.className = "users";
       div.dataset.username = user.username;
@@ -37,9 +38,13 @@ export async function sortUsers(aside) {
               </span>
             </span>
           </div>
-          <span class="online">.</span>
-      `;
+    ${user.id === isOnline.id
+          ? `<span class="online" style="background-color: green">.</span>`
+          : `<span class="online">.</span>`
+        }
 
+    `;
+      div.addEventListener("click", HandleMessages)
       aside.appendChild(div);
     }
 

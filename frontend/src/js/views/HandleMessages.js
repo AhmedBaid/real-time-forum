@@ -27,8 +27,7 @@ export async function HandleMessages(e) {
   if (user.textContent !== "") {
     user.innerHTML = ""
   }
-  let notif = document.querySelector(".notifIcon");
-  notif.innerHTML = ""
+
 
 
 
