@@ -49,9 +49,9 @@ const categories = [
   { id: 1, name: "Sport" },
   { id: 2, name: "Music" },
   { id: 3, name: "Movies" },
-  { id: 4, name: "Gym" },
-  { id: 5, name: "Technology" },
-  { id: 6, name: "Science" },
+  { id: 4, name: "Science" },
+  { id: 5, name: "Gym" },
+  { id: 6, name: "Technology" },
   { id: 7, name: "Culture" },
   { id: 8, name: "Politics" },
 ];

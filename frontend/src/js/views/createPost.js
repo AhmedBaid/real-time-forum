@@ -12,7 +12,7 @@ export async function createPost(e) {
   const categories = Array.from(
     document.querySelectorAll("input[name='tags']:checked")
   ).map(tag => Number(tag.value));
-  console.log({ title, content, categories });
+  console.log(categories);
 
   const response = await fetch("/createpost", {
     method: "POST",
