@@ -47,12 +47,12 @@ export const Header = `<h1>RT-<span class="logo">FO</span>RUM</h1>
 
 const categories = [
   { id: 1, name: "Sport" },
-  { id: 6, name: "Music" },
+  { id: 2, name: "Music" },
   { id: 3, name: "Movies" },
-  { id: 5, name: "Gym" },
-  { id: 2, name: "Technology" },
-  { id: 7, name: "Science" },
-  { id: 4, name: "Culture" },
+  { id: 4, name: "Gym" },
+  { id: 5, name: "Technology" },
+  { id: 6, name: "Science" },
+  { id: 7, name: "Culture" },
   { id: 8, name: "Politics" },
 ];
 export const PostForm = `

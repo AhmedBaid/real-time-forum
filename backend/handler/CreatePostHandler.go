@@ -124,7 +124,7 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 			"description": post.Description,
 			"username":    username,
 			"time":        time.Now(),
-			"categories":  catNames, // now returns names
+			"categories":  catNames,
 		},
 	})
 }
