@@ -119,12 +119,16 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 		"message": "Post created successfully.",
 		"status":  http.StatusOK,
 		"data": map[string]any{
-			"id":          postID,
-			"title":       post.Title,
-			"description": post.Description,
-			"username":    username,
-			"time":        time.Now(),
-			"categories":  catNames,
+			"id":                postID,
+			"title":             post.Title,
+			"description":       post.Description,
+			"username":          username,
+			"time":              time.Now(),
+			"categories":        catNames,
+			"totalLikes":        0,
+			"totalDislikes":     0,
+			"totalComments":     0,
+			"userReactionPosts": 0,
 		},
 	})
 }
