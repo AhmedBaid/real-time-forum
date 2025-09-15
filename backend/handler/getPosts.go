@@ -116,8 +116,8 @@ func GetPosts(w http.ResponseWriter, r *http.Request) {
 
 	// Prepare response data
 	responseData := struct {
-		Session string         
-		Posts   []config.Posts 
+		Session string
+		Posts   []config.Posts
 	}{
 		Session: sessValue,
 		Posts:   posts,

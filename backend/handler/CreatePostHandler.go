@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"slices"
+	"time"
 
 	"real_time/backend/config"
 	"real_time/backend/helpers"
@@ -33,6 +34,7 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Valid categories
 	validCategories := []int{1, 2, 3, 4, 5, 6, 7, 8}
 	for _, v := range post.Categories {
 		if !slices.Contains(validCategories, v) {
@@ -51,6 +53,7 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
+
 	if len(post.Title) < 3 || len(post.Title) > 30 ||
 		len(post.Description) < 1 || len(post.Description) > 100 {
 		config.ResponseJSON(w, http.StatusBadRequest, map[string]any{
@@ -60,10 +63,10 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Get user info
 	var userId int
 	var username string
-	stmt2 := `SELECT username, id FROM users WHERE session = ?`
-	err := config.Db.QueryRow(stmt2, session).Scan(&username, &userId)
+	err := config.Db.QueryRow(`SELECT username, id FROM users WHERE session = ?`, session).Scan(&username, &userId)
 	if err != nil {
 		config.ResponseJSON(w, http.StatusUnauthorized, map[string]any{
 			"message": "Unauthorized. Invalid session.",
@@ -72,8 +75,9 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	stmt := `INSERT INTO posts (title, description, username, userID) VALUES (?, ?, ?, ?)`
-	res, err := config.Db.Exec(stmt, post.Title, post.Description, username, userId)
+	// Insert post
+	res, err := config.Db.Exec(`INSERT INTO posts (title, description, username, userID) VALUES (?, ?, ?, ?)`,
+		post.Title, post.Description, username, userId)
 	if err != nil {
 		config.ResponseJSON(w, http.StatusInternalServerError, map[string]any{
 			"message": "Failed to create post.",
@@ -91,9 +95,10 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	stmtcat := `INSERT INTO categories_post (categoryID, postID) VALUES (?, ?)`
-	for _, v := range post.Categories {
-		_, err := config.Db.Exec(stmtcat, v, postID)
+	// Assign categories
+	catNames := []string{}
+	for _, catID := range post.Categories {
+		_, err := config.Db.Exec(`INSERT INTO categories_post (categoryID, postID) VALUES (?, ?)`, catID, postID)
 		if err != nil {
 			config.ResponseJSON(w, http.StatusInternalServerError, map[string]any{
 				"message": "Failed to assign category to post.",
@@ -101,10 +106,25 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 			})
 			return
 		}
+
+		// Get category name
+		var catName string
+		err = config.Db.QueryRow(`SELECT name FROM categories WHERE id = ?`, catID).Scan(&catName)
+		if err == nil {
+			catNames = append(catNames, catName)
+		}
 	}
 
 	config.ResponseJSON(w, http.StatusOK, map[string]any{
 		"message": "Post created successfully.",
 		"status":  http.StatusOK,
+		"data": map[string]any{
+			"id":          postID,
+			"title":       post.Title,
+			"description": post.Description,
+			"username":    username,
+			"time":        time.Now(),
+			"categories":  catNames, // now returns names
+		},
 	})
 }
