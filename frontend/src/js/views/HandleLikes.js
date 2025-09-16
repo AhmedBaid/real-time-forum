@@ -1,4 +1,6 @@
+import { Navigate } from "../config.js";
 import { showToast } from "../helpers/showToast.js";
+import { login } from "./login.js";
 
 export async function HandleLikes(e) {
   e.preventDefault();
@@ -18,6 +20,11 @@ export async function HandleLikes(e) {
       body: JSON.stringify({ like, postId }),
     });
     if (!res.ok) {
+      if (res.status === 401 ) {
+        Navigate("login")
+        login()
+        return
+      }
       const er = await res.text();
       throw new Error(er);
     }

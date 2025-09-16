@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"html"
-	"log"
 	"net/http"
 	"strconv"
 	"sync"
@@ -126,8 +125,6 @@ func broadcastToAll(data map[string]interface{}) {
 	}
 }
 
-
-
 // handleConnection reads & handles messages from a connection.
 func handleConnection(userID int, conn *websocket.Conn, db *sql.DB) {
 	defer func() {
@@ -160,7 +157,7 @@ func handleConnection(userID int, conn *websocket.Conn, db *sql.DB) {
 			if !ok {
 				continue
 			}
-			
+
 			content = html.EscapeString(content)
 
 			var senderUsername string
@@ -186,16 +183,6 @@ func handleConnection(userID int, conn *websocket.Conn, db *sql.DB) {
 			}
 
 			sendToUser(receiver, out)
-
-		/* 	sendToUser(userID, map[string]interface{}{
-				"type":           "message_sent",
-				"id":             msgID,
-				"sender":         userID,
-				"receiver":       receiver,
-				"message":        content,
-				"time":           time.Now().Format(time.RFC3339),
-				"senderUsername": senderUsername,
-			}) */
 
 			notification := map[string]interface{}{
 				"type":     "notification",
@@ -233,7 +220,10 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 	var username string
 	err := config.Db.QueryRow("SELECT id , username FROM users WHERE session = ?", session).Scan(&userID, &username)
 	if err != nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		config.ResponseJSON(w, http.StatusUnauthorized, map[string]any{
+			"message": "bad request Invalide receiver ID",
+			"status":  http.StatusBadRequest,
+		})
 		return
 	}
 
@@ -264,7 +254,7 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 		"time":  time.Now().Format(time.RFC3339),
 	})
 
-	//sendUnreadMessages(userID, conn, config.Db)
+	// sendUnreadMessages(userID, conn, config.Db)
 
 	handleConnection(userID, conn, config.Db)
 }
@@ -276,13 +266,19 @@ func GetMessagesHandler(w http.ResponseWriter, r *http.Request) {
 
 	offsetId, err := strconv.Atoi(offsetStr)
 	if err != nil {
-		http.Error(w, "Invalid offset", http.StatusBadRequest)
+		config.ResponseJSON(w, http.StatusUnauthorized, map[string]any{
+			"message": "bad request Invalide offset nbr",
+			"status":  http.StatusBadRequest,
+		})
 		return
 	}
 
 	receiverID, err := strconv.Atoi(receiverIDStr)
 	if err != nil {
-		http.Error(w, "Invalid receiver ID", http.StatusBadRequest)
+		config.ResponseJSON(w, http.StatusUnauthorized, map[string]any{
+			"message": "bad request Invalide receiver ID",
+			"status":  http.StatusBadRequest,
+		})
 		return
 	}
 
@@ -290,7 +286,10 @@ func GetMessagesHandler(w http.ResponseWriter, r *http.Request) {
 	var senderID int
 	err = config.Db.QueryRow("SELECT id FROM users WHERE session = ?", session).Scan(&senderID)
 	if err != nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		config.ResponseJSON(w, http.StatusUnauthorized, map[string]any{
+			"message": "Unauthorized. Invalid session.",
+			"status":  http.StatusUnauthorized,
+		})
 		return
 	}
 
@@ -301,7 +300,10 @@ func GetMessagesHandler(w http.ResponseWriter, r *http.Request) {
 		WHERE (m.sender_id = ? AND m.receiver_id = ?) OR (m.sender_id = ? AND m.receiver_id = ?)
 		ORDER BY m.id Desc LIMIT 10 OFFSET ?`, senderID, receiverID, receiverID, senderID, offsetId)
 	if err != nil {
-		http.Error(w, "Database error", http.StatusInternalServerError)
+		config.ResponseJSON(w, http.StatusUnauthorized, map[string]any{
+			"message": "db error",
+			"status":  http.StatusInternalServerError,
+		})
 		return
 	}
 	defer rows.Close()
@@ -312,7 +314,6 @@ func GetMessagesHandler(w http.ResponseWriter, r *http.Request) {
 		var senderUsername string
 		var createdAt string
 		if err := rows.Scan(&m.Id, &m.Sender, &m.Reciever, &m.Message, &createdAt, &senderUsername); err != nil {
-			log.Printf("Error scanning message: %v", err)
 			continue
 		}
 		m.Message = html.EscapeString(m.Message)
@@ -332,4 +333,3 @@ func GetMessagesHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(messages)
 }
 
-// MessageHandler - HTTP route for sending messages

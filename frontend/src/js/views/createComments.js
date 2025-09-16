@@ -25,10 +25,8 @@ export async function HandleComments(e) {
     if (!response.ok) {
 
       if (response.status === 401) {
-        Navigate("/login");
-        login();
-        showToast("error", data.message);
-        return
+        Logout()
+
       }
       showToast("error", data.message);
       return;

@@ -22,6 +22,7 @@ export let offset = { nbr: 0 };
 let id = null;
 export let isOnline = { users: [] }
 export let onlineUser = { id: null }
+export let offlineUser = { id: null }
 
 // get the current user
 async function fetchCurrentUserId() {
@@ -49,13 +50,13 @@ function connectWebSocket() {
   socket.onmessage = async (e) => {
     let data = JSON.parse(e.data);
 
-    await new Promise((resolve) => setTimeout(resolve, 500)); // Delay to avoid race
+    await new Promise((resolve) => setTimeout(resolve, 500)); 
     let checklogged = await isLogged();
     console.log(checklogged);
 
     if (!checklogged) {
-      Navigate("/login");
-      login();
+      
+     Logout()
       return;
     }
     switch (data.type) {
@@ -71,6 +72,7 @@ function connectWebSocket() {
         }, 0);
         break;
       case "offline":
+        offlineUser.id = data.userId
         setTimeout(() => {
           let el = document.querySelector(`.users`);
           if (el) {
@@ -88,7 +90,7 @@ function connectWebSocket() {
       case "notification":
         setTimeout(async () => {
           let aside = document.querySelector(".aside2");
-          sortUsers(aside)
+        await  sortUsers(aside)
           let chatbox = document.querySelector(
             `.chat-box[data-id-u="${data.from}"]`
           );
@@ -387,7 +389,7 @@ export async function home() {
   });
 
 }
-async function Logout(e) {
+export async function Logout(e) {
   e.preventDefault();
   Navigate("/logout");
   const response = await fetch("/logout", {

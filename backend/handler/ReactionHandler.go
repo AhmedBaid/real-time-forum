@@ -43,9 +43,9 @@ func ReactionHandler(w http.ResponseWriter, r *http.Request) {
 	var userid int
 	err = config.Db.QueryRow(stmt2, session).Scan(&userid)
 	if err != nil {
-		config.ResponseJSON(w, config.ErrorInternalServerErr.Code, map[string]any{
-			"message": "error in database",
-			"status":  config.ErrorInternalServerErr.Code,
+		config.ResponseJSON(w, http.StatusUnauthorized, map[string]any{
+			"message": "Unauthorized. Invalid session.",
+			"status":  http.StatusUnauthorized,
 		})
 		return
 	}

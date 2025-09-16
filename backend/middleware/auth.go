@@ -8,7 +8,6 @@ import (
 )
 
 func IsLogged(w http.ResponseWriter, r *http.Request) {
-	
 	exist, _ := helpers.SessionChecked(w, r)
 	if !exist {
 		config.ResponseJSON(w, config.ErrorUnauthorized.Code, map[string]any{
@@ -17,9 +16,10 @@ func IsLogged(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	
+
 	config.ResponseJSON(w, http.StatusOK, map[string]any{
 		"message": "user is logged",
+		"status":  http.StatusOK,
 	})
 }
 

@@ -1,5 +1,5 @@
 import { HandleMessages } from "../views/HandleMessages.js";
-import { isOnline, onlineUser } from "../views/home.js";
+import { isOnline, offlineUser, onlineUser } from "../views/home.js";
 import { fetchUsers } from "./api.js";
 
 export async function sortUsers(aside) {
@@ -8,9 +8,10 @@ export async function sortUsers(aside) {
     aside.innerHTML = "<h2>No users found</h2>";
     return;
   }
-
-  aside.innerHTML = ""; // Clear previous content, including "No users found"
-
+if (aside) {
+  
+  aside.innerHTML = ""; 
+}
   users = users.data.sort((a, b) => {
     const aHasMsg = !!a.lastMessageTime;
     const bHasMsg = !!b.lastMessageTime;
