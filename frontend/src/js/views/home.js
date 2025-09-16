@@ -181,10 +181,8 @@ function connectWebSocket() {
     setTimeout(connectWebSocket, 5000);
   };
 }
-window.addEventListener("DOMContentLoaded", async () => {
-  connectWebSocket();
-  await loadUnreadNotifications();
-});
+connectWebSocket();
+
 
 // messages realtime
 function appendMessage(msg) {
