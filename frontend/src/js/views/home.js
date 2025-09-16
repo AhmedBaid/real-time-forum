@@ -90,12 +90,7 @@ function connectWebSocket() {
 
       case "notification":
         setTimeout(async () => {
-
-
-
           let aside = document.querySelector(".aside2");
-
-
           sortUsers(aside)
           let chatbox = document.querySelector(
             `.chat-box[data-id-u="${data.from}"]`
@@ -103,7 +98,6 @@ function connectWebSocket() {
           if (chatbox) {
             return;
           }
-
           let notif = document.querySelector(".notifIcon");
           notif.innerHTML = ` <i class="fa-solid fa-bell bell-icon" id="bellIcon"></i>`
           setTimeout(() => {

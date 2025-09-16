@@ -32,14 +32,19 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 
 	// Query to get users and their last message time
 	userQuery := `
-        SELECT u.username, u.id, MAX(m.created_at) as last_message_time
-        FROM users u
-        LEFT JOIN messages m 
-            ON u.id = m.sender_id OR u.id = m.receiver_id
-        WHERE u.id != ?
-        GROUP BY u.id, u.username
+        SELECT 
+    u.username, 
+    u.id, 
+    COALESCE(MAX(m.created_at), '') as last_message_time
+FROM users u
+LEFT JOIN messages m 
+    ON ( (u.id = m.sender_id AND m.receiver_id = ?) 
+      OR (u.id = m.receiver_id AND m.sender_id = ?) )
+WHERE u.id != ?
+GROUP BY u.id, u.username
+
     `
-	rows, err := config.Db.Query(userQuery, userId)
+	rows, err := config.Db.Query(userQuery, userId ,userId, userId)
 	if err != nil {
 		config.ResponseJSON(w, http.StatusInternalServerError, map[string]any{
 			"message": "Internal server error while retrieving users.",

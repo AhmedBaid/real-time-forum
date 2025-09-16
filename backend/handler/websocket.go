@@ -127,7 +127,7 @@ func broadcastToAll(data map[string]interface{}) {
 }
 
 // sendUnreadMessages sends last X messages to the provided conn for userID.
-func sendUnreadMessages(userID int, conn *websocket.Conn, db *sql.DB) {
+/* func sendUnreadMessages(userID int, conn *websocket.Conn, db *sql.DB) {
 	if db == nil || conn == nil {
 		return
 	}
@@ -161,7 +161,7 @@ func sendUnreadMessages(userID int, conn *websocket.Conn, db *sql.DB) {
 		}
 		_ = writeToConnSafe(conn, data)
 	}
-}
+} */
 
 // handleConnection reads & handles messages from a connection.
 func handleConnection(userID int, conn *websocket.Conn, db *sql.DB) {
@@ -221,7 +221,7 @@ func handleConnection(userID int, conn *websocket.Conn, db *sql.DB) {
 
 			sendToUser(receiver, out)
 
-			sendToUser(userID, map[string]interface{}{
+		/* 	sendToUser(userID, map[string]interface{}{
 				"type":           "message_sent",
 				"id":             msgID,
 				"sender":         userID,
@@ -229,7 +229,7 @@ func handleConnection(userID int, conn *websocket.Conn, db *sql.DB) {
 				"message":        content,
 				"time":           time.Now().Format(time.RFC3339),
 				"senderUsername": senderUsername,
-			})
+			}) */
 
 			notification := map[string]interface{}{
 				"type":     "notification",
@@ -298,7 +298,7 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 		"time":  time.Now().Format(time.RFC3339),
 	})
 
-	sendUnreadMessages(userID, conn, config.Db)
+	//sendUnreadMessages(userID, conn, config.Db)
 
 	handleConnection(userID, conn, config.Db)
 }
@@ -419,7 +419,7 @@ func MessageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sendToUser(message.Reciever, out)
-	sendToUser(message.Sender, map[string]any{
+/* 	sendToUser(message.Sender, map[string]any{
 		"type":           "message_sent",
 		"id":             message.Id,
 		"sender":         message.Sender,
@@ -428,7 +428,7 @@ func MessageHandler(w http.ResponseWriter, r *http.Request) {
 		"time":           time.Now().Format(time.RFC3339),
 		"senderUsername": username,
 	})
-
+ */
 	notif := map[string]any{
 		"type":     "notification",
 		"reciever": message.Reciever,
