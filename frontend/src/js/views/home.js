@@ -20,8 +20,8 @@ export let currentUserId = null;
 export let Currentusername = null;
 export let offset = { nbr: 0 };
 let id = null;
-export let isOnline = { id: null }
-
+export let isOnline = { users: [] }
+export let onlineUser = { id: null }
 
 // get the current user
 async function fetchCurrentUserId() {
@@ -58,45 +58,12 @@ function connectWebSocket() {
     }
     switch (data.type) {
       case "online":
+        onlineUser.id = data.userId
         setTimeout(() => {
           console.log(data);
 
-          isOnline.id = data.userId
 
           const aside = document.querySelector(".aside2")
-          // new user
-
-          /* 
-                    const usr = document.querySelector(`.users [data-id="${data.userId}"]`)
-                    if (!usr && data.userId !== currentUserId) {
-                      const div = document.createElement("div");
-                      div.className = "users";
-                      div.dataset.username = data.username;
-                      div.dataset.id = data.userId;
-                      div.innerHTML = `
-                  <img src="https://robohash.org/${data.username}.png?size=50x50" class="avatar" />
-                    <div class="text-wrapper">
-                      <span class="username">${data.username}</span>
-                      <span class="notification"></span>
-                      <span class="typing"> 
-                        <strong>typing</strong>
-                        <span class="dots">
-                            <span class="dot">.</span>
-                            <span class="dot">.</span>
-                            <span class="dot">.</span>
-                        </span>
-                      </span>
-                    </div>
-                    <span class="online"  style="backgound-color:green">.</span>
-                    
-          `
-                      div.addEventListener("click", HandleMessages)
-                      aside.append(div)
-          
-                    } */
-          //end new user  
-
-
           sortUsers(aside)
 
 
@@ -142,11 +109,6 @@ function connectWebSocket() {
           setTimeout(() => {
             notif.innerHTML = ""
           }, 2000);
-
-
-
-
-
           const user = document.querySelector(
             `.users[data-id="${data.from}"] .text-wrapper .notification`
           );
@@ -158,9 +120,9 @@ function connectWebSocket() {
 
         break;
       case "online_list":
+        isOnline.users = data.users
         setTimeout(() => {
-          let aside = document.querySelector(".aside2");
-          sortUsers(aside)
+
           console.log(data);
           let el = document.querySelector(`.users`);
           if (el) {
@@ -365,7 +327,7 @@ export async function home() {
                 .closest(".post-card")
                 .querySelector(".totalComnts");
               if (countSpan) {
-                countSpan.innerHTML = !data.data ? 0  : data.data.length;   ;
+                countSpan.innerHTML = !data.data ? 0 : data.data.length;;
               }
             }
           });

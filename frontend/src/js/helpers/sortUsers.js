@@ -1,5 +1,5 @@
 import { HandleMessages } from "../views/HandleMessages.js";
-import { isOnline } from "../views/home.js";
+import { isOnline, onlineUser } from "../views/home.js";
 import { fetchUsers } from "./api.js";
 
 export async function sortUsers(aside) {
@@ -44,12 +44,19 @@ export async function sortUsers(aside) {
               </span>
             </span>
           </div>
-    ${user.id === isOnline.id
-          ? `<span class="online" style="background-color: green">.</span>`
+          ${isOnline.users.includes(user.id) || onlineUser.id === user.id
+
+          ? `<span class="online" style="background-color: green " >.</span>`
           : `<span class="online" >.</span>`
         }
+  
+         
+       
+       
 
     `;
+
+
       div.addEventListener("click", HandleMessages)
       aside.appendChild(div);
     }
