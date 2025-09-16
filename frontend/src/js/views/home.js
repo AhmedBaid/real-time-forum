@@ -51,6 +51,8 @@ function connectWebSocket() {
 
     await new Promise((resolve) => setTimeout(resolve, 500)); // Delay to avoid race
     let checklogged = await isLogged();
+    console.log(checklogged);
+
     if (!checklogged) {
       Navigate("/login");
       login();
@@ -60,13 +62,8 @@ function connectWebSocket() {
       case "online":
         onlineUser.id = data.userId
         setTimeout(() => {
-          console.log(data);
-
-
           const aside = document.querySelector(".aside2")
           sortUsers(aside)
-
-
           let el = document.querySelector(`.users`);
           if (el) {
             setUserOnline(data.userId);
@@ -100,16 +97,16 @@ function connectWebSocket() {
           }
           let notif = document.querySelector(".notifIcon");
           notif.innerHTML = ` <i class="fa-solid fa-bell bell-icon" id="bellIcon"></i>`
-          setTimeout(() => {
-            notif.innerHTML = ""
-          }, 2000);
           const user = document.querySelector(
             `.users[data-id="${data.from}"] .text-wrapper .notification`
           );
-
           if (user) {
             user.innerHTML = "new Message";
           }
+          setTimeout(() => {
+            notif.innerHTML = ""
+          }, 2000);
+
         }, 0);
 
         break;
@@ -177,7 +174,6 @@ function connectWebSocket() {
   };
 
   socket.onerror = (err) => console.error("WebSocket error:", err);
-
   socket.onclose = () => {
     console.log("WebSocket disconnected");
     setTimeout(connectWebSocket, 5000);

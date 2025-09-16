@@ -126,42 +126,7 @@ func broadcastToAll(data map[string]interface{}) {
 	}
 }
 
-// sendUnreadMessages sends last X messages to the provided conn for userID.
-/* func sendUnreadMessages(userID int, conn *websocket.Conn, db *sql.DB) {
-	if db == nil || conn == nil {
-		return
-	}
-	rows, err := db.Query(`
-		SELECT m.id, m.sender_id, m.message, m.created_at, u.username
-		FROM messages m
-		JOIN users u ON m.sender_id = u.id
-		WHERE m.receiver_id = ?
-		ORDER BY m.created_at ASC
-		LIMIT 50`, userID) // optional limit
-	if err != nil {
-		return
-	}
-	defer rows.Close()
-	for rows.Next() {
-		var msgID, senderID int
-		var message, createdAt, senderUsername string
-		if err := rows.Scan(&msgID, &senderID, &message, &createdAt, &senderUsername); err != nil {
-			continue
-		}
-		message = html.EscapeString(message)
-		senderUsername = html.EscapeString(senderUsername)
-		data := map[string]interface{}{
-			"type":           "message",
-			"id":             msgID,
-			"sender":         senderID,
-			"receiver":       userID,
-			"message":        message,
-			"time":           createdAt,
-			"senderUsername": senderUsername,
-		}
-		_ = writeToConnSafe(conn, data)
-	}
-} */
+
 
 // handleConnection reads & handles messages from a connection.
 func handleConnection(userID int, conn *websocket.Conn, db *sql.DB) {
@@ -195,6 +160,7 @@ func handleConnection(userID int, conn *websocket.Conn, db *sql.DB) {
 			if !ok {
 				continue
 			}
+			
 			content = html.EscapeString(content)
 
 			var senderUsername string
@@ -367,79 +333,3 @@ func GetMessagesHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // MessageHandler - HTTP route for sending messages
-func MessageHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		config.ResponseJSON(w, http.StatusMethodNotAllowed, map[string]any{
-			"message": "method not allowed",
-			"status":  http.StatusMethodNotAllowed,
-		})
-		return
-	}
-
-	_, session := helpers.SessionChecked(w, r)
-	var senderId int
-	err := config.Db.QueryRow("SELECT id FROM users WHERE session=?", session).Scan(&senderId)
-	if err != nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-
-	var message config.Messages
-	err = json.NewDecoder(r.Body).Decode(&message)
-	if err != nil {
-		config.ResponseJSON(w, http.StatusBadRequest, map[string]any{
-			"message": "Invalid request",
-		})
-		return
-	}
-
-	message.Sender = senderId
-
-	stmt := `INSERT INTO messages (sender_id, receiver_id, message) VALUES (?, ?, ?)`
-	res, err := config.Db.Exec(stmt, message.Sender, message.Reciever, message.Message)
-	if err != nil {
-		http.Error(w, "Database error", http.StatusInternalServerError)
-		return
-	}
-
-	messageId, _ := res.LastInsertId()
-	message.Id = int(messageId)
-
-	var username string
-	_ = config.Db.QueryRow("SELECT username FROM users WHERE id=?", senderId).Scan(&username)
-
-	out := map[string]any{
-		"type":           "message",
-		"id":             message.Id,
-		"sender":         message.Sender,
-		"reciever":       message.Reciever,
-		"message":        message.Message,
-		"time":           time.Now().Format(time.RFC3339),
-		"senderUsername": username,
-	}
-
-	sendToUser(message.Reciever, out)
-/* 	sendToUser(message.Sender, map[string]any{
-		"type":           "message_sent",
-		"id":             message.Id,
-		"sender":         message.Sender,
-		"reciever":       message.Reciever,
-		"message":        message.Message,
-		"time":           time.Now().Format(time.RFC3339),
-		"senderUsername": username,
-	})
- */
-	notif := map[string]any{
-		"type":     "notification",
-		"reciever": message.Reciever,
-		"from":     message.Sender,
-		"message":  "new Message",
-		"time":     time.Now().Format(time.RFC3339),
-	}
-	sendToUser(message.Reciever, notif)
-
-	config.ResponseJSON(w, http.StatusOK, map[string]any{
-		"message": "Message sent",
-		"data":    out,
-	})
-}
