@@ -13,67 +13,68 @@ import (
 )
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.ServeFile(w, r, "frontend/main.html")
+		return
+	}
 	// check the session
-	if r.Method == http.MethodPost {
-		var user config.Users
-		err := json.NewDecoder(r.Body).Decode(&user)
-		if err != nil {
-			config.ResponseJSON(w, http.StatusInternalServerError, map[string]any{
-				"message": "error in decode",
-				"status":  http.StatusInternalServerError,
-			})
-		}
-
-		errMsg, ok := Isvalid(user.Username, user.Email, user.FirstName, user.LastName, user.Password, user.Gender, user.Age)
-		if !ok {
-			config.ResponseJSON(w, http.StatusBadRequest, map[string]any{
-				"message": errMsg,
-				"status":  http.StatusBadRequest,
-			})
-			return
-		}
-		var userId int
-		query1 := `select id from users where username = ? or email = ?`
-		err = config.Db.QueryRow(query1, user.Username, user.Email).Scan(&userId)
-		if err != sql.ErrNoRows {
-			config.ResponseJSON(w, http.StatusBadRequest, map[string]any{
-				"message": "Username or email already exists",
-				"status":  http.StatusBadRequest,
-			})
-			return
-		}
-		// create a new session
-		session := uuid.New().String()
-		// hash the password
-		hashPassword, Err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
-		if Err != nil {
-			config.ResponseJSON(w, http.StatusInternalServerError, map[string]any{
-				"message": "error in hashing",
-				"status":  http.StatusInternalServerError,
-			})
-		}
-		query2 := `INSERT INTO users (username, firstname, lastname,email, password,gender, age,session) VALUES (?, ?, ?, ?, ?, ?, ?,?)`
-		_, err = config.Db.Exec(query2, user.Username, user.FirstName, user.LastName, user.Email, hashPassword, user.Gender, user.Age, session)
-		if err != nil {
-			config.ResponseJSON(w, http.StatusInternalServerError, map[string]any{
-				"message": "error in query",
-				"status":  http.StatusInternalServerError,
-			})
-		}
-		http.SetCookie(w, &http.Cookie{
-			Name:     "session",
-			Value:    session,
-			Path:     "/",
-			HttpOnly: true,
-			MaxAge:   3600,
-		})
-		config.ResponseJSON(w, http.StatusOK, map[string]any{
-			"message": "Registration successful",
-			"status":  http.StatusOK,
-			"data":    user,
+	var user config.Users
+	err := json.NewDecoder(r.Body).Decode(&user)
+	if err != nil {
+		config.ResponseJSON(w, http.StatusInternalServerError, map[string]any{
+			"message": "error in decode",
+			"status":  http.StatusInternalServerError,
 		})
 	}
-	http.ServeFile(w, r, "frontend/main.html")
+
+	errMsg, ok := Isvalid(user.Username, user.Email, user.FirstName, user.LastName, user.Password, user.Gender, user.Age)
+	if !ok {
+		config.ResponseJSON(w, http.StatusBadRequest, map[string]any{
+			"message": errMsg,
+			"status":  http.StatusBadRequest,
+		})
+		return
+	}
+	var userId int
+	query1 := `select id from users where username = ? or email = ?`
+	err = config.Db.QueryRow(query1, user.Username, user.Email).Scan(&userId)
+	if err != sql.ErrNoRows {
+		config.ResponseJSON(w, http.StatusBadRequest, map[string]any{
+			"message": "Username or email already exists",
+			"status":  http.StatusBadRequest,
+		})
+		return
+	}
+	// create a new session
+	session := uuid.New().String()
+	// hash the password
+	hashPassword, Err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	if Err != nil {
+		config.ResponseJSON(w, http.StatusInternalServerError, map[string]any{
+			"message": "error in hashing",
+			"status":  http.StatusInternalServerError,
+		})
+	}
+	query2 := `INSERT INTO users (username, firstname, lastname,email, password,gender, age,session) VALUES (?, ?, ?, ?, ?, ?, ?,?)`
+	_, err = config.Db.Exec(query2, user.Username, user.FirstName, user.LastName, user.Email, hashPassword, user.Gender, user.Age, session)
+	if err != nil {
+		config.ResponseJSON(w, http.StatusInternalServerError, map[string]any{
+			"message": "error in query",
+			"status":  http.StatusInternalServerError,
+		})
+	}
+	http.SetCookie(w, &http.Cookie{
+		Name:     "session",
+		Value:    session,
+		Path:     "/",
+		HttpOnly: true,
+		MaxAge:   3600,
+	})
+	config.ResponseJSON(w, http.StatusOK, map[string]any{
+		"message": "Registration successful",
+		"status":  http.StatusOK,
+		"data":    user,
+	})
 }
 
 func Isvalid(username, email, firstName, lastName, password, gender string, age int) (string, bool) {
