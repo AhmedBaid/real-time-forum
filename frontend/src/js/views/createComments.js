@@ -23,7 +23,7 @@ export async function HandleComments(e) {
 
     const data = await response.json();
     if (!response.ok) {
-      if (res.status === 401) {
+      if (response.status === 401) {
         showToast("error", "you are not authorized");
         Navigate("/login");
         login();

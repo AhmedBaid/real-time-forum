@@ -26,6 +26,7 @@ export async function HandleLikes(e) {
         return
       }
       const er = await res.text();
+      
       throw new Error(er);
     }
     const data = await res.json();
