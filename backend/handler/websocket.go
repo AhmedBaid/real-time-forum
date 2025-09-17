@@ -161,7 +161,7 @@ func handleConnection(userID int, conn *websocket.Conn, db *sql.DB) {
 				continue
 			}
 
-			//content = html.EscapeString(content)
+			// content = html.EscapeString(content)
 
 			var senderUsername string
 			_ = db.QueryRow("SELECT username FROM users WHERE id = ?", userID).Scan(&senderUsername)
@@ -183,9 +183,11 @@ func handleConnection(userID int, conn *websocket.Conn, db *sql.DB) {
 				"message":        content,
 				"time":           time.Now().Format(time.RFC3339),
 				"senderUsername": senderUsername,
+				
 			}
 
 			sendToUser(receiver, out)
+			sendToUser(userID, out)
 
 			notification := map[string]interface{}{
 				"type":     "notification",
@@ -243,7 +245,7 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 		"username": username,
 		"time":     time.Now().Format(time.RFC3339),
 	}
-			config.Db.Exec("UPDATE users SET is_online = TRUE WHERE id = ?", userID)
+	config.Db.Exec("UPDATE users SET is_online = TRUE WHERE id = ?", userID)
 
 	broadcastToAll(onlineMsg)
 

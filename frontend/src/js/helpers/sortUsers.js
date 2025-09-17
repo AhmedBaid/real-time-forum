@@ -20,7 +20,6 @@ export async function sortUsers(aside) {
     if (bHasMsg) return 1;
     return a.username.localeCompare(b.username);
   });
-  console.log(users);
 
 
   for (const user of users) {

@@ -79,9 +79,11 @@ async function connectWebSocket() {
 
         break;
       case "message":
-        if (currentUserId) {
+        console.log(data);
+        
+          
           appendMessage(data);
-        }
+        
         break;
 
       case "notification":
@@ -193,6 +195,7 @@ async function connectWebSocket() {
 
 // messages realtime
 function appendMessage(msg) {
+  
   
   let chatBox = document.getElementById(`chat-${msg.senderUsername}`);
   if (!chatBox) return;

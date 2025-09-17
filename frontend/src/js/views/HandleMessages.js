@@ -153,14 +153,6 @@ export async function HandleMessages(e) {
   }, 200, { leading: false, trailing: true }));
 
   form.addEventListener("submit", (ev) => {
-
-
-
-
-
-
-
-
     offset.nbr += 1
     ev.preventDefault();
     let input = form.querySelector("input");
@@ -171,7 +163,8 @@ export async function HandleMessages(e) {
       receiver: receiverId,
       message: input.value,
     }));
-
+    input.value=""
+/* 
     let div = document.createElement("div");
     div.className = "msg right";
     div.innerHTML = `
@@ -184,7 +177,7 @@ export async function HandleMessages(e) {
     span.textContent = Currentusername + "  -  " + new Date().toLocaleString();
     messagesBox.appendChild(div);
 
-    input.value = "";
+    input.value = ""; */
     messagesBox.scrollTop = messagesBox.scrollHeight;
   });
 }
