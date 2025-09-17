@@ -1,28 +1,25 @@
 import { offset, socket, Currentusername, currentUserId } from "./home.js";
 
 function throttle(func, time, option = { leading: false, trailing: false }) {
-  let wait = false
+  let wait = false;
   return (...args) => {
-
     if (!wait) {
       if (option.leading) {
-        func.apply(this, args)
+        func.apply(this, args);
       }
-      wait = true
+      wait = true;
       setTimeout(() => {
         if (!option.leading && option.trailing) {
-          func.apply(this, args)
+          func.apply(this, args);
         }
-        wait = false
+        wait = false;
       }, time);
     }
-  }
+  };
 }
 
-
 export async function HandleMessages(e) {
-
-  offset.nbr = 0
+  offset.nbr = 0;
 
   let notifs = JSON.parse(localStorage.getItem("userNotifs")) || {};
   delete notifs[e.currentTarget.dataset.id];
@@ -34,8 +31,6 @@ export async function HandleMessages(e) {
   if (user) {
     user.innerHTML = "";
   }
-
-
 
   let username = e.currentTarget.dataset.username;
   let receiverId = Number(e.currentTarget.dataset.id);
@@ -52,7 +47,7 @@ export async function HandleMessages(e) {
 
   let chatDiv = document.createElement("div");
   chatDiv.className = "chat-box";
-  chatDiv.dataset.idU = receiverId
+  chatDiv.dataset.idU = receiverId;
   chatDiv.id = `chat-${username}`;
   chatDiv.innerHTML = `
     <div class="chat-header">
@@ -77,60 +72,67 @@ export async function HandleMessages(e) {
   chatArea.appendChild(chatDiv);
 
   chatDiv.querySelector(".close-btn").onclick = () => {
-    offset.nbr = 0
+    offset.nbr = 0;
     chatDiv.remove();
   };
-
-
-
-
 
   let form = chatDiv.querySelector(".chat-form");
   let messagesBox = chatDiv.querySelector(".chat-messages");
 
-
-  let inputt = form.querySelector("#input")
+  let inputt = form.querySelector("#input");
   let typingTimeout;
 
   inputt.addEventListener("input", () => {
     clearTimeout(typingTimeout);
 
-    socket.send(JSON.stringify({
-      type: "typing",
-      senderUsername: Currentusername,
-      senderId: currentUserId,
-      receiver: receiverId,
-    }));
-
-    typingTimeout = setTimeout(() => {
-      socket.send(JSON.stringify({
-        type: "stopTyping",
+    socket.send(
+      JSON.stringify({
+        type: "typing",
         senderUsername: Currentusername,
         senderId: currentUserId,
         receiver: receiverId,
-      }));
+      })
+    );
+
+    typingTimeout = setTimeout(() => {
+      socket.send(
+        JSON.stringify({
+          type: "stopTyping",
+          senderUsername: Currentusername,
+          senderId: currentUserId,
+          receiver: receiverId,
+        })
+      );
     }, 300);
   });
 
-
-
-
   async function loadMessages(scroll) {
-    let res = await fetch(`/messages?receiver=${receiverId}&offset=${offset.nbr}`);
-    if (!res.ok) throw new Error(await res.text());
+    let res = await fetch(
+      `/messages?receiver=${receiverId}&offset=${offset.nbr}`
+    );
+    if (!res.ok) {
+      if (res.status === 401) {
+        showToast("error", "you are not authorized");
+        Navigate("/login");
+        login();
+        return;
+      }
+      throw new Error(await res.text());
+    }
     let messages = await res.json();
 
     if (messages.length === 0) return;
     let oldScrollHeight = messagesBox.scrollHeight;
-    messages.forEach(msg => {
+    messages.forEach((msg) => {
       let div = document.createElement("div");
       div.className = `msg ${msg.receiver === receiverId ? "right" : "left"}`;
       div.innerHTML = `
         <p>${msg.message}</p>
-        <span class="time">${msg.senderUsername}-${new Date(msg.time).toLocaleString()}</span>
+        <span class="time">${msg.senderUsername}-${new Date(
+        msg.time
+      ).toLocaleString()}</span>
       `;
       messagesBox.prepend(div);
-
     });
 
     if (scroll) {
@@ -139,45 +141,39 @@ export async function HandleMessages(e) {
       messagesBox.scrollTop = messagesBox.scrollHeight - oldScrollHeight;
     }
 
-
     offset.nbr += 10;
   }
 
   await loadMessages(true);
 
-  messagesBox.addEventListener("scroll", throttle(async () => {
-    if (messagesBox.scrollTop === 0) {
-      await loadMessages(false);
-    }
-
-  }, 200, { leading: false, trailing: true }));
+  messagesBox.addEventListener(
+    "scroll",
+    throttle(
+      async () => {
+        if (messagesBox.scrollTop === 0) {
+          await loadMessages(false);
+        }
+      },
+      200,
+      { leading: false, trailing: true }
+    )
+  );
 
   form.addEventListener("submit", (ev) => {
-    offset.nbr += 1
+    offset.nbr += 1;
     ev.preventDefault();
     let input = form.querySelector("input");
     if (input.value.trim() === "") return;
 
-    socket.send(JSON.stringify({
-      type: "message",
-      receiver: receiverId,
-      message: input.value,
-    }));
-    input.value=""
-/* 
-    let div = document.createElement("div");
-    div.className = "msg right";
-    div.innerHTML = `
-      <p></p>
-      <span class="time"></span>
-    `;
-    let p = div.querySelector("p")
-    let span = div.querySelector("span")
-    p.textContent = input.value
-    span.textContent = Currentusername + "  -  " + new Date().toLocaleString();
-    messagesBox.appendChild(div);
-
-    input.value = ""; */
+    socket.send(
+      JSON.stringify({
+        type: "message",
+        receiver: receiverId,
+        message: input.value,
+      })
+    );
+    input.value = "";
+  
     messagesBox.scrollTop = messagesBox.scrollHeight;
   });
 }
