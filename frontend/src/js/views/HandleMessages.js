@@ -23,11 +23,17 @@ function throttle(func, time, option = { leading: false, trailing: false }) {
 export async function HandleMessages(e) {
 
   offset.nbr = 0
-  const user = document.querySelector(`.users[data-id="${e.currentTarget.dataset.id}"] .text-wrapper .notification`)
-  if (user.textContent !== "") {
-    user.innerHTML = ""
-  }
 
+  let notifs = JSON.parse(localStorage.getItem("userNotifs")) || {};
+  delete notifs[e.currentTarget.dataset.id];
+  localStorage.setItem("userNotifs", JSON.stringify(notifs));
+
+  let user = document.querySelector(
+    `.users[data-id="${e.currentTarget.dataset.id}"] .text-wrapper .notification`
+  );
+  if (user) {
+    user.innerHTML = "";
+  }
 
 
 

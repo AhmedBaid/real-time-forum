@@ -87,28 +87,37 @@ async function connectWebSocket() {
       case "notification":
         setTimeout(async () => {
           let aside = document.querySelector(".aside2");
-          await sortUsers(aside)
+          await sortUsers(aside);
+
           let chatbox = document.querySelector(
             `.chat-box[data-id-u="${data.from}"]`
           );
           if (chatbox) {
             return;
           }
+
           let notif = document.querySelector(".notifIcon");
-          notif.innerHTML = ` <i class="fa-solid fa-bell bell-icon" id="bellIcon"></i>`
+          notif.innerHTML = `<i class="fa-solid fa-bell bell-icon" id="bellIcon"></i>`;
+
           const user = document.querySelector(
             `.users[data-id="${data.from}"] .text-wrapper .notification`
           );
+
           if (user) {
             user.innerHTML = "new Message";
-          }
-          setTimeout(() => {
-            notif.innerHTML = ""
-          }, 2000);
 
+            let notifs = JSON.parse(localStorage.getItem("userNotifs")) || {};
+            notifs[data.from] = "new Message";
+            localStorage.setItem("userNotifs", JSON.stringify(notifs));
+          }
+
+          setTimeout(() => {
+            notif.innerHTML = "";
+          }, 2000);
         }, 0);
 
         break;
+
       case "online_list":
         isOnline.users = data.users
         setTimeout(() => {
@@ -118,6 +127,8 @@ async function connectWebSocket() {
           if (el) {
             data.users.forEach((id) => setUserOnline(Number(id)));
           }
+          restoreNotifications();
+
         }, 0);
 
         break;
@@ -381,8 +392,8 @@ export async function home() {
       });
     }
   });
-  await connectWebSocket();
 
+  await connectWebSocket();
 }
 
 
@@ -402,4 +413,17 @@ export async function Logout(e) {
   socket.close();
   Navigate("/login");
   login();
+}
+
+
+function restoreNotifications() {
+  let notifs = JSON.parse(localStorage.getItem("userNotifs")) || {};
+  Object.keys(notifs).forEach(userId => {
+    let user = document.querySelector(
+      `.users[data-id="${userId}"] .text-wrapper .notification`
+    );
+    if (user) {
+      user.innerHTML = notifs[userId];
+    }
+  });
 }

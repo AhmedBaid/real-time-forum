@@ -62,9 +62,9 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 			MaxAge:   3600,
 		})
 		config.ResponseJSON(w, http.StatusOK, map[string]any{
-			"message":  "Registration successful",
-			"status":   http.StatusOK,
-			"data": user,
+			"message": "Registration successful",
+			"status":  http.StatusOK,
+			"data":    user,
 		})
 	} else {
 		http.ServeFile(w, r, "frontend/main.html")
@@ -83,6 +83,8 @@ func Isvalid(username, email, firstName, lastName, password, gender string, age 
 		return "Username must be between 3 and 15 characters", false
 	} else if len(password) < 6 || len(password) > 15 {
 		return "Password must be between 6 and 15 characters", false
+	} else if age <= 10 || age >= 100 {
+		return "age should between 10 and 100", false
 	}
 	return "", true
 }
