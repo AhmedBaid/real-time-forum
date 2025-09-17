@@ -8,6 +8,13 @@ import (
 )
 
 func CurrentUserHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		config.ResponseJSON(w, http.StatusMethodNotAllowed, map[string]any{
+			"message": "Method not allowed. Only GET is permitted.",
+			"status":  http.StatusMethodNotAllowed,
+		})
+		return
+	}
 	_, session := helpers.SessionChecked(w, r)
 	var userID int
 	var username string

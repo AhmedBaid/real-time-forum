@@ -12,7 +12,10 @@ var LoggedOut bool = false
 
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		config.ResponseJSON(w, http.StatusUnauthorized, map[string]any{
+			"message": "Unauthorized. Invalid session.",
+			"status":  http.StatusUnauthorized,
+		})
 		return
 	}
 	// Check if user session exists

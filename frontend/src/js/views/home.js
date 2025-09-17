@@ -193,6 +193,7 @@ async function connectWebSocket() {
 
 // messages realtime
 function appendMessage(msg) {
+  
   let chatBox = document.getElementById(`chat-${msg.senderUsername}`);
   if (!chatBox) return;
 
@@ -201,11 +202,11 @@ function appendMessage(msg) {
   div.className = `msg ${msg.sender === currentUserId ? "right" : "left"}`;
 
   let p = document.createElement("p");
-  p.textContent = msg.message;
+  p.innerHTML = msg.message;
 
   let span = document.createElement("span");
   span.className = "time";
-  span.textContent =
+  span.innerHTML =
     msg.senderUsername + " - " + new Date(msg.time).toLocaleString();
 
   div.appendChild(p);
@@ -404,7 +405,9 @@ export async function Logout(e) {
     method: "POST",
   });
   if (!response.ok) {
-    showToast("Failed to logout");
+  
+    
+    showToast("error","Failed to logout ");
     Navigate("/login");
     login();
     return;

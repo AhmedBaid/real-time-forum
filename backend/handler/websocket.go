@@ -161,7 +161,7 @@ func handleConnection(userID int, conn *websocket.Conn, db *sql.DB) {
 				continue
 			}
 
-			content = html.EscapeString(content)
+			//content = html.EscapeString(content)
 
 			var senderUsername string
 			_ = db.QueryRow("SELECT username FROM users WHERE id = ?", userID).Scan(&senderUsername)

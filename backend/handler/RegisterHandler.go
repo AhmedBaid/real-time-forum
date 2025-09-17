@@ -18,8 +18,10 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		var user config.Users
 		err := json.NewDecoder(r.Body).Decode(&user)
 		if err != nil {
-			http.Error(w, "error in decoder", http.StatusInternalServerError)
-			return
+			config.ResponseJSON(w, http.StatusInternalServerError, map[string]any{
+				"message": "error in decode",
+				"status":  http.StatusInternalServerError,
+			})
 		}
 
 		errMsg, ok := Isvalid(user.Username, user.Email, user.FirstName, user.LastName, user.Password, user.Gender, user.Age)
@@ -45,14 +47,18 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		// hash the password
 		hashPassword, Err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 		if Err != nil {
-			http.Error(w, "error in hashing password", http.StatusInternalServerError)
-			return
+			config.ResponseJSON(w, http.StatusInternalServerError, map[string]any{
+				"message": "error in hashing",
+				"status":  http.StatusInternalServerError,
+			})
 		}
 		query2 := `INSERT INTO users (username, firstname, lastname,email, password,gender, age,session) VALUES (?, ?, ?, ?, ?, ?, ?,?)`
 		_, err = config.Db.Exec(query2, user.Username, user.FirstName, user.LastName, user.Email, hashPassword, user.Gender, user.Age, session)
 		if err != nil {
-			http.Error(w, "error in query", http.StatusInternalServerError)
-			return
+			config.ResponseJSON(w, http.StatusInternalServerError, map[string]any{
+				"message": "error in query",
+				"status":  http.StatusInternalServerError,
+			})
 		}
 		http.SetCookie(w, &http.Cookie{
 			Name:     "session",
@@ -66,9 +72,8 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 			"status":  http.StatusOK,
 			"data":    user,
 		})
-	} else {
-		http.ServeFile(w, r, "frontend/main.html")
 	}
+	http.ServeFile(w, r, "frontend/main.html")
 }
 
 func Isvalid(username, email, firstName, lastName, password, gender string, age int) (string, bool) {
