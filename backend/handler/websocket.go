@@ -133,6 +133,21 @@ func handleConnection(userID int, conn *websocket.Conn, db *sql.DB) {
 	defer func() {
 		removeUserConn(userID, conn)
 		_ = conn.Close()
+		if LoggedOut {
+			delete(users, userID)
+			
+			offlineMsg := map[string]interface{}{
+				"type":   "offline",
+				"userId": userID,
+				"time":   time.Now().Format(time.RFC3339),
+			}
+			for _, remaining := range users {
+				for _, rc := range remaining {
+					_ = rc.WriteJSON(offlineMsg)
+				}
+			}
+			LoggedOut = false
+		}
 	}()
 
 	for {
