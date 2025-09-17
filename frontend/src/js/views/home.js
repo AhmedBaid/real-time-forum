@@ -9,11 +9,10 @@ import { login } from "./login.js";
 import { timeFormat } from "../helpers/timeFormat.js";
 import { HandleComments } from "./createComments.js";
 import { HandleLikes } from "./HandleLikes.js";
-import { fetchComments, fetchPosts, fetchUsers } from "../helpers/api.js";
+import { fetchComments, fetchPosts } from "../helpers/api.js";
 import { renderCommentsStyled } from "../helpers/randerComments.js";
 import { createPost } from "./createPost.js";
 import { HandleMessages } from "./HandleMessages.js";
-import { loadUnreadNotifications } from "./notification.js";
 import { sortUsers } from "../helpers/sortUsers.js";
 import { showToast } from "../helpers/showToast.js";
 export let currentUserId = null;
@@ -39,7 +38,9 @@ async function fetchCurrentUserId() {
 
 export let socket = null;
 // websocket andler
-function connectWebSocket() {
+async function connectWebSocket() {
+  console.log("hadii tanya");
+
   socket = new WebSocket("ws://localhost:8080/ws");
 
   socket.onopen = () => {
@@ -50,21 +51,17 @@ function connectWebSocket() {
   socket.onmessage = async (e) => {
     let data = JSON.parse(e.data);
 
-    await new Promise((resolve) => setTimeout(resolve, 500)); 
-    let checklogged = await isLogged();
-    console.log(checklogged);
-
-    if (!checklogged) {
-      
-     Logout()
-      return;
+    const logged = await isLogged()
+    if (!logged) {
+      ws.close()
+      return
     }
     switch (data.type) {
       case "online":
         onlineUser.id = data.userId
-        setTimeout(() => {
+        setTimeout(async () => {
           const aside = document.querySelector(".aside2")
-          sortUsers(aside)
+          await sortUsers(aside)
           let el = document.querySelector(`.users`);
           if (el) {
             setUserOnline(data.userId);
@@ -90,7 +87,7 @@ function connectWebSocket() {
       case "notification":
         setTimeout(async () => {
           let aside = document.querySelector(".aside2");
-        await  sortUsers(aside)
+          await sortUsers(aside)
           let chatbox = document.querySelector(
             `.chat-box[data-id-u="${data.from}"]`
           );
@@ -181,7 +178,6 @@ function connectWebSocket() {
     setTimeout(connectWebSocket, 5000);
   };
 }
-connectWebSocket();
 
 
 // messages realtime
@@ -221,6 +217,11 @@ function setUserOffline(userId) {
 }
 
 export async function home() {
+  console.log("hadiii lwla");
+  let logged = await isLogged()
+  if (!logged) {
+    return
+  }
   let header = document.createElement("header");
   let parentContainer = document.createElement("div");
   parentContainer.className = "parentContainer";
@@ -229,7 +230,6 @@ export async function home() {
   aside.className = "aside2";
   allPost.className = "allPost";
 
-  await sortUsers(aside);
   let obj = await fetchPosts();
 
   if (obj.data.Posts && obj.data.Posts.length > 0) {
@@ -325,8 +325,6 @@ export async function home() {
       }, 0);
     }
 
-
-
   } else {
     allPost.innerHTML = "<h2>No posts yet</h2>";
   }
@@ -337,7 +335,7 @@ export async function home() {
   parentContainer.appendChild(aside);
   container.appendChild(header);
   container.append(parentContainer);
-
+  await sortUsers(aside);
   const logoutButton = header.querySelector(".logout");
   let createButton = header.querySelector(".create");
 
@@ -375,18 +373,19 @@ export async function home() {
       const form = injecthtml.querySelector("form");
       form.addEventListener("submit", createPost);
 
-      overlay.addEventListener("click", (e) => {
+      overlay.addEventListener("click", async (e) => {
         if (e.target === overlay) {
           overlay.remove();
           Navigate("/");
-          aside = document.querySelector(".aside2");
-          sortUsers(aside);
         }
       });
     }
   });
+  await connectWebSocket();
 
 }
+
+
 export async function Logout(e) {
   e.preventDefault();
   Navigate("/logout");

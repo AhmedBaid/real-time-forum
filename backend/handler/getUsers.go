@@ -33,6 +33,7 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 	// Query to get users and their last message time
 	userQuery := `
         SELECT 
+		u.is_online,
     u.username, 
     u.id, 
     COALESCE(MAX(m.created_at), '') as last_message_time
@@ -57,7 +58,7 @@ GROUP BY u.id, u.username
 	var Users []config.UserStatus
 	var user config.UserStatus
 	for rows.Next() {
-		err := rows.Scan(&user.Username, &user.Id, &user.LastMessageTime)
+		err := rows.Scan( &user.Is_online, &user.Username, &user.Id, &user.LastMessageTime)
 		if err != nil {
 			config.ResponseJSON(w, http.StatusInternalServerError, map[string]any{
 				"message": "Internal server error while processing users.",
@@ -65,7 +66,7 @@ GROUP BY u.id, u.username
 			})
 			return
 		}
-		user.Status = "offline"
+		
 		Users = append(Users, user)
 	}
 

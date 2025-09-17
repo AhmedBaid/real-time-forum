@@ -74,8 +74,13 @@ export const PostForm = `
     </form>`;
 
 export async function isLogged() {
-  let response = await fetch("/isloged", {
-    credentials: "include"
-  });
-  return response.ok;
+  const response = await fetch("/isloged");
+  if (!response.ok) {
+    Navigate("/login")
+    return false
+  }
+
+  let data = await response.json()
+
+  return data
 }

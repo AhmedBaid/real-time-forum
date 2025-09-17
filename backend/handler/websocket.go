@@ -49,6 +49,7 @@ func removeUserConn(userID int, conn *websocket.Conn) {
 	}
 	if len(users[userID]) == 0 {
 		delete(users, userID)
+		config.Db.Exec("UPDATE users SET is_online = FALSE WHERE id = ?", userID)
 		msg := map[string]interface{}{
 			"type":   "offline",
 			"userId": userID,
@@ -108,6 +109,8 @@ func broadcastToAll(data map[string]interface{}) {
 				}
 				if len(users[uid]) == 0 {
 					delete(users, uid)
+					config.Db.Exec("UPDATE users SET is_online = FALSE WHERE id = ?", uid)
+
 					offlineMsg := map[string]interface{}{
 						"type":   "offline",
 						"userId": uid,
@@ -240,6 +243,8 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 		"username": username,
 		"time":     time.Now().Format(time.RFC3339),
 	}
+			config.Db.Exec("UPDATE users SET is_online = TRUE WHERE id = ?", userID)
+
 	broadcastToAll(onlineMsg)
 
 	usersMu.Lock()
@@ -332,4 +337,3 @@ func GetMessagesHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(messages)
 }
-

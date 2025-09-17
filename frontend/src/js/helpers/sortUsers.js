@@ -1,17 +1,14 @@
 import { HandleMessages } from "../views/HandleMessages.js";
-import { isOnline, offlineUser, onlineUser } from "../views/home.js";
 import { fetchUsers } from "./api.js";
 
 export async function sortUsers(aside) {
+
   let users = await fetchUsers();
   if (!users.data) {
     aside.innerHTML = "<h2>No users found</h2>";
     return;
   }
-if (aside) {
-  
-  aside.innerHTML = ""; 
-}
+
   users = users.data.sort((a, b) => {
     const aHasMsg = !!a.lastMessageTime;
     const bHasMsg = !!b.lastMessageTime;
@@ -23,6 +20,8 @@ if (aside) {
     if (bHasMsg) return 1;
     return a.username.localeCompare(b.username);
   });
+  console.log(users);
+
 
   for (const user of users) {
     let div = aside.querySelector(`.users[data-id="${user.id}"]`);
@@ -45,19 +44,9 @@ if (aside) {
               </span>
             </span>
           </div>
-          ${isOnline.users.includes(user.id) || onlineUser.id === user.id
 
-          ? `<span class="online" style="background-color: green " >.</span>`
-          : `<span class="online" >.</span>`
-        }
-  
-         
-       
-       
-
+        <span class="online" ${user.isOnline === true ? `style="background-color: green "` : `style="background-color: red "`}  >.</span>
     `;
-
-
       div.addEventListener("click", HandleMessages)
       aside.appendChild(div);
     }

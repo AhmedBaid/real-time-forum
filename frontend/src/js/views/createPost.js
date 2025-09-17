@@ -31,8 +31,8 @@ export async function createPost(e) {
     if (response.status === 401) {
       overlay.remove();
       showToast("error", data.message);
-      logout
-      ()
+      Navigate("/login")
+      login()
       return;
     }
     showToast("error", data.message);
@@ -40,7 +40,7 @@ export async function createPost(e) {
   }
   overlay.remove();
   console.log("efefef");
-  
+
   showToast("success", "Post created successfully");
   Navigate("/");
   const allPost = document.querySelector(".allPost");

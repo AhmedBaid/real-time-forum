@@ -6,15 +6,13 @@ import (
 	"time"
 )
 
-
-
 type UserStatus struct {
-    Id              int     `json:"id"`
-    Username        string  `json:"username"`
-    Status          string  `json:"status"`
-    LastMessageTime *string `json:"lastMessageTime,omitempty"`
+	Id              int     `json:"id"`
+	Username        string  `json:"username"`
+	Status          string  `json:"status"`
+	LastMessageTime *string `json:"lastMessageTime,omitempty"`
+	Is_online       bool    `json:"is_online"`
 }
-
 
 type Messages struct {
 	Id       int       `json:"id"`
