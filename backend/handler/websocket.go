@@ -174,16 +174,17 @@ func handleConnection(userID int, conn *websocket.Conn, db *sql.DB) {
 			}
 			msgID64, _ := res.LastInsertId()
 			msgID := int(msgID64)
-
+			var receiverUsername string
+			_ = db.QueryRow("SELECT username FROM users WHERE id = ?", receiver).Scan(&receiverUsername)
 			out := map[string]interface{}{
-				"type":           "message",
-				"id":             msgID,
-				"sender":         userID,
-				"receiver":       receiver,
-				"message":        content,
-				"time":           time.Now().Format(time.RFC3339),
-				"senderUsername": senderUsername,
-				
+				"type":             "message",
+				"id":               msgID,
+				"sender":           userID,
+				"receiver":         receiver,
+				"message":          content,
+				"time":             time.Now().Format(time.RFC3339),
+				"senderUsername":   senderUsername,
+				"receiverUsername": receiverUsername,
 			}
 
 			sendToUser(receiver, out)
