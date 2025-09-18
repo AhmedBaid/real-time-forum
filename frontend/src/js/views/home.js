@@ -80,10 +80,10 @@ async function connectWebSocket() {
         break;
       case "message":
         console.log(data);
-        
-          
-          appendMessage(data);
-        
+
+
+        appendMessage(data);
+
         break;
 
       case "notification":
@@ -195,10 +195,20 @@ async function connectWebSocket() {
 
 // messages realtime
 function appendMessage(msg) {
-  
-  
-  let chatBox = document.getElementById(`chat-${msg.senderUsername}`);
-  if (!chatBox) return;
+  let chatBoxSender = document.getElementById(`chat-${msg.senderUsername}`);
+  let chatBoxreciever = document.getElementById(`chat-${msg.receiverUsername}`);
+
+
+
+
+  let chatBox = chatBoxSender ? chatBoxSender : chatBoxreciever;
+  if (!chatBox) { 
+    console.log(msg.senderUsername);
+    console.log(msg.receiverUsername);
+
+    
+    
+    return;}
 
   let messagesBox = chatBox.querySelector(".chat-messages");
   let div = document.createElement("div");
@@ -408,9 +418,9 @@ export async function Logout(e) {
     method: "POST",
   });
   if (!response.ok) {
-  
-    
-    showToast("error","Failed to logout ");
+
+
+    showToast("error", "Failed to logout ");
     Navigate("/login");
     login();
     return;

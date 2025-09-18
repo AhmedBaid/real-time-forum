@@ -133,6 +133,21 @@ func handleConnection(userID int, conn *websocket.Conn, db *sql.DB) {
 	defer func() {
 		removeUserConn(userID, conn)
 		_ = conn.Close()
+		if LoggedOut {
+			delete(users, userID)
+			
+			offlineMsg := map[string]interface{}{
+				"type":   "offline",
+				"userId": userID,
+				"time":   time.Now().Format(time.RFC3339),
+			}
+			for _, remaining := range users {
+				for _, rc := range remaining {
+					_ = rc.WriteJSON(offlineMsg)
+				}
+			}
+			LoggedOut = false
+		}
 	}()
 
 	for {
@@ -174,16 +189,17 @@ func handleConnection(userID int, conn *websocket.Conn, db *sql.DB) {
 			}
 			msgID64, _ := res.LastInsertId()
 			msgID := int(msgID64)
-
+			var receiverUsername string
+			_ = db.QueryRow("SELECT username FROM users WHERE id = ?", receiver).Scan(&receiverUsername)
 			out := map[string]interface{}{
-				"type":           "message",
-				"id":             msgID,
-				"sender":         userID,
-				"receiver":       receiver,
-				"message":        content,
-				"time":           time.Now().Format(time.RFC3339),
-				"senderUsername": senderUsername,
-				
+				"type":             "message",
+				"id":               msgID,
+				"sender":           userID,
+				"receiver":         receiver,
+				"message":          content,
+				"time":             time.Now().Format(time.RFC3339),
+				"senderUsername":   senderUsername,
+				"receiverUsername": receiverUsername,
 			}
 
 			sendToUser(receiver, out)

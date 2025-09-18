@@ -23,15 +23,15 @@ export async function HandleComments(e) {
 
     const data = await response.json();
     if (!response.ok) {
-
       if (response.status === 401) {
-        Logout()
-
+        showToast("error", "you are not authorized");
+        Navigate("/login");
+        login();
+        return;
       }
       showToast("error", data.message);
       return;
     }
-
 
     const commentaires = form
       .closest(".second-part")
@@ -39,9 +39,9 @@ export async function HandleComments(e) {
 
     let div = document.createElement("div");
     div.className = "comments";
-    let j = document.querySelector(".messageErr")
+    let j = document.querySelector(".messageErr");
     if (j) {
-      j.innerHTML = ""
+      j.innerHTML = "";
     }
     div.innerHTML = `
       <img src="https://robohash.org/${data.data.Username}.png?size=50x50" />
@@ -55,8 +55,8 @@ export async function HandleComments(e) {
         </div>
       </div>
     `;
-    let p = div.querySelector(".comm")
-    p.textContent = data.data.Comment
+    let p = div.querySelector(".comm");
+    p.textContent = data.data.Comment;
 
     form.reset();
 
