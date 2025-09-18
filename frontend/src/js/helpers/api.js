@@ -1,4 +1,4 @@
-import { errorMessage, errorDiv, Navigate } from "../config.js";
+import { Navigate } from "../config.js";
 import { showToast } from "./showToast.js";
 import { login } from "../views/login.js";
 
@@ -6,7 +6,7 @@ export async function fetchPosts() {
   try {
     let res = await fetch("/getPosts");
     if (!res.ok) {
-       if (res.status === 401) {
+      if (res.status === 401) {
         showToast("error", "you are not authorized");
         Navigate("/login");
         login();
@@ -31,8 +31,10 @@ export async function fetchComments(postID) {
         login();
         return;
       }
-      let errormsg = await res.text();
-      throw new Error(errormsg);
+      if (res.status === 429) {        
+        showToast("error", "too many request , try again after 1  min")
+        return
+      }
     }
 
     return await res.json();
@@ -45,7 +47,7 @@ export async function fetchUsers() {
   try {
     const res = await fetch(`/getUsers`);
     if (!res.ok) {
-       if (res.status === 401) {
+      if (res.status === 401) {
         showToast("error", "you are not authorized");
         Navigate("/login");
         login();

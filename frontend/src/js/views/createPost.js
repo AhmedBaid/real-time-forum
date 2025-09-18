@@ -35,6 +35,10 @@ export async function createPost(e) {
       login()
       return;
     }
+    if (response.status === 429) {
+      showToast("error", data.message);
+      return;
+    }
     showToast("error", data.message);
     return;
   }
