@@ -1,15 +1,21 @@
 import { Navigate } from "../config.js";
 import { showToast } from "./showToast.js";
 import { login } from "../views/login.js";
+import { socket } from "../views/home.js";
 
 export async function fetchPosts() {
   try {
     let res = await fetch("/getPosts");
     if (!res.ok) {
       if (res.status === 401) {
+        await fetch("/logout", {
+          method: "POST",
+          credentials: "include"
+        });
         showToast("error", "you are not authorized");
         Navigate("/login");
         login();
+        socket.close()
         return;
       }
       let errormsg = await res.text();
@@ -26,12 +32,17 @@ export async function fetchComments(postID) {
     const res = await fetch(`/getComments?id=${postID}`);
     if (!res.ok) {
       if (res.status === 401) {
+        await fetch("/logout", {
+          method: "POST",
+          credentials: "include"
+        });
         showToast("error", "you are not authorized");
         Navigate("/login");
         login();
+        socket.close()
         return;
       }
-      if (res.status === 429) {        
+      if (res.status === 429) {
         showToast("error", "too many request , try again after 1  min")
         return
       }
@@ -48,9 +59,14 @@ export async function fetchUsers() {
     const res = await fetch(`/getUsers`);
     if (!res.ok) {
       if (res.status === 401) {
+        await fetch("/logout", {
+          method: "POST",
+          credentials: "include"
+        });
         showToast("error", "you are not authorized");
         Navigate("/login");
         login();
+        socket.close()
         return;
       }
       let errormsg = await res.text();

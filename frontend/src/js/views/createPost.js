@@ -3,6 +3,7 @@ import { renderPost } from "../helpers/renderPosts.js";
 import { showToast } from "../helpers/showToast.js";
 import { HandleComments } from "./createComments.js";
 import { HandleLikes } from "./HandleLikes.js";
+import { socket } from "./home.js";
 import { login } from "./login.js";
 
 export async function createPost(e) {
@@ -13,7 +14,6 @@ export async function createPost(e) {
   const categories = Array.from(
     document.querySelectorAll("input[name='tags']:checked")
   ).map(tag => Number(tag.value));
-  console.log(categories);
 
   const response = await fetch("/createpost", {
     method: "POST",
@@ -29,10 +29,16 @@ export async function createPost(e) {
   const data = await response.json();
   if (!response.ok) {
     if (response.status === 401) {
+      await fetch("/logout", {
+        method: "POST",
+        credentials: "include"
+      });
       overlay.remove();
       showToast("error", data.message);
       Navigate("/login")
       login()
+      socket.close()
+
       return;
     }
     if (response.status === 429) {
@@ -43,7 +49,6 @@ export async function createPost(e) {
     return;
   }
   overlay.remove();
-  console.log("efefef");
 
   showToast("success", "Post created successfully");
   Navigate("/");

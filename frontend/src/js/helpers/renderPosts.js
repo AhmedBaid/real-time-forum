@@ -75,7 +75,7 @@ export function renderPost(post, userActiveId) {
         if (!data) return;
         renderCommentsStyled(section, data.data);
         const countSpan = section.closest(".post-card").querySelector(".totalComnts");
-        if (countSpan) countSpan.innerHTML = data.datax ? data.data.length : 0 ;
+        if (countSpan) countSpan.innerHTML = data.datax ? data.data.length : 0;
       }
     });
   }

@@ -1,5 +1,6 @@
 import { Navigate } from "../config.js";
 import { showToast } from "../helpers/showToast.js";
+import { socket } from "./home.js";
 import { login } from "./login.js";
 
 export async function HandleLikes(e) {
@@ -22,12 +23,18 @@ export async function HandleLikes(e) {
     const data = await res.json();
     if (!res.ok) {
       if (res.status === 401) {
+        await fetch("/logout", {
+          method: "POST",
+          credentials: "include"
+        });
+        socket.close()
         Navigate("login")
         login()
+
         return
       }
-      if (res.status === 429) {        
-        showToast("error", data.message); 
+      if (res.status === 429) {
+        showToast("error", data.message);
         return;
       }
     }
@@ -56,7 +63,7 @@ export async function HandleLikes(e) {
       deslikebtn.classList.remove("active-dislike");
     }
 
-  } catch (error) {    
+  } catch (error) {
     showToast("error", error.message);
   }
 }

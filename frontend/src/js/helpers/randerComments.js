@@ -1,7 +1,7 @@
 
 import { timeFormat } from "./timeFormat.js";
 
-export  function renderCommentsStyled(section, comments) {
+export function renderCommentsStyled(section, comments) {
   const commentsContainer = section.querySelector(".comments-list");
 
   const commentsHTML =
@@ -11,11 +11,10 @@ export  function renderCommentsStyled(section, comments) {
       <hr/>
       <div class="commentaires">
         ${comments
-          .map(
-            (comment) => `
+        .map(
+          (comment) => `
           <div class="comments">
-            <img src="https://robohash.org/${
-              comment.Username
+            <img src="https://robohash.org/${comment.Username
             }.png?size=50x50" />
             <div class="comment-content">
               <div>
@@ -28,8 +27,8 @@ export  function renderCommentsStyled(section, comments) {
             </div>
           </div>
         `
-          )
-          .join("")}
+        )
+        .join("")}
       </div>
     `
       : `<div class="commentaires" id="cmnt"><h1 class="messageErr">No Commentaires 🤷‍♂️</h1></div>`;

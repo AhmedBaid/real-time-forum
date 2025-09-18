@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"html"
 	"net/http"
 
@@ -38,7 +37,6 @@ func GetPosts(w http.ResponseWriter, r *http.Request) {
 	// Fetch categories map
 	categorMap, errcat := helpers.FetchCategories()
 	if errcat != nil {
-		fmt.Println("FetchCategories error:", errcat)
 		config.ResponseJSON(w, http.StatusInternalServerError, map[string]any{
 			"message": "Internal server error while fetching categories.",
 			"status":  http.StatusInternalServerError,

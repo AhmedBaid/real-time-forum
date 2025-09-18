@@ -22,7 +22,7 @@ isloged()
 window.onpopstate = () => {
     loadPage(location.pathname);
     const content = document.getElementById("content")
-content.innerHTML = `
+    content.innerHTML = `
 <div class="login">
     <h1>Zone01</h1>
         <form  id="form">

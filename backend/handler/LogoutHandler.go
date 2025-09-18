@@ -12,9 +12,9 @@ var LoggedOut bool = false
 
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		config.ResponseJSON(w, http.StatusUnauthorized, map[string]any{
-			"message": "Unauthorized. Invalid session.",
-			"status":  http.StatusUnauthorized,
+		config.ResponseJSON(w, http.StatusMethodNotAllowed, map[string]any{
+			"message": "Methodd not allowed .",
+			"status":  http.StatusMethodNotAllowed,
 		})
 		return
 	}
@@ -29,22 +29,19 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 			HttpOnly: true,
 			Path:     "/",
 		})
+		config.Db.Exec("UPDATE users SET session = NULL WHERE session = ?", session)
+
 		config.ResponseJSON(w, http.StatusUnauthorized, map[string]any{
 			"message": "User is not logged in.",
 			"status":  http.StatusUnauthorized,
 		})
+		LoggedOut = true
 		return
+
 	}
 
 	// Remove session from database
-	_, err := config.Db.Exec("UPDATE users SET session = NULL WHERE session = ?", session)
-	if err != nil {
-		config.ResponseJSON(w, http.StatusInternalServerError, map[string]any{
-			"message": "Internal server error while logging out.",
-			"status":  http.StatusInternalServerError,
-		})
-		return
-	}
+	config.Db.Exec("UPDATE users SET session = NULL WHERE session = ?", session)
 
 	// Clear session cookie
 	http.SetCookie(w, &http.Cookie{

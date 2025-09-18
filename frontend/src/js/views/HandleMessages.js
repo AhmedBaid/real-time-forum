@@ -1,4 +1,7 @@
+import { isLogged, Navigate } from "../config.js";
+import { showToast } from "../helpers/showToast.js";
 import { offset, socket, Currentusername, currentUserId } from "./home.js";
+import { login } from "./login.js";
 
 function throttle(func, time, option = { leading: false, trailing: false }) {
   let wait = false;
@@ -76,7 +79,18 @@ export async function HandleMessages(e) {
   let inputt = form.querySelector("#input");
   let typingTimeout;
 
-  inputt.addEventListener("input", () => {
+  inputt.addEventListener("input", async () => {
+
+    const logged = await isLogged()
+    if (!logged) {
+      await fetch("/logout", {
+        method: "POST",
+        credentials: "include"
+      });
+      login()
+      socket.close()
+      return
+    }
     clearTimeout(typingTimeout);
 
     socket.send(
@@ -106,12 +120,16 @@ export async function HandleMessages(e) {
     );
     if (!res.ok) {
       if (res.status === 401) {
+        await fetch("/logout", {
+          method: "POST",
+          credentials: "include"
+        });
+        socket.close()
         showToast("error", "you are not authorized");
         Navigate("/login");
         login();
         return;
       }
-      throw new Error(await res.text());
     }
     let messages = await res.json();
 
@@ -153,9 +171,19 @@ export async function HandleMessages(e) {
     )
   );
 
-  form.addEventListener("submit", (ev) => {
+  form.addEventListener("submit", async (ev) => {
     offset.nbr += 1;
     ev.preventDefault();
+    let logged = await isLogged()
+    if (!logged) {
+      await fetch("/logout", {
+        method: "POST",
+        credentials: "include"
+      });
+      socket.close()
+      login()
+      return
+    }
     let input = form.querySelector("input");
     if (input.value.trim() === "") return;
 

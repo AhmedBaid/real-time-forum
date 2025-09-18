@@ -1,6 +1,7 @@
 import { Navigate } from "../config.js";
 import { showToast } from "../helpers/showToast.js";
 import { timeFormat } from "../helpers/timeFormat.js";
+import { socket } from "./home.js";
 import { login } from "./login.js";
 
 export async function HandleComments(e) {
@@ -24,9 +25,15 @@ export async function HandleComments(e) {
     const data = await response.json();
     if (!response.ok) {
       if (response.status === 401) {
+        await fetch("/logout", {
+          method: "POST",
+          credentials: "include"
+        });
         showToast("error", "you are not authorized");
         Navigate("/login");
         login();
+        socket.close()
+
         return;
       }
       showToast("error", data.message);

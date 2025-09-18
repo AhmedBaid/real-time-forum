@@ -37,7 +37,6 @@ async function fetchCurrentUserId() {
 export let socket = null;
 // websocket andler
 async function connectWebSocket() {
-  console.log("hadii tanya");
 
   socket = new WebSocket("ws://localhost:8080/ws");
 
@@ -47,11 +46,15 @@ async function connectWebSocket() {
   };
 
   socket.onmessage = async (e) => {
+
     let data = JSON.parse(e.data);
 
     const logged = await isLogged()
     if (!logged) {
-      Navigate("/login")
+      await fetch("/logout", {
+        method: "POST",
+        credentials: "include"
+      });
       login()
       socket.close()
       return
@@ -116,7 +119,6 @@ async function connectWebSocket() {
       case "online_list":
         setTimeout(() => {
 
-          console.log(data);
           let el = document.querySelector(`.users`);
           if (el) {
             data.users.forEach((id) => setUserOnline(Number(id)));
@@ -179,7 +181,6 @@ async function connectWebSocket() {
   socket.onerror = (err) => console.error("WebSocket error:", err);
   socket.onclose = () => {
     console.log("WebSocket disconnected");
-    setTimeout(connectWebSocket, 5000);
   };
 }
 
@@ -194,8 +195,7 @@ function appendMessage(msg) {
 
   let chatBox = chatBoxSender ? chatBoxSender : chatBoxreciever;
   if (!chatBox) {
-    console.log(msg.senderUsername);
-    console.log(msg.receiverUsername);
+
 
 
 
@@ -236,9 +236,12 @@ function setUserOffline(userId) {
 export async function home() {
   let logged = await isLogged()
   if (!logged) {
-    Navigate("/login")
-    login()
+    await fetch("/logout", {
+      method: "POST",
+      credentials: "include"
+    });
     socket.close()
+    login()
     return
   }
   let header = document.createElement("header");

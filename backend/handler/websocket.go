@@ -135,7 +135,7 @@ func handleConnection(userID int, conn *websocket.Conn, db *sql.DB) {
 		_ = conn.Close()
 		if LoggedOut {
 			delete(users, userID)
-			
+
 			offlineMsg := map[string]interface{}{
 				"type":   "offline",
 				"userId": userID,
