@@ -51,6 +51,8 @@ async function connectWebSocket() {
 
     const logged = await isLogged()
     if (!logged) {
+      Navigate("/login")
+      login()
       ws.close()
       return
     }
@@ -228,13 +230,15 @@ function setUserOnline(userId) {
 //offline handler
 function setUserOffline(userId) {
   let el = document.querySelector(`.users[data-id="${userId}"] .online`);
-  if (el) el.style.backgroundColor = "red";
+  if (el) el.style.backgroundColor = "grey";
 }
 
 export async function home() {
   console.log("hadiii lwla");
   let logged = await isLogged()
   if (!logged) {
+    Navigate("/login")
+    login()
     return
   }
   let header = document.createElement("header");
