@@ -53,7 +53,7 @@ async function connectWebSocket() {
     if (!logged) {
       Navigate("/login")
       login()
-      ws.close()
+      socket.close()
       return
     }
     switch (data.type) {
@@ -234,11 +234,11 @@ function setUserOffline(userId) {
 }
 
 export async function home() {
-  console.log("hadiii lwla");
   let logged = await isLogged()
   if (!logged) {
     Navigate("/login")
     login()
+    socket.close()
     return
   }
   let header = document.createElement("header");
