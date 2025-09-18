@@ -19,17 +19,19 @@ export async function HandleLikes(e) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ like, postId }),
     });
+    const data = await res.json();
     if (!res.ok) {
-      if (res.status === 401 ) {
+      if (res.status === 401) {
         Navigate("login")
         login()
         return
       }
-      const er = await res.text();
-      
-      throw new Error(er);
+      if (res.status === 429) {        
+        showToast("error", data.message); 
+        return;
+      }
     }
-    const data = await res.json();
+
 
     let spanlike = form.querySelector(".span-like");
     let spandislike = form.querySelector(".span-dislike");
@@ -54,7 +56,7 @@ export async function HandleLikes(e) {
       deslikebtn.classList.remove("active-dislike");
     }
 
-  } catch (error) {
+  } catch (error) {    
     showToast("error", error.message);
   }
 }
