@@ -43,7 +43,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if err == sql.ErrNoRows {
 			config.ResponseJSON(w, http.StatusNotFound, map[string]any{
-				"message": "User not found.",
+				"message": "Incorrect Username or Password",
 				"status":  http.StatusNotFound,
 			})
 		} else {
@@ -58,7 +58,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	// Compare provided password with stored hash
 	if bcrypt.CompareHashAndPassword([]byte(password), []byte(user.Password)) != nil {
 		config.ResponseJSON(w, http.StatusUnauthorized, map[string]any{
-			"message": "Invalid password.",
+			"message": "Incorrect Username or Password",
 			"status":  http.StatusUnauthorized,
 		})
 		return

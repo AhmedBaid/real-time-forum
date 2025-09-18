@@ -314,6 +314,9 @@ hr {
 
 .comment-content .comm {
   font-size: 18px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
   color: #ccc;
   margin: 0;
 }
@@ -618,11 +621,10 @@ body:has(#commentshow:checked) .second-part {
 .online {
   width: 12px;
   height: 12px;
-  background-color: var(--akhdar);
   border-radius: 50%;
   position: relative;
   margin-left: auto;
-  background-color: red;
+  background-color: grey;
 
 }
 

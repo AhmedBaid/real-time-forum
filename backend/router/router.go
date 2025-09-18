@@ -10,7 +10,7 @@ import (
 func Router() {
 	http.HandleFunc("/api/current-user",  middleware.Authorisation((handler.CurrentUserHandler)))
 	http.HandleFunc("/ws",  middleware.Authorisation(handler.WsHandler))
-	http.HandleFunc("/messages",  middleware.Authorisation(middleware.RateLimit(handler.GetMessagesHandler)))
+	http.HandleFunc("/messages",  middleware.Authorisation((handler.GetMessagesHandler)))
 	http.HandleFunc("/ReactionHandler", middleware.Authorisation(middleware.RateLimit(handler.ReactionHandler) ))
 	http.HandleFunc("/getComments",  middleware.Authorisation(middleware.RateLimit(handler.GetComments)))
 	http.HandleFunc("/getUsers",  middleware.Authorisation(handler.GetUsers))

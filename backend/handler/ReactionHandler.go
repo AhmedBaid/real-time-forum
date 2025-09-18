@@ -56,7 +56,7 @@ func ReactionHandler(w http.ResponseWriter, r *http.Request) {
 
 	var reactionValue string
 	err = row.Scan(&reactionValue)
-reactionValue =  html.EscapeString(reactionValue)
+	reactionValue = html.EscapeString(reactionValue)
 	if err == sql.ErrNoRows {
 		// insert
 		stmt := `INSERT INTO likes (postID, userID, value) VALUES (?, ?, ?)`

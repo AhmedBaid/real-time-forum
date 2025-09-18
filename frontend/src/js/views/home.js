@@ -19,9 +19,7 @@ export let currentUserId = null;
 export let Currentusername = null;
 export let offset = { nbr: 0 };
 let id = null;
-export let isOnline = { users: [] }
-export let onlineUser = { id: null }
-export let offlineUser = { id: null }
+
 
 // get the current user
 async function fetchCurrentUserId() {
@@ -58,7 +56,6 @@ async function connectWebSocket() {
     }
     switch (data.type) {
       case "online":
-        onlineUser.id = data.userId
         setTimeout(async () => {
           const aside = document.querySelector(".aside2")
           await sortUsers(aside)
@@ -69,7 +66,6 @@ async function connectWebSocket() {
         }, 0);
         break;
       case "offline":
-        offlineUser.id = data.userId
         setTimeout(() => {
           let el = document.querySelector(`.users`);
           if (el) {
@@ -79,13 +75,12 @@ async function connectWebSocket() {
 
         break;
       case "message":
-        console.log(data);
-
-
-        appendMessage(data);
-
+        setTimeout(async () => {
+          const aside = document.querySelector(".aside2")
+          await sortUsers(aside)
+          appendMessage(data);
+        }, 0);
         break;
-
       case "notification":
         setTimeout(async () => {
           let aside = document.querySelector(".aside2");
@@ -107,10 +102,6 @@ async function connectWebSocket() {
 
           if (user) {
             user.innerHTML = "new Message";
-
-            let notifs = JSON.parse(localStorage.getItem("userNotifs")) || {};
-            notifs[data.from] = "new Message";
-            localStorage.setItem("userNotifs", JSON.stringify(notifs));
           }
 
           setTimeout(() => {
@@ -121,7 +112,6 @@ async function connectWebSocket() {
         break;
 
       case "online_list":
-        isOnline.users = data.users
         setTimeout(() => {
 
           console.log(data);
@@ -129,7 +119,6 @@ async function connectWebSocket() {
           if (el) {
             data.users.forEach((id) => setUserOnline(Number(id)));
           }
-          restoreNotifications();
 
         }, 0);
 
@@ -202,13 +191,14 @@ function appendMessage(msg) {
 
 
   let chatBox = chatBoxSender ? chatBoxSender : chatBoxreciever;
-  if (!chatBox) { 
+  if (!chatBox) {
     console.log(msg.senderUsername);
     console.log(msg.receiverUsername);
 
-    
-    
-    return;}
+
+
+    return;
+  }
 
   let messagesBox = chatBox.querySelector(".chat-messages");
   let div = document.createElement("div");
@@ -432,14 +422,3 @@ export async function Logout(e) {
 }
 
 
-function restoreNotifications() {
-  let notifs = JSON.parse(localStorage.getItem("userNotifs")) || {};
-  Object.keys(notifs).forEach(userId => {
-    let user = document.querySelector(
-      `.users[data-id="${userId}"] .text-wrapper .notification`
-    );
-    if (user) {
-      user.innerHTML = notifs[userId];
-    }
-  });
-}

@@ -10,8 +10,8 @@ export async function HandleComments(e) {
   let post_id = Number(form.querySelector("[name='postID']").value);
   let Comment = form.querySelector("[name='comment']").value;
 
-  if (post_id === 0 || Comment.trim() === "" || Comment.length < 3) {
-    showToast("error", "Comment must be at least 3 characters.");
+  if (post_id === 0 || Comment.trim() === "" || Comment.length < 3 || Comment.length > 50) {
+    showToast("error", "Comment must be between 3 and 50 characters.");
     return;
   }
   try {

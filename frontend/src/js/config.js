@@ -45,6 +45,18 @@ export const Header = `<h1>RT-<span class="logo">FO</span>RUM</h1>
     <button class="logout"><span class="span-logout">Logout</span><i class="fa-solid fa-right-from-bracket"></i></button>
     </div>`;
 
+export const notFound = `
+<div class="nf-container">
+        <div class="error-content">
+            <h1 class="code">404</h1>
+            <h2 class="oop">oops!</h2>
+            <p class="mess">Uh-oh! The page you're looking for doesn't exist. It might have been moved or deleted.</p>
+            <div class="btns">
+                <a class="linkHome">Go home</a>
+            </div>
+        </div>
+    </div>
+`
 const categories = [
   { id: 1, name: "Sport" },
   { id: 2, name: "Music" },

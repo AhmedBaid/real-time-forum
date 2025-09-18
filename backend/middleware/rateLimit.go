@@ -27,7 +27,7 @@ func RateLimit(HandlerFunc http.HandlerFunc) http.HandlerFunc  {
 		requests[ip]++
 		lastSeen[ip] = time.Now()
 
-		if requests[ip] > 10 {
+		if requests[ip] > 30 {
 			config.ResponseJSON(w, http.StatusTooManyRequests, map[string]any{
 				"message": "too many request , try again after 1  min ",
 				"status":  http.StatusTooManyRequests,

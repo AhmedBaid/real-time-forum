@@ -44,7 +44,7 @@ export async function sortUsers(aside) {
             </span>
           </div>
 
-        <span class="online" ${user.isOnline === true ? `style="background-color: green "` : `style="background-color: red "`}  >.</span>
+        <span class="online" ${user.isOnline === true ? `style="background-color: green "` : `style="background-color: grey "`}  >.</span>
     `;
       div.addEventListener("click", HandleMessages)
       aside.appendChild(div);
