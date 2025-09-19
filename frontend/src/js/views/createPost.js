@@ -56,7 +56,7 @@ export async function createPost(e) {
   const newPost = data.data;
   const userActiveId = newPost.username;
   const postDiv = renderPost(newPost, userActiveId);
-  allPost.prepend(postDiv);
+    allPost.prepend(postDiv);
 
   const newPostForm = postDiv.querySelector(".formComment");
   if (newPostForm) {

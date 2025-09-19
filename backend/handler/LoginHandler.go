@@ -42,19 +42,18 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	err := config.Db.QueryRow(query, user.Username, user.Username).Scan(&password)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			config.ResponseJSON(w, http.StatusNotFound, map[string]any{
+			config.ResponseJSON(w, http.StatusBadRequest, map[string]any{
 				"message": "Incorrect Username or Password",
-				"status":  http.StatusNotFound,
+				"status":  http.StatusBadRequest,
 			})
 		} else {
 			config.ResponseJSON(w, http.StatusInternalServerError, map[string]any{
-				"message": "Internal server error while retrieving user.",
+				"message": "Internal server error while retrieving user .",
 				"status":  http.StatusInternalServerError,
 			})
 		}
 		return
 	}
-
 	// Compare provided password with stored hash
 	if bcrypt.CompareHashAndPassword([]byte(password), []byte(user.Password)) != nil {
 		config.ResponseJSON(w, http.StatusUnauthorized, map[string]any{

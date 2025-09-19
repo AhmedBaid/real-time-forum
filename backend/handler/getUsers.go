@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 
 	"real_time/backend/config"
@@ -45,8 +46,9 @@ WHERE u.id != ?
 GROUP BY u.id, u.username
 
     `
-	rows, err := config.Db.Query(userQuery, userId ,userId, userId)
+	rows, err := config.Db.Query(userQuery, userId, userId, userId)
 	if err != nil {
+		fmt.Println("f", err)
 		config.ResponseJSON(w, http.StatusInternalServerError, map[string]any{
 			"message": "Internal server error while retrieving users.",
 			"status":  http.StatusInternalServerError,
@@ -58,7 +60,7 @@ GROUP BY u.id, u.username
 	var Users []config.UserStatus
 	var user config.UserStatus
 	for rows.Next() {
-		err := rows.Scan( &user.Is_online, &user.Username, &user.Id, &user.LastMessageTime)
+		err := rows.Scan(&user.Is_online, &user.Username, &user.Id, &user.LastMessageTime)
 		if err != nil {
 			config.ResponseJSON(w, http.StatusInternalServerError, map[string]any{
 				"message": "Internal server error while processing users.",
@@ -66,7 +68,7 @@ GROUP BY u.id, u.username
 			})
 			return
 		}
-		
+
 		Users = append(Users, user)
 	}
 

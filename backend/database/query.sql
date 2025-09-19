@@ -1,8 +1,18 @@
 CREATE TABLE IF NOT EXISTS categories (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name VARCHAR(50) UNIQUE,
-    icon TEXT UNIQUE
+    name VARCHAR(50) UNIQUE
 );
+INSERT OR IGNORE INTO categories (name) VALUES
+  ('Sport'),
+  ('Music'),
+  ('Movies'),
+  ('Science'),
+  ('Gym'),
+  ('Technology'),
+  ('Culture'),
+  ('Politics');
+
+
 CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL UNIQUE,
@@ -12,9 +22,9 @@ CREATE TABLE IF NOT EXISTS users (
     gender TEXT NOT NULL,
     age INTEGER NOT NULL,
     password TEXT NOT NULL,
-    session TEXT DEFAULT NULL
+    session TEXT DEFAULT NULL,
+    is_online BOOLEAN DEFAULT false
 );
-
 CREATE TABLE IF NOT EXISTS posts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username VARCHAR(30),

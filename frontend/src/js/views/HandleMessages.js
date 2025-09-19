@@ -186,7 +186,13 @@ export async function HandleMessages(e) {
     }
     let input = form.querySelector("input");
     if (input.value.trim() === "") return;
+if (input.value.trim().length >=  1000){
 
+  showToast("error", "long message")
+  input.value = ""
+   return 
+}
+  
     socket.send(
       JSON.stringify({
         type: "message",

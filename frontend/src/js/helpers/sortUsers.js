@@ -5,7 +5,7 @@ export async function sortUsers(aside) {
 
   let users = await fetchUsers();
   if (!users.data) {
-    aside.innerHTML = "<h2>No users found</h2>";
+    aside.innerHTML = "";
     return;
   }
 

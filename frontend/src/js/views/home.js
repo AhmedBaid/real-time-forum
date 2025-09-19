@@ -189,16 +189,8 @@ async function connectWebSocket() {
 function appendMessage(msg) {
   let chatBoxSender = document.getElementById(`chat-${msg.senderUsername}`);
   let chatBoxreciever = document.getElementById(`chat-${msg.receiverUsername}`);
-
-
-
-
   let chatBox = chatBoxSender ? chatBoxSender : chatBoxreciever;
   if (!chatBox) {
-
-
-
-
     return;
   }
 
@@ -255,7 +247,7 @@ export async function home() {
   let obj = await fetchPosts();
 
   if (obj.data.Posts && obj.data.Posts.length > 0) {
-    allPost.innerHTML = ""; // Clear previous content, including "No posts yet"
+    allPost.innerHTML = ""; 
     for (const post of obj.data.Posts) {
       const postId = post.id;
       const commentToggleId = `commentshow-${postId}`;
@@ -348,7 +340,7 @@ export async function home() {
     }
 
   } else {
-    allPost.innerHTML = "<h2>No posts yet</h2>";
+    allPost.innerHTML = "";
   }
 
   container.innerHTML = "";
