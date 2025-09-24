@@ -22,8 +22,8 @@ export function renderPost(post, userActiveId) {
         </div>
         <span class="post-time">${timeFormat(post.time)}</span>
       </div>
-      <h2 class="post-title">${post.title}</h2>
-      <p class="post-description">${post.description}</p>
+      <h2 class="post-title"></h2>
+      <p class="post-description"></p>
       <div class="post-tags">
         ${post.categories.map(cat => `<span class="tag">${cat}</span>`).join("")}
       </div>
@@ -64,6 +64,12 @@ export function renderPost(post, userActiveId) {
       <div class="comments-list"></div>
     </div>
 `;
+
+div.querySelector(".post-title").textContent = post.title
+div.querySelector(".post-description").textContent = post.description
+
+
+
 
   const toggle = div.querySelector(`#${commentToggleId}`);
   const section = div.querySelector(`#${commentsSectionId}`);

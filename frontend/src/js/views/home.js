@@ -199,11 +199,11 @@ function appendMessage(msg) {
   div.className = `msg ${msg.sender === currentUserId ? "right" : "left"}`;
 
   let p = document.createElement("p");
-  p.innerHTML = msg.message;
+  p.textContent = msg.message;
 
   let span = document.createElement("span");
   span.className = "time";
-  span.innerHTML =
+  span.textContent =
     msg.senderUsername + " - " + new Date(msg.time).toLocaleString();
 
   div.appendChild(p);
